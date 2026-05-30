@@ -1,0 +1,259 @@
+[
+  {
+    "id": "airmon-start",
+    "tool": "aircrack-ng",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "airmon-ng start wlan0",
+    "name": "Enable Monitor Mode",
+    "description": "Puts wireless interface into monitor mode for packet capture.",
+    "arguments": {
+      "start": "Enable monitor mode",
+      "wlan0": "Interface name"
+    },
+    "expected_output": "PHY     Interface   Driver\nphy0    wlan0mon    ath9k (monitor mode enabled)",
+    "use_case": "Required first step for any wireless attack \u2014 enables raw packet capture.",
+    "prerequisites": [
+      "Compatible wireless adapter",
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Interface mode change",
+      "Monitor mode detection by AP"
+    ],
+    "remediation": [
+      "Use 802.11w",
+      "WIDS deployment"
+    ],
+    "common_mistakes": [
+      "Adapter doesn't support monitor mode"
+    ],
+    "alternatives": [
+      "ip link set wlan0 down && iw wlan0 set monitor control"
+    ],
+    "references": [
+      "https://www.aircrack-ng.org/doku.php?id=airmon-ng"
+    ],
+    "tags": [
+      "monitor-mode",
+      "wireless",
+      "setup",
+      "capture"
+    ]
+  },
+  {
+    "id": "airodump-scan",
+    "tool": "aircrack-ng",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "airodump-ng wlan0mon",
+    "name": "Wireless Network Discovery",
+    "description": "Scans all channels and displays nearby access points and connected clients.",
+    "arguments": {
+      "wlan0mon": "Monitor mode interface"
+    },
+    "expected_output": "BSSID              CH  ENC   ESSID\nAA:BB:CC:DD:EE:FF  6   WPA2  CorpWiFi\n11:22:33:44:55:66  1   WPA2  GuestNet",
+    "use_case": "Discover all nearby wireless networks \u2014 first step in wireless assessment.",
+    "prerequisites": [
+      "Monitor mode enabled"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Monitor mode activity",
+      "Probe requests"
+    ],
+    "remediation": [
+      "Hide SSID (minimal protection)",
+      "Use WPA3"
+    ],
+    "common_mistakes": [
+      "Not waiting long enough to see all networks"
+    ],
+    "alternatives": [
+      "kismet",
+      "wifite --kill"
+    ],
+    "references": [
+      "https://www.aircrack-ng.org/doku.php?id=airodump-ng"
+    ],
+    "tags": [
+      "wireless",
+      "discovery",
+      "networks",
+      "scan"
+    ]
+  },
+  {
+    "id": "aireplay-deauth",
+    "tool": "aircrack-ng",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "aireplay-ng --deauth 10 -a <AP_BSSID> -c <CLIENT_MAC> wlan0mon",
+    "name": "Targeted Deauthentication",
+    "description": "Sends deauth frames to disconnect a specific client \u2014 forces handshake recapture.",
+    "arguments": {
+      "--deauth 10": "Send 10 deauth frames",
+      "-a": "AP BSSID",
+      "-c": "Client MAC"
+    },
+    "expected_output": "Sending DeAuth to station -- STMAC: [CC:DD:EE:FF:00:11]",
+    "use_case": "Force client reconnection to capture WPA handshake.",
+    "prerequisites": [
+      "Monitor mode",
+      "Target AP and client MACs known"
+    ],
+    "mitre_mapping": [
+      "T1498"
+    ],
+    "mitre_tactic": "Impact",
+    "detections": [
+      "Deauth frames in WIDS",
+      "Client disconnection events"
+    ],
+    "remediation": [
+      "802.11w (management frame protection)",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "Deauthing wrong client",
+      "AP has 802.11w"
+    ],
+    "alternatives": [
+      "mdk4",
+      "bettercap wifi.deauth"
+    ],
+    "references": [
+      "https://www.aircrack-ng.org/doku.php?id=aireplay-ng"
+    ],
+    "tags": [
+      "deauth",
+      "wireless",
+      "handshake",
+      "force"
+    ]
+  },
+  {
+    "id": "wifite-auto",
+    "tool": "wifite",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "wifite --kill --dict /usr/share/wordlists/rockyou.txt",
+    "name": "Automated WiFi Attack",
+    "description": "Automated wireless attack tool \u2014 scans, captures handshakes, and cracks in one command.",
+    "arguments": {
+      "--kill": "Kill interfering processes",
+      "--dict": "Wordlist for cracking"
+    },
+    "expected_output": "[+] Captured handshake for CorpWiFi\n[+] Cracking with rockyou.txt...\n[+] KEY FOUND: Summer2024!",
+    "use_case": "Fully automated WiFi assessment \u2014 from scan to crack in one tool.",
+    "prerequisites": [
+      "Compatible adapter",
+      "Monitor mode capable"
+    ],
+    "mitre_mapping": [
+      "T1040",
+      "T1110"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Deauth frames",
+      "Handshake capture activity"
+    ],
+    "remediation": [
+      "WPA3",
+      "Strong passwords",
+      "802.1X"
+    ],
+    "common_mistakes": [
+      "Adapter incompatible",
+      "Password not in wordlist"
+    ],
+    "alternatives": [
+      "manual aircrack-ng workflow",
+      "bettercap"
+    ],
+    "references": [
+      "https://github.com/derv82/wifite2"
+    ],
+    "tags": [
+      "automated",
+      "wifi",
+      "crack",
+      "handshake",
+      "all-in-one"
+    ]
+  },
+  {
+    "id": "evil-twin",
+    "tool": "hostapd",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "# Create evil twin AP:\nhostapd evil_twin.conf\n# evil_twin.conf:\ninterface=wlan1\nssid=CorpWiFi\nchannel=6",
+    "name": "Evil Twin Attack Setup",
+    "description": "Creates a rogue access point mimicking a legitimate network to capture credentials.",
+    "arguments": {
+      "hostapd": "AP daemon",
+      "ssid=CorpWiFi": "Clone target SSID",
+      "channel=6": "Same channel as target"
+    },
+    "expected_output": "# Victims connect to fake AP\n# Capture credentials via captive portal",
+    "use_case": "Create fake AP to intercept traffic or present phishing captive portal.",
+    "prerequisites": [
+      "Two wireless adapters",
+      "hostapd + dnsmasq"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Duplicate SSID detection",
+      "Unusual AP characteristics"
+    ],
+    "remediation": [
+      "802.1X enterprise auth",
+      "Certificate pinning",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "Victims don't connect",
+      "Real AP signal stronger"
+    ],
+    "alternatives": [
+      "fluxion (automated)",
+      "wifiphisher"
+    ],
+    "references": [
+      "https://w1.fi/hostapd/"
+    ],
+    "tags": [
+      "evil-twin",
+      "rogue-ap",
+      "phishing",
+      "wireless",
+      "mitm"
+    ]
+  }
+]

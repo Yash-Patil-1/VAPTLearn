@@ -1,0 +1,254 @@
+[
+  {
+    "id": "nmap-script-banner",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script banner -p 1-10000 <target>",
+    "name": "Banner Grabbing (All Ports)",
+    "description": "Grabs service banners from all open ports \u2014 reveals software versions and custom messages.",
+    "arguments": {
+      "--script banner": "Grab banners",
+      "-p 1-10000": "First 10000 ports"
+    },
+    "expected_output": "| banner: SSH-2.0-OpenSSH_8.9p1\n| banner: 220 ProFTPD 1.3.5",
+    "use_case": "Identify services by their banners \u2014 sometimes reveals internal hostnames or version info.",
+    "prerequisites": [
+      "Open ports"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Banner grab connections"
+    ],
+    "remediation": [
+      "Customize banners to hide version info"
+    ],
+    "common_mistakes": [
+      "Not checking high ports"
+    ],
+    "alternatives": [
+      "nc -v <target> <port>",
+      "telnet"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/banner.html"
+    ],
+    "tags": [
+      "banner",
+      "version",
+      "identification",
+      "service"
+    ]
+  },
+  {
+    "id": "nmap-script-ssl-cert",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script ssl-cert -p 443 <target>",
+    "name": "SSL Certificate Information",
+    "description": "Extracts SSL certificate details \u2014 issuer, subject, SANs, expiry dates.",
+    "arguments": {
+      "--script ssl-cert": "Get certificate info"
+    },
+    "expected_output": "| Subject: CN=*.target.com\n| Issuer: Let's Encrypt\n| SANs: target.com, api.target.com, mail.target.com\n| Not valid after: 2024-06-01",
+    "use_case": "Discover additional hostnames from certificate SANs and check for expired certs.",
+    "prerequisites": [
+      "HTTPS port open"
+    ],
+    "mitre_mapping": [
+      "T1596.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "SSL probing"
+    ],
+    "remediation": [
+      "Keep certificates updated",
+      "Use proper SANs"
+    ],
+    "common_mistakes": [
+      "Not checking SANs for additional subdomains"
+    ],
+    "alternatives": [
+      "openssl s_client",
+      "testssl.sh"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/ssl-cert.html"
+    ],
+    "tags": [
+      "ssl",
+      "certificate",
+      "san",
+      "subdomain",
+      "expiry"
+    ]
+  },
+  {
+    "id": "nuclei-exposure",
+    "tool": "nuclei",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nuclei -u http://<target> -t exposures/ -severity info,low,medium",
+    "name": "Sensitive Exposure Detection",
+    "description": "Detects exposed sensitive files, directories, and information leaks.",
+    "arguments": {
+      "-t exposures/": "Exposure detection templates"
+    },
+    "expected_output": "[info] [git-config] http://target/.git/config\n[low] [env-file] http://target/.env\n[medium] [phpinfo] http://target/phpinfo.php",
+    "use_case": "Find accidentally exposed configuration files, git repos, and debug info.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1552"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Access to sensitive paths"
+    ],
+    "remediation": [
+      "Remove sensitive files",
+      "Restrict access",
+      "Use .htaccess"
+    ],
+    "common_mistakes": [
+      "Not checking all common paths"
+    ],
+    "alternatives": [
+      "ffuf with sensitive wordlist",
+      "dirsearch"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/nuclei-templates"
+    ],
+    "tags": [
+      "exposure",
+      "sensitive",
+      "git",
+      "env",
+      "config"
+    ]
+  },
+  {
+    "id": "gospider-crawl",
+    "tool": "gospider",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "gospider -s http://<target> -d 3 -c 10 --other-source --include-subs",
+    "name": "GoSpider Web Crawler",
+    "description": "Fast web crawler that extracts URLs, JavaScript files, and form actions.",
+    "arguments": {
+      "-s": "Start URL",
+      "-d 3": "Depth",
+      "-c 10": "Concurrency",
+      "--other-source": "Include Wayback/CommonCrawl",
+      "--include-subs": "Include subdomains"
+    },
+    "expected_output": "[url] http://target/api/v2/users\n[javascript] http://target/static/app.js\n[form] http://target/login POST",
+    "use_case": "Discover endpoints, JS files (for secrets), and forms for testing.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "High crawl rate"
+    ],
+    "remediation": [
+      "Rate limiting",
+      "robots.txt"
+    ],
+    "common_mistakes": [
+      "Not extracting secrets from JS files"
+    ],
+    "alternatives": [
+      "katana",
+      "hakrawler",
+      "burp spider"
+    ],
+    "references": [
+      "https://github.com/jaeles-project/gospider"
+    ],
+    "tags": [
+      "crawler",
+      "spider",
+      "javascript",
+      "endpoints",
+      "active"
+    ]
+  },
+  {
+    "id": "dnsx-resolve",
+    "tool": "dnsx",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "cat subdomains.txt | dnsx -silent -a -resp",
+    "name": "DNS Resolution (Bulk)",
+    "description": "Resolves a list of subdomains to IPs \u2014 filters out dead/non-resolving entries.",
+    "arguments": {
+      "-silent": "Only output",
+      "-a": "A records",
+      "-resp": "Show response"
+    },
+    "expected_output": "api.target.com [10.0.0.5]\nwww.target.com [10.0.0.1]\ndev.target.com [10.0.0.10]",
+    "use_case": "Filter subdomain lists to only live, resolving hosts before further testing.",
+    "prerequisites": [
+      "Subdomain list"
+    ],
+    "mitre_mapping": [
+      "T1590"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Bulk DNS queries"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "Not checking for wildcard DNS"
+    ],
+    "alternatives": [
+      "massdns",
+      "puredns"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/dnsx"
+    ],
+    "tags": [
+      "dns",
+      "resolve",
+      "bulk",
+      "filter",
+      "alive"
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "Reconnaissance",
+    "description": "Information gathering about the target — passive and active techniques to map the attack surface.",
+    "methodology": "PTES Phase 2 — Intelligence Gathering",
+    "objectives": ["Identify target scope", "Discover subdomains and hosts", "Map network topology", "Enumerate services", "Gather OSINT"],
+    "tools": ["nmap", "amass", "subfinder", "theHarvester", "shodan", "censys", "whois", "dnsrecon", "masscan"]
+  },
+  {
+    "id": 2,
+    "name": "Enumeration",
+    "description": "Deep enumeration of discovered services — extracting usernames, shares, configurations, and version details.",
+    "methodology": "PTES Phase 2 — Detailed Enumeration",
+    "objectives": ["Enumerate users and groups", "Discover network shares", "Identify service configurations", "Extract version information"],
+    "tools": ["nmap", "enum4linux", "smbclient", "snmpwalk", "ldapsearch", "rpcclient", "nbtscan"]
+  },
+  {
+    "id": 3,
+    "name": "Vulnerability Assessment",
+    "description": "Identify vulnerabilities in discovered services using scanners and manual analysis.",
+    "methodology": "PTES Phase 3 — Vulnerability Analysis",
+    "objectives": ["Identify known CVEs", "Assess misconfigurations", "Prioritize vulnerabilities", "Validate findings"],
+    "tools": ["nuclei", "nikto", "openvas", "nmap-vulners", "searchsploit"]
+  },
+  {
+    "id": 4,
+    "name": "Web Application Testing",
+    "description": "Test web applications for OWASP Top 10 vulnerabilities and business logic flaws.",
+    "methodology": "OWASP WSTG + PTES Web Testing",
+    "objectives": ["Test authentication", "Find injection flaws", "Test access controls", "Identify XSS/CSRF", "Test API security"],
+    "tools": ["burpsuite", "ffuf", "gobuster", "sqlmap", "xsstrike", "nuclei", "wpscan", "feroxbuster"]
+  },
+  {
+    "id": 5,
+    "name": "Exploitation",
+    "description": "Exploit identified vulnerabilities to gain initial access — understanding attack methodology.",
+    "methodology": "PTES Phase 4 — Exploitation",
+    "objectives": ["Gain initial access", "Understand exploit mechanics", "Document exploitation path", "Maintain access"],
+    "tools": ["metasploit", "msfvenom", "searchsploit", "beef"]
+  },
+  {
+    "id": 6,
+    "name": "Post-Exploitation & Privilege Escalation",
+    "description": "Escalate privileges, move laterally, and establish persistence after initial access.",
+    "methodology": "PTES Phase 5 — Post-Exploitation",
+    "objectives": ["Escalate to root/SYSTEM", "Dump credentials", "Move laterally", "Establish persistence", "Exfiltrate data"],
+    "tools": ["peass-ng", "mimikatz", "bloodhound", "impacket", "chisel", "ligolo", "rubeus"]
+  },
+  {
+    "id": 7,
+    "name": "Reporting",
+    "description": "Document findings, create professional reports, and provide remediation guidance.",
+    "methodology": "PTES Phase 7 — Reporting",
+    "objectives": ["Document all findings", "Assign risk ratings", "Provide remediation", "Create executive summary", "Include evidence"],
+    "tools": ["custom-templates", "markdown", "screenshots"]
+  }
+]

@@ -1,0 +1,501 @@
+[
+  {
+    "id": "nessus-scan",
+    "tool": "nessus",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Nessus Web UI: https://localhost:8834\n# New Scan \u2192 Advanced Scan \u2192 Set targets \u2192 Launch",
+    "name": "Nessus Vulnerability Scan",
+    "description": "Industry-standard vulnerability scanner \u2014 comprehensive checks with low false positives.",
+    "arguments": {},
+    "expected_output": "CRITICAL: MS17-010 (EternalBlue) - 10.0.0.5\nHIGH: Apache Struts RCE - 10.0.0.10\nMEDIUM: SSL/TLS weak ciphers - 10.0.0.15",
+    "use_case": "Comprehensive vulnerability assessment \u2014 gold standard for enterprise scanning.",
+    "prerequisites": [
+      "Nessus installed",
+      "Network access to targets"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Scanning traffic",
+      "Authentication attempts"
+    ],
+    "remediation": [
+      "Patch vulnerabilities",
+      "Harden configurations"
+    ],
+    "common_mistakes": [
+      "Credentialed scan needs valid creds"
+    ],
+    "alternatives": [
+      "OpenVAS",
+      "Qualys",
+      "Nexpose"
+    ],
+    "references": [
+      "https://www.tenable.com/products/nessus"
+    ],
+    "tags": [
+      "nessus",
+      "vulnerability",
+      "scanner",
+      "enterprise",
+      "comprehensive"
+    ]
+  },
+  {
+    "id": "openvas-scan",
+    "tool": "openvas",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "gvm-cli socket --xml '<create_task><name>Full Scan</name><target id=\"...\"/><config id=\"...\"/></create_task>'",
+    "name": "OpenVAS/GVM Vulnerability Scan",
+    "description": "Free open-source vulnerability scanner \u2014 alternative to Nessus with 50,000+ NVTs.",
+    "arguments": {},
+    "expected_output": "CRITICAL: CVE-2021-44228 Log4Shell\nHIGH: Default credentials on admin panel\nMEDIUM: Missing security headers",
+    "use_case": "Free comprehensive vulnerability scanning \u2014 good for labs and small engagements.",
+    "prerequisites": [
+      "GVM/OpenVAS installed",
+      "Feeds updated"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Scanning traffic"
+    ],
+    "remediation": [
+      "Patch systems",
+      "Update configurations"
+    ],
+    "common_mistakes": [
+      "Feeds not updated (misses new vulns)"
+    ],
+    "alternatives": [
+      "Nessus",
+      "Nexpose",
+      "nuclei"
+    ],
+    "references": [
+      "https://www.greenbone.net/en/community-edition/"
+    ],
+    "tags": [
+      "openvas",
+      "gvm",
+      "free",
+      "vulnerability",
+      "scanner"
+    ]
+  },
+  {
+    "id": "nuclei-custom",
+    "tool": "nuclei",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "nuclei -u http://<target> -t /custom-templates/ -severity critical,high -rate-limit 50",
+    "name": "Nuclei Custom Template Scan",
+    "description": "Runs custom nuclei templates \u2014 write your own checks for specific vulnerabilities.",
+    "arguments": {
+      "-t": "Template directory",
+      "-severity": "Filter severity",
+      "--rate-limit": "Requests per second"
+    },
+    "expected_output": "[critical] [custom-rce] http://target/api/exec\n[high] [custom-sqli] http://target/search?q=",
+    "use_case": "Run custom vulnerability checks tailored to the target application.",
+    "prerequisites": [
+      "nuclei installed",
+      "Custom templates written"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "HTTP requests matching template patterns"
+    ],
+    "remediation": [
+      "Fix identified vulnerabilities"
+    ],
+    "common_mistakes": [
+      "Templates have false positives"
+    ],
+    "alternatives": [
+      "burp scanner",
+      "custom scripts"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/nuclei"
+    ],
+    "tags": [
+      "nuclei",
+      "custom",
+      "templates",
+      "targeted",
+      "scanning"
+    ]
+  },
+  {
+    "id": "nikto-web",
+    "tool": "nikto",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nikto -h http://<target> -Tuning 123bde -output report.html -Format htm",
+    "name": "Nikto Web Server Scanner",
+    "description": "Scans web servers for dangerous files, outdated software, and misconfigurations.",
+    "arguments": {
+      "-h": "Target host",
+      "-Tuning": "Test types",
+      "-output": "Report file"
+    },
+    "expected_output": "+ Server: Apache/2.4.49\n+ /admin/: Directory indexing found\n+ /backup.sql: Database backup exposed\n+ OSVDB-3092: /.git/: Git repository found",
+    "use_case": "Quick web server assessment \u2014 finds common misconfigurations and exposed files.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Rapid HTTP requests to known paths"
+    ],
+    "remediation": [
+      "Remove exposed files",
+      "Disable directory listing"
+    ],
+    "common_mistakes": [
+      "Many false positives"
+    ],
+    "alternatives": [
+      "nuclei",
+      "dirsearch",
+      "feroxbuster"
+    ],
+    "references": [
+      "https://github.com/sullo/nikto"
+    ],
+    "tags": [
+      "nikto",
+      "web",
+      "scanner",
+      "misconfig",
+      "files"
+    ]
+  },
+  {
+    "id": "testssl-audit",
+    "tool": "testssl.sh",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "testssl.sh --severity HIGH --sneaky https://<target>",
+    "name": "TLS/SSL Configuration Audit",
+    "description": "Comprehensive TLS/SSL testing \u2014 checks protocols, ciphers, vulnerabilities (BEAST, POODLE, Heartbleed).",
+    "arguments": {
+      "--severity HIGH": "Show only high+ findings",
+      "--sneaky": "Slower, less detectable"
+    },
+    "expected_output": "CRITICAL: Heartbleed (CVE-2014-0160) - VULNERABLE\nHIGH: POODLE (SSLv3) - VULNERABLE\nHIGH: Weak cipher: RC4",
+    "use_case": "Audit TLS configuration for vulnerabilities and weak ciphers.",
+    "prerequisites": [
+      "HTTPS target"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "TLS connection attempts with various parameters"
+    ],
+    "remediation": [
+      "Update TLS config",
+      "Disable weak ciphers"
+    ],
+    "common_mistakes": [
+      "Can't connect (firewall)"
+    ],
+    "alternatives": [
+      "sslyze",
+      "nmap --script ssl-enum-ciphers"
+    ],
+    "references": [
+      "https://github.com/drwetter/testssl.sh"
+    ],
+    "tags": [
+      "tls",
+      "ssl",
+      "audit",
+      "ciphers",
+      "heartbleed",
+      "poodle"
+    ]
+  },
+  {
+    "id": "wpscan-wordpress",
+    "tool": "wpscan",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "wpscan --url http://<target> --enumerate vp,vt,u --plugins-detection aggressive",
+    "name": "WPScan WordPress Audit",
+    "description": "Comprehensive WordPress vulnerability scanner \u2014 checks plugins, themes, users.",
+    "arguments": {
+      "--enumerate vp,vt,u": "Vulnerable plugins, themes, users",
+      "--plugins-detection aggressive": "Check all plugins"
+    },
+    "expected_output": "[+] WordPress 6.1.1\n[!] Plugin: contact-form-7 (v5.1.3) - SQLi (CVE-2023-1234)\n[+] Users: admin, editor",
+    "use_case": "Full WordPress security audit \u2014 finds vulnerable plugins and exposed users.",
+    "prerequisites": [
+      "WordPress site"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Aggressive plugin enumeration requests"
+    ],
+    "remediation": [
+      "Update WordPress and plugins",
+      "Hide user enumeration"
+    ],
+    "common_mistakes": [
+      "Not WordPress"
+    ],
+    "alternatives": [
+      "nuclei -t technologies/wordpress"
+    ],
+    "references": [
+      "https://github.com/wpscanteam/wpscan"
+    ],
+    "tags": [
+      "wordpress",
+      "wpscan",
+      "plugins",
+      "themes",
+      "cms"
+    ]
+  },
+  {
+    "id": "lynis-audit",
+    "tool": "lynis",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "lynis audit system --quick",
+    "name": "Lynis System Hardening Audit",
+    "description": "Audits Linux system security \u2014 checks configuration, permissions, services, firewall.",
+    "arguments": {
+      "audit system": "Full system audit",
+      "--quick": "Skip user interaction"
+    },
+    "expected_output": "[WARNING] Found: /etc/shadow readable by group\n[SUGGESTION] Enable ASLR\n[SUGGESTION] Install fail2ban\nHardening index: 62/100",
+    "use_case": "Audit Linux system hardening \u2014 useful for privilege escalation research.",
+    "prerequisites": [
+      "Root access on Linux system"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "N/A \u2014 local audit"
+    ],
+    "remediation": [
+      "Follow hardening suggestions"
+    ],
+    "common_mistakes": [
+      "Not running as root (limited checks)"
+    ],
+    "alternatives": [
+      "linpeas",
+      "linux-exploit-suggester"
+    ],
+    "references": [
+      "https://github.com/CISOfy/lynis"
+    ],
+    "tags": [
+      "lynis",
+      "hardening",
+      "audit",
+      "linux",
+      "configuration"
+    ]
+  },
+  {
+    "id": "scout-suite-cloud",
+    "tool": "scoutsuite",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "scout --provider aws --report-dir ./report",
+    "name": "ScoutSuite Multi-Cloud Audit",
+    "description": "Audits AWS/Azure/GCP security configuration \u2014 finds misconfigurations across services.",
+    "arguments": {
+      "--provider": "Cloud provider",
+      "--report-dir": "Output directory"
+    },
+    "expected_output": "[DANGER] S3 bucket 'logs' allows public access\n[WARNING] IAM user 'deploy' has no MFA\n[DANGER] Security group allows 0.0.0.0/0 on port 22",
+    "use_case": "Multi-cloud security audit \u2014 comprehensive check of cloud configurations.",
+    "prerequisites": [
+      "Cloud credentials configured"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "API calls from unusual source"
+    ],
+    "remediation": [
+      "Fix misconfigurations",
+      "Enable MFA"
+    ],
+    "common_mistakes": [
+      "Insufficient permissions"
+    ],
+    "alternatives": [
+      "prowler",
+      "steampipe",
+      "cloudsploit"
+    ],
+    "references": [
+      "https://github.com/nccgroup/ScoutSuite"
+    ],
+    "tags": [
+      "cloud",
+      "aws",
+      "azure",
+      "gcp",
+      "audit",
+      "misconfiguration"
+    ]
+  },
+  {
+    "id": "dnsrecon-zone",
+    "tool": "dnsrecon",
+    "category": "vulnerability_assessment",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "dnsrecon -d <domain> -t axfr,std,brt -D /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+    "name": "DNSRecon Comprehensive DNS Audit",
+    "description": "Full DNS reconnaissance \u2014 zone transfer, standard records, brute-force subdomains.",
+    "arguments": {
+      "-t axfr,std,brt": "Zone transfer + standard + brute",
+      "-D": "Subdomain wordlist"
+    },
+    "expected_output": "[*] Zone Transfer successful!\n[*] A admin.target.com 10.0.0.5\n[*] MX mail.target.com\n[*] TXT v=spf1 include:...",
+    "use_case": "Comprehensive DNS enumeration \u2014 finds subdomains, mail servers, SPF records.",
+    "prerequisites": [
+      "Target domain"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "DNS queries from single source",
+      "Zone transfer attempts"
+    ],
+    "remediation": [
+      "Disable zone transfers",
+      "Use split-horizon DNS"
+    ],
+    "common_mistakes": [
+      "Zone transfer blocked (normal)"
+    ],
+    "alternatives": [
+      "subfinder",
+      "amass",
+      "fierce"
+    ],
+    "references": [
+      "https://github.com/darkoperator/dnsrecon"
+    ],
+    "tags": [
+      "dns",
+      "zone-transfer",
+      "subdomain",
+      "enumeration",
+      "recon"
+    ]
+  },
+  {
+    "id": "sslyze-tls",
+    "tool": "sslyze",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sslyze --regular <target>:443",
+    "name": "SSLyze TLS Analysis",
+    "description": "Fast TLS/SSL scanner \u2014 checks certificate, protocols, ciphers, and known vulnerabilities.",
+    "arguments": {
+      "--regular": "Standard scan suite"
+    },
+    "expected_output": "Certificate: CN=target.com, expires 2025-01-01\nProtocols: TLSv1.2, TLSv1.3\nVulnerabilities: None detected\nWeak ciphers: RC4 (disabled)",
+    "use_case": "Quick TLS assessment \u2014 faster than testssl.sh with Python API for automation.",
+    "prerequisites": [
+      "HTTPS target accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "TLS probing"
+    ],
+    "remediation": [
+      "Update TLS configuration"
+    ],
+    "common_mistakes": [
+      "Target not HTTPS"
+    ],
+    "alternatives": [
+      "testssl.sh",
+      "nmap ssl-enum-ciphers"
+    ],
+    "references": [
+      "https://github.com/nabla-c0d3/sslyze"
+    ],
+    "tags": [
+      "sslyze",
+      "tls",
+      "ssl",
+      "certificate",
+      "fast"
+    ]
+  }
+]

@@ -1,0 +1,552 @@
+[
+  {
+    "id": "ffuf-param-fuzz",
+    "tool": "ffuf",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "ffuf -u 'http://<target>/page?FUZZ=value' -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -fs <default_size>",
+    "name": "Parameter Discovery",
+    "description": "Discovers hidden GET parameters by fuzzing parameter names.",
+    "arguments": {
+      "-u": "URL with FUZZ keyword in param name",
+      "-w": "Parameter name wordlist",
+      "-fs": "Filter by response size"
+    },
+    "expected_output": "id                      [Status: 200, Size: 4521]\ndebug                   [Status: 200, Size: 8923]\nadmin                   [Status: 200, Size: 1200]",
+    "use_case": "Find hidden parameters that may reveal debug info, admin functions, or injection points.",
+    "prerequisites": [
+      "Target URL",
+      "SecLists wordlist"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual parameter names in WAF logs",
+      "High request volume"
+    ],
+    "remediation": [
+      "Input validation on all parameters",
+      "Remove debug parameters in production"
+    ],
+    "common_mistakes": [
+      "Not filtering default response size",
+      "Missing POST parameters"
+    ],
+    "alternatives": [
+      "arjun (dedicated param finder)",
+      "paramspider"
+    ],
+    "references": [
+      "https://github.com/ffuf/ffuf"
+    ],
+    "tags": [
+      "parameter",
+      "fuzzing",
+      "hidden",
+      "web",
+      "discovery"
+    ]
+  },
+  {
+    "id": "ffuf-post-fuzz",
+    "tool": "ffuf",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "ffuf -u http://<target>/login -X POST -d 'username=admin&FUZZ=test' -w wordlist.txt -fs <size>",
+    "name": "POST Parameter Fuzzing",
+    "description": "Fuzzes POST request body parameters to discover hidden form fields.",
+    "arguments": {
+      "-X POST": "HTTP method",
+      "-d": "POST data with FUZZ keyword",
+      "-fs": "Filter size"
+    },
+    "expected_output": "password                [Status: 200, Size: 3421]\ntoken                   [Status: 200, Size: 3890]",
+    "use_case": "Discover hidden POST parameters in login forms, APIs, or admin panels.",
+    "prerequisites": [
+      "Target URL with POST endpoint"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual POST parameters in logs"
+    ],
+    "remediation": [
+      "Validate all input parameters",
+      "Use CSRF tokens"
+    ],
+    "common_mistakes": [
+      "Not trying different content types (JSON, XML)"
+    ],
+    "alternatives": [
+      "burp intruder",
+      "wfuzz"
+    ],
+    "references": [
+      "https://github.com/ffuf/ffuf"
+    ],
+    "tags": [
+      "post",
+      "parameter",
+      "fuzzing",
+      "form",
+      "web"
+    ]
+  },
+  {
+    "id": "sqlmap-post",
+    "tool": "sqlmap",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sqlmap -u 'http://<target>/login' --data='user=admin&pass=test' --batch --dbs",
+    "name": "SQL Injection on POST Parameters",
+    "description": "Tests POST parameters for SQL injection and enumerates databases if vulnerable.",
+    "arguments": {
+      "-u": "Target URL",
+      "--data": "POST body",
+      "--batch": "Non-interactive",
+      "--dbs": "List databases"
+    },
+    "expected_output": "[*] available databases [2]:\n[*] information_schema\n[*] users_db",
+    "use_case": "Test login forms and POST endpoints for SQL injection.",
+    "prerequisites": [
+      "POST endpoint with parameters"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "SQL error messages in logs",
+      "WAF SQL injection alerts"
+    ],
+    "remediation": [
+      "Parameterized queries",
+      "Input validation",
+      "WAF rules"
+    ],
+    "common_mistakes": [
+      "Only testing GET parameters",
+      "Not trying --level 5 --risk 3"
+    ],
+    "alternatives": [
+      "ghauri",
+      "manual testing with Burp"
+    ],
+    "references": [
+      "https://sqlmap.org"
+    ],
+    "tags": [
+      "sqli",
+      "post",
+      "injection",
+      "login",
+      "database"
+    ]
+  },
+  {
+    "id": "sqlmap-cookie",
+    "tool": "sqlmap",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sqlmap -u 'http://<target>/dashboard' --cookie='session=abc123' --batch --dbs",
+    "name": "SQL Injection via Cookie",
+    "description": "Tests cookie values for SQL injection \u2014 often overlooked by developers.",
+    "arguments": {
+      "--cookie": "Cookie header value",
+      "--batch": "Auto mode",
+      "--dbs": "Enumerate databases"
+    },
+    "expected_output": "[*] cookie parameter 'session' is vulnerable\n[*] available databases [3]:",
+    "use_case": "Test session cookies and other cookie values for injection vulnerabilities.",
+    "prerequisites": [
+      "Authenticated session",
+      "Cookie values to test"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Malformed cookie values in logs",
+      "Database errors"
+    ],
+    "remediation": [
+      "Never use cookie values in SQL queries directly",
+      "Use parameterized queries"
+    ],
+    "common_mistakes": [
+      "Only testing URL parameters",
+      "Forgetting cookie-based injection"
+    ],
+    "alternatives": [
+      "manual testing with Burp repeater"
+    ],
+    "references": [
+      "https://sqlmap.org"
+    ],
+    "tags": [
+      "sqli",
+      "cookie",
+      "injection",
+      "session",
+      "web"
+    ]
+  },
+  {
+    "id": "nuclei-full-scan",
+    "tool": "nuclei",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nuclei -u http://<target> -severity critical,high,medium -o results.txt",
+    "name": "Full Nuclei Vulnerability Scan",
+    "description": "Comprehensive vulnerability scan using all templates at medium+ severity.",
+    "arguments": {
+      "-u": "Target URL",
+      "-severity": "Filter by severity",
+      "-o": "Output file"
+    },
+    "expected_output": "[critical] [CVE-2021-44228] Log4Shell\n[high] [CVE-2023-22515] Confluence Auth Bypass\n[medium] [exposed-panels] phpMyAdmin",
+    "use_case": "Broad vulnerability assessment using community-maintained templates.",
+    "prerequisites": [
+      "Target URL",
+      "Updated templates (nuclei -update-templates)"
+    ],
+    "mitre_mapping": [
+      "T1190",
+      "T1595"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "WAF alerts",
+      "Application error spikes"
+    ],
+    "remediation": [
+      "Patch vulnerabilities",
+      "Remove exposed panels",
+      "WAF rules"
+    ],
+    "common_mistakes": [
+      "Not updating templates",
+      "Scanning without authorization"
+    ],
+    "alternatives": [
+      "nmap --script vuln",
+      "nikto",
+      "OpenVAS"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/nuclei"
+    ],
+    "tags": [
+      "vulnerability",
+      "scan",
+      "templates",
+      "cve",
+      "automated"
+    ]
+  },
+  {
+    "id": "nuclei-exposed-panels",
+    "tool": "nuclei",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nuclei -u http://<target> -t exposed-panels/ -o panels.txt",
+    "name": "Exposed Admin Panel Detection",
+    "description": "Detects exposed admin panels, dashboards, and management interfaces.",
+    "arguments": {
+      "-t exposed-panels/": "Use exposed panels templates",
+      "-o": "Output file"
+    },
+    "expected_output": "[exposed-panels] [info] http://target/phpmyadmin\n[exposed-panels] [info] http://target/wp-admin\n[exposed-panels] [info] http://target/grafana",
+    "use_case": "Find exposed admin interfaces that should be restricted.",
+    "prerequisites": [
+      "Target URL"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Access to admin paths in logs"
+    ],
+    "remediation": [
+      "Restrict admin panels to internal IPs",
+      "Require VPN for admin access",
+      "Use non-default paths"
+    ],
+    "common_mistakes": [
+      "Not checking non-standard ports"
+    ],
+    "alternatives": [
+      "gobuster with admin wordlist",
+      "dirsearch"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/nuclei-templates"
+    ],
+    "tags": [
+      "admin",
+      "panel",
+      "exposed",
+      "management",
+      "detection"
+    ]
+  },
+  {
+    "id": "wpscan-enum",
+    "tool": "wpscan",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "wpscan --url http://<target> --enumerate u,vp,vt,dbe",
+    "name": "WordPress Vulnerability Scan",
+    "description": "Enumerates WordPress users, vulnerable plugins, themes, and database exports.",
+    "arguments": {
+      "--url": "Target WordPress site",
+      "--enumerate u": "Users",
+      "vp": "Vulnerable plugins",
+      "vt": "Vulnerable themes",
+      "dbe": "DB exports"
+    },
+    "expected_output": "[+] WordPress version 6.4.2\n[+] User: admin\n[i] Plugin: contact-form-7 (vulnerable)\n[!] 2 vulnerabilities found",
+    "use_case": "Comprehensive WordPress security assessment \u2014 finds outdated plugins, weak users, and known CVEs.",
+    "prerequisites": [
+      "WordPress site",
+      "wpscan installed"
+    ],
+    "mitre_mapping": [
+      "T1190",
+      "T1595"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "WPScan user-agent in logs",
+      "Enumeration requests to wp-json"
+    ],
+    "remediation": [
+      "Keep WordPress and plugins updated",
+      "Disable user enumeration",
+      "Use security plugins"
+    ],
+    "common_mistakes": [
+      "Not using --api-token for vulnerability data",
+      "Missing wp-json API endpoints"
+    ],
+    "alternatives": [
+      "nuclei -t wordpress/",
+      "manual wp-json enumeration"
+    ],
+    "references": [
+      "https://wpscan.com"
+    ],
+    "tags": [
+      "wordpress",
+      "cms",
+      "plugins",
+      "enumeration",
+      "vulnerability"
+    ]
+  },
+  {
+    "id": "feroxbuster-recursive",
+    "tool": "feroxbuster",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "feroxbuster -u http://<target> -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -x php,html,txt,bak --depth 3",
+    "name": "Recursive Directory Brute-Force",
+    "description": "Recursively discovers directories and files up to 3 levels deep with multiple extensions.",
+    "arguments": {
+      "-u": "Target URL",
+      "-w": "Wordlist",
+      "-x": "Extensions",
+      "--depth 3": "Recurse 3 levels"
+    },
+    "expected_output": "200  GET  /admin/\n200  GET  /admin/config.php.bak\n301  GET  /admin/uploads/\n200  GET  /admin/uploads/db.sql",
+    "use_case": "Deep content discovery \u2014 finds nested directories and backup files that flat scans miss.",
+    "prerequisites": [
+      "Target web server",
+      "SecLists wordlist"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "High 404 rate",
+      "Recursive request patterns in logs"
+    ],
+    "remediation": [
+      "Remove backup files",
+      "Restrict directory access",
+      "Disable directory listing"
+    ],
+    "common_mistakes": [
+      "Not using recursive mode",
+      "Missing backup file extensions (.bak, .old, .swp)"
+    ],
+    "alternatives": [
+      "gobuster (non-recursive)",
+      "ffuf",
+      "dirsearch"
+    ],
+    "references": [
+      "https://github.com/epi052/feroxbuster"
+    ],
+    "tags": [
+      "directory",
+      "recursive",
+      "brute-force",
+      "backup",
+      "deep-scan"
+    ]
+  },
+  {
+    "id": "burp-intruder-basic",
+    "tool": "burpsuite",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Burp Suite Intruder: Sniper mode on login form\n# Target: POST /login\n# Payload position: password field\n# Wordlist: rockyou-top1000.txt",
+    "name": "Burp Intruder \u2014 Login Brute-Force",
+    "description": "Uses Burp Suite's Intruder to brute-force login credentials by fuzzing the password field.",
+    "arguments": {
+      "Sniper mode": "Single payload position",
+      "Payload position": "Mark field with \u00a7\u00a7",
+      "Wordlist": "Password list"
+    },
+    "expected_output": "Request 1: admin/password123 \u2192 302 (redirect = success)\nRequest 2: admin/admin \u2192 200 (login page = failed)",
+    "use_case": "Brute-force web login forms when you have a username but not the password.",
+    "prerequisites": [
+      "Burp Suite running",
+      "Intercepted login request",
+      "Username known"
+    ],
+    "mitre_mapping": [
+      "T1110.001"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Multiple failed login attempts",
+      "Account lockout triggers"
+    ],
+    "remediation": [
+      "Implement account lockout",
+      "Rate limiting",
+      "CAPTCHA after failures",
+      "MFA"
+    ],
+    "common_mistakes": [
+      "Not checking for CSRF tokens",
+      "Too fast (gets blocked)",
+      "Not checking response differences"
+    ],
+    "alternatives": [
+      "hydra -f http-post-form",
+      "ffuf with POST"
+    ],
+    "references": [
+      "https://portswigger.net/burp/documentation/desktop/tools/intruder"
+    ],
+    "tags": [
+      "brute-force",
+      "login",
+      "intruder",
+      "burp",
+      "credentials"
+    ]
+  },
+  {
+    "id": "commix-injection",
+    "tool": "commix",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "commix --url='http://<target>/ping?ip=127.0.0.1' --batch",
+    "name": "OS Command Injection",
+    "description": "Automated tool for detecting and exploiting command injection vulnerabilities in web applications.",
+    "arguments": {
+      "--url": "Target URL with injectable parameter",
+      "--batch": "Non-interactive mode"
+    },
+    "expected_output": "[*] Testing parameter: ip\n[+] The parameter 'ip' is vulnerable to command injection\n[+] Type: Results-based\n$ whoami\nwww-data",
+    "use_case": "Test web parameters for OS command injection (e.g., ping utilities, file processors).",
+    "prerequisites": [
+      "URL with parameter that might execute system commands"
+    ],
+    "mitre_mapping": [
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Unusual system commands in process logs",
+      "Command characters in web logs (;|`$)"
+    ],
+    "remediation": [
+      "Never pass user input to system commands",
+      "Use allowlists for input",
+      "Implement WAF command injection rules"
+    ],
+    "common_mistakes": [
+      "Only testing with semicolons (try |, ||, &&, backticks, $())"
+    ],
+    "alternatives": [
+      "manual testing with Burp",
+      "command injection cheat sheets"
+    ],
+    "references": [
+      "https://github.com/commixproject/commix"
+    ],
+    "tags": [
+      "command-injection",
+      "rce",
+      "os-command",
+      "web",
+      "injection"
+    ]
+  }
+]

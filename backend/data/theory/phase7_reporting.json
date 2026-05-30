@@ -1,0 +1,18 @@
+{
+  "phase_id": 7,
+  "title": "Reporting — Communicating Findings Effectively",
+  "sections": [
+    {
+      "id": "report-why",
+      "title": "Why Reporting is the Most Important Deliverable",
+      "content": "Your report is the only thing the client keeps after the engagement. A brilliant pentest with a terrible report is worthless — the client won't understand the risk or know how to fix it.\n\n**A good report:**\n- Tells a story (attack narrative)\n- Separates executive summary from technical details\n- Provides clear remediation steps\n- Rates findings by actual business risk (not just CVSS)\n- Includes proof (screenshots, commands, outputs)\n\n**Audience awareness:** The CISO reads the executive summary. The sysadmin reads the technical findings. Write for both.",
+      "key_concepts": ["Audience", "Business risk", "Remediation", "Evidence"]
+    },
+    {
+      "id": "report-structure",
+      "title": "Report Structure",
+      "content": "**Standard pentest report sections:**\n\n1. **Executive Summary** (1-2 pages)\n   - Overall risk rating\n   - Key findings in business language\n   - Strategic recommendations\n\n2. **Scope & Methodology**\n   - What was tested, what was excluded\n   - Tools and techniques used\n   - Testing dates and constraints\n\n3. **Findings** (bulk of report)\n   - Each finding: Title, Severity, Description, Impact, Steps to Reproduce, Evidence, Remediation\n   - Ordered by severity (Critical → High → Medium → Low → Info)\n\n4. **Attack Narrative** (optional but valuable)\n   - Step-by-step story of how you went from zero access to Domain Admin\n   - Shows the chain of vulnerabilities\n\n5. **Remediation Summary**\n   - Prioritized fix list\n   - Quick wins vs long-term improvements",
+      "key_concepts": ["Executive summary", "Findings format", "Attack narrative", "Prioritization"]
+    }
+  ]
+}

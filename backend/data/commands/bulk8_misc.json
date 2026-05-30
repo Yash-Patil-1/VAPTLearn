@@ -1,0 +1,260 @@
+[
+  {
+    "id": "wifiphisher-evil-twin",
+    "tool": "wifiphisher",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "wifiphisher --essid CorpWiFi -p firmware-upgrade",
+    "name": "WiFiPhisher (Automated Evil Twin)",
+    "description": "Automated evil twin + captive portal attack \u2014 presents fake firmware upgrade page.",
+    "arguments": {
+      "--essid": "Target network name",
+      "-p": "Phishing scenario"
+    },
+    "expected_output": "[*] Deauthing clients from CorpWiFi\n[*] Clients connecting to evil twin\n[*] Credentials captured: admin/P@ss123",
+    "use_case": "Automated WiFi phishing \u2014 deauths clients, creates evil twin, captures credentials.",
+    "prerequisites": [
+      "Two wireless adapters"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Duplicate SSID",
+      "Deauth frames",
+      "Captive portal"
+    ],
+    "remediation": [
+      "802.1X enterprise",
+      "Certificate pinning",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "Victims don't connect"
+    ],
+    "alternatives": [
+      "fluxion",
+      "manual hostapd+dnsmasq"
+    ],
+    "references": [
+      "https://github.com/wifiphisher/wifiphisher"
+    ],
+    "tags": [
+      "wifiphisher",
+      "evil-twin",
+      "phishing",
+      "automated",
+      "captive-portal"
+    ]
+  },
+  {
+    "id": "bettercap-arp-spoof",
+    "tool": "bettercap",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "bettercap -iface eth0 -eval 'set arp.spoof.targets <victim_ip>; arp.spoof on; net.sniff on'",
+    "name": "ARP Spoofing (MITM)",
+    "description": "Performs ARP spoofing to intercept traffic between victim and gateway.",
+    "arguments": {
+      "arp.spoof.targets": "Victim IP",
+      "arp.spoof on": "Start spoofing",
+      "net.sniff on": "Capture traffic"
+    },
+    "expected_output": "[*] ARP spoofing active\n[*] Captured: HTTP POST /login user=admin&pass=secret",
+    "use_case": "Intercept network traffic to capture credentials and sensitive data.",
+    "prerequisites": [
+      "Same network segment",
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1557.002"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Duplicate ARP entries",
+      "Unusual ARP traffic"
+    ],
+    "remediation": [
+      "Static ARP entries",
+      "Dynamic ARP Inspection",
+      "HTTPS everywhere"
+    ],
+    "common_mistakes": [
+      "Target uses HTTPS (encrypted)"
+    ],
+    "alternatives": [
+      "arpspoof",
+      "ettercap"
+    ],
+    "references": [
+      "https://www.bettercap.org"
+    ],
+    "tags": [
+      "arp",
+      "spoofing",
+      "mitm",
+      "sniffing",
+      "network"
+    ]
+  },
+  {
+    "id": "trivy-container",
+    "tool": "trivy",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "trivy image <image_name>:<tag>",
+    "name": "Container Image Vulnerability Scan",
+    "description": "Scans Docker/OCI container images for known vulnerabilities in OS packages and libraries.",
+    "arguments": {
+      "image": "Scan mode",
+      "<image_name>": "Container image to scan"
+    },
+    "expected_output": "CRITICAL: CVE-2021-44228 (log4j-core 2.14.1)\nHIGH: CVE-2023-1234 (openssl 1.1.1)\nTotal: 45 vulnerabilities (12 CRITICAL)",
+    "use_case": "Scan container images before deployment to find vulnerable packages.",
+    "prerequisites": [
+      "Docker image available",
+      "trivy installed"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "N/A \u2014 local scan"
+    ],
+    "remediation": [
+      "Scan images in CI/CD",
+      "Use minimal base images",
+      "Update regularly"
+    ],
+    "common_mistakes": [
+      "Not scanning all layers"
+    ],
+    "alternatives": [
+      "grype",
+      "docker scout",
+      "snyk container"
+    ],
+    "references": [
+      "https://github.com/aquasecurity/trivy"
+    ],
+    "tags": [
+      "container",
+      "docker",
+      "vulnerability",
+      "image",
+      "scan"
+    ]
+  },
+  {
+    "id": "kube-bench-audit",
+    "tool": "kube-bench",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "kube-bench run --targets master,node",
+    "name": "Kubernetes Security Benchmark",
+    "description": "Checks Kubernetes cluster against CIS Kubernetes Benchmark.",
+    "arguments": {
+      "--targets master,node": "Check both master and node configurations"
+    },
+    "expected_output": "[FAIL] 1.1.1 Ensure API server --anonymous-auth is set to false\n[PASS] 1.1.2 Ensure API server --basic-auth-file is not set\n47 checks PASS, 12 FAIL",
+    "use_case": "Audit Kubernetes security configuration against CIS benchmarks.",
+    "prerequisites": [
+      "Access to Kubernetes nodes",
+      "kube-bench installed"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "N/A \u2014 local audit"
+    ],
+    "remediation": [
+      "Fix failing CIS checks",
+      "Implement RBAC",
+      "Network policies"
+    ],
+    "common_mistakes": [
+      "Not running on all node types"
+    ],
+    "alternatives": [
+      "kubescape",
+      "kube-hunter"
+    ],
+    "references": [
+      "https://github.com/aquasecurity/kube-bench"
+    ],
+    "tags": [
+      "kubernetes",
+      "cis",
+      "benchmark",
+      "audit",
+      "security"
+    ]
+  },
+  {
+    "id": "prowler-cloud",
+    "tool": "prowler",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "prowler aws --severity critical high",
+    "name": "Cloud Security Assessment (AWS)",
+    "description": "Scans AWS account for security misconfigurations and compliance issues.",
+    "arguments": {
+      "aws": "AWS provider",
+      "--severity": "Filter by severity"
+    },
+    "expected_output": "CRITICAL: S3 bucket 'backups' is publicly accessible\nHIGH: Root account has no MFA\nHIGH: Security groups allow 0.0.0.0/0 on port 22",
+    "use_case": "Comprehensive AWS security audit \u2014 checks hundreds of security controls.",
+    "prerequisites": [
+      "AWS credentials configured",
+      "prowler installed"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "API calls from unusual source"
+    ],
+    "remediation": [
+      "Fix critical findings",
+      "Enable MFA",
+      "Restrict security groups"
+    ],
+    "common_mistakes": [
+      "No AWS access"
+    ],
+    "alternatives": [
+      "ScoutSuite",
+      "steampipe"
+    ],
+    "references": [
+      "https://github.com/prowler-cloud/prowler"
+    ],
+    "tags": [
+      "aws",
+      "cloud",
+      "security",
+      "audit",
+      "misconfiguration"
+    ]
+  }
+]

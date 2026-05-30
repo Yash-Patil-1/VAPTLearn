@@ -1,0 +1,753 @@
+[
+  {
+    "id": "enum4linux-ng",
+    "tool": "enum4linux-ng",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "enum4linux-ng -A <target>",
+    "name": "Enum4linux-ng (Modern SMB Enum)",
+    "description": "Modern rewrite of enum4linux \u2014 enumerates SMB shares, users, groups, policies.",
+    "arguments": {
+      "-A": "All enumeration"
+    },
+    "expected_output": "Users: admin, jsmith, svc_backup\nShares: C$, ADMIN$, Backups (READ)\nPassword Policy: min 8, lockout 5/30min",
+    "use_case": "Comprehensive SMB/AD enumeration \u2014 first tool to run against Windows targets.",
+    "prerequisites": [
+      "SMB accessible (445)"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SMB enumeration attempts",
+      "Multiple RPC calls"
+    ],
+    "remediation": [
+      "Restrict anonymous access",
+      "Disable SMBv1"
+    ],
+    "common_mistakes": [
+      "Anonymous access blocked"
+    ],
+    "alternatives": [
+      "crackmapexec",
+      "smbclient",
+      "rpcclient"
+    ],
+    "references": [
+      "https://github.com/cddmp/enum4linux-ng"
+    ],
+    "tags": [
+      "enum4linux",
+      "smb",
+      "users",
+      "shares",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "smbclient-list",
+    "tool": "smbclient",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "smbclient -L //<target>/ -N",
+    "name": "SMB Share Listing",
+    "description": "Lists available SMB shares \u2014 anonymous or authenticated.",
+    "arguments": {
+      "-L": "List shares",
+      "-N": "No password (null session)"
+    },
+    "expected_output": "Sharename  Type  Comment\n---------  ----  -------\nBackups    Disk  Company backups\nIPC$       IPC   Remote IPC",
+    "use_case": "Quick SMB share enumeration \u2014 check for readable shares with sensitive data.",
+    "prerequisites": [
+      "SMB accessible"
+    ],
+    "mitre_mapping": [
+      "T1135"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SMB connection attempts"
+    ],
+    "remediation": [
+      "Restrict share access",
+      "Disable null sessions"
+    ],
+    "common_mistakes": [
+      "Null session blocked"
+    ],
+    "alternatives": [
+      "crackmapexec smb --shares",
+      "net view"
+    ],
+    "references": [
+      "https://www.samba.org/samba/docs/current/man-html/smbclient.1.html"
+    ],
+    "tags": [
+      "smbclient",
+      "shares",
+      "listing",
+      "null-session",
+      "smb"
+    ]
+  },
+  {
+    "id": "ldapsearch-users",
+    "tool": "ldapsearch",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "ldapsearch -x -H ldap://<dc> -b 'DC=corp,DC=local' '(objectClass=user)' sAMAccountName description",
+    "name": "LDAP User Enumeration",
+    "description": "Queries Active Directory via LDAP for all user accounts and descriptions.",
+    "arguments": {
+      "-x": "Simple auth",
+      "-H": "LDAP URI",
+      "-b": "Base DN",
+      "(objectClass=user)": "Filter"
+    },
+    "expected_output": "dn: CN=John Smith,OU=Users,DC=corp,DC=local\nsAMAccountName: jsmith\ndescription: Temp password: Welcome1!",
+    "use_case": "Enumerate AD users \u2014 descriptions often contain passwords!",
+    "prerequisites": [
+      "LDAP accessible (389)",
+      "Anonymous or valid creds"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP queries from non-standard sources"
+    ],
+    "remediation": [
+      "Disable anonymous LDAP",
+      "Don't put passwords in descriptions"
+    ],
+    "common_mistakes": [
+      "Anonymous LDAP blocked"
+    ],
+    "alternatives": [
+      "crackmapexec ldap",
+      "windapsearch"
+    ],
+    "references": [
+      "https://linux.die.net/man/1/ldapsearch"
+    ],
+    "tags": [
+      "ldap",
+      "users",
+      "active-directory",
+      "description",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "snmpwalk-enum",
+    "tool": "snmpwalk",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "snmpwalk -v2c -c public <target> 1.3.6.1.2.1",
+    "name": "SNMP Enumeration",
+    "description": "Walks SNMP MIB tree \u2014 reveals system info, interfaces, routes, running processes.",
+    "arguments": {
+      "-v2c": "SNMP version 2c",
+      "-c public": "Community string"
+    },
+    "expected_output": "sysDescr: Linux server 5.15.0\nsysName: web01\nifDescr: eth0 (10.0.0.5)\nhrSWRunName: apache2, mysql",
+    "use_case": "SNMP often reveals extensive system information with default community strings.",
+    "prerequisites": [
+      "SNMP accessible (161/udp)",
+      "Valid community string"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SNMP queries"
+    ],
+    "remediation": [
+      "Change default community strings",
+      "Use SNMPv3",
+      "Restrict SNMP access"
+    ],
+    "common_mistakes": [
+      "Non-default community string"
+    ],
+    "alternatives": [
+      "onesixtyone (brute community)",
+      "snmp-check"
+    ],
+    "references": [
+      "https://linux.die.net/man/1/snmpwalk"
+    ],
+    "tags": [
+      "snmp",
+      "walk",
+      "community",
+      "mib",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "rpcclient-enum",
+    "tool": "rpcclient",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "rpcclient -U '' -N <target> -c 'enumdomusers; enumdomgroups; getdompwinfo'",
+    "name": "RPC Client Domain Enumeration",
+    "description": "Enumerates domain users, groups, and password policy via MS-RPC.",
+    "arguments": {
+      "-U ''": "Empty username",
+      "-N": "No password",
+      "-c": "Commands to run"
+    },
+    "expected_output": "user:[admin] rid:[0x1f4]\nuser:[jsmith] rid:[0x450]\ngroup:[Domain Admins] rid:[0x200]\nMin password length: 8",
+    "use_case": "Enumerate AD information via RPC \u2014 often works with null sessions.",
+    "prerequisites": [
+      "RPC accessible (135/445)"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "RPC enumeration calls"
+    ],
+    "remediation": [
+      "Disable null sessions",
+      "Restrict RPC access"
+    ],
+    "common_mistakes": [
+      "Null session blocked"
+    ],
+    "alternatives": [
+      "enum4linux-ng",
+      "crackmapexec"
+    ],
+    "references": [
+      "https://www.samba.org/samba/docs/current/man-html/rpcclient.1.html"
+    ],
+    "tags": [
+      "rpcclient",
+      "rpc",
+      "users",
+      "groups",
+      "null-session"
+    ]
+  },
+  {
+    "id": "bloodhound-collect",
+    "tool": "sharphound",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "windows"
+    ],
+    "command": "SharpHound.exe -c All --outputdirectory C:\\temp\\",
+    "name": "BloodHound Collection (SharpHound)",
+    "description": "Collects Active Directory relationship data for BloodHound graph analysis.",
+    "arguments": {
+      "-c All": "Collect all data types",
+      "--outputdirectory": "Output location"
+    },
+    "expected_output": "[+] Resolved Collection Methods: Group, LocalAdmin, Session, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote\n[+] Finished collection in 00:02:34\n[+] Compressing data to C:\\temp\\20240101_BloodHound.zip",
+    "use_case": "Collect AD data for attack path analysis \u2014 essential for AD pentesting.",
+    "prerequisites": [
+      "Domain user credentials",
+      "Domain-joined machine"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP queries",
+      "SAMR calls",
+      "NetSessionEnum"
+    ],
+    "remediation": [
+      "Monitor for SharpHound signatures",
+      "Restrict session enumeration"
+    ],
+    "common_mistakes": [
+      "AV blocks SharpHound"
+    ],
+    "alternatives": [
+      "bloodhound-python",
+      "ADExplorer"
+    ],
+    "references": [
+      "https://github.com/SpecterOps/BloodHound"
+    ],
+    "tags": [
+      "bloodhound",
+      "sharphound",
+      "active-directory",
+      "graph",
+      "paths"
+    ]
+  },
+  {
+    "id": "bloodhound-python",
+    "tool": "bloodhound-python",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "bloodhound-python -u jsmith -p 'Password1!' -d corp.local -ns <dc_ip> -c all",
+    "name": "BloodHound Collection (Python)",
+    "description": "Linux-based BloodHound collector \u2014 no need for domain-joined machine.",
+    "arguments": {
+      "-u": "Username",
+      "-p": "Password",
+      "-d": "Domain",
+      "-c all": "Collect all"
+    },
+    "expected_output": "[+] Connecting to LDAP...\n[+] Found 1500 users\n[+] Found 200 groups\n[+] Wrote JSON files for BloodHound import",
+    "use_case": "Collect BloodHound data from Linux \u2014 useful when you only have creds, not a domain machine.",
+    "prerequisites": [
+      "Valid domain credentials",
+      "Network access to DC"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP queries from Linux host"
+    ],
+    "remediation": [
+      "Monitor LDAP query patterns"
+    ],
+    "common_mistakes": [
+      "Credentials invalid"
+    ],
+    "alternatives": [
+      "SharpHound",
+      "ADExplorer"
+    ],
+    "references": [
+      "https://github.com/dirkjanm/BloodHound.py"
+    ],
+    "tags": [
+      "bloodhound",
+      "python",
+      "linux",
+      "collection",
+      "active-directory"
+    ]
+  },
+  {
+    "id": "ffuf-vhost",
+    "tool": "ffuf",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://<target> -H 'Host: FUZZ.<domain>' -fs <default_size>",
+    "name": "Virtual Host Discovery (FFUF)",
+    "description": "Discovers virtual hosts by fuzzing the Host header \u2014 finds hidden sites on same IP.",
+    "arguments": {
+      "-H 'Host: FUZZ...'": "Fuzz Host header",
+      "-fs": "Filter by response size"
+    },
+    "expected_output": "[Status: 200, Size: 4521] dev.target.com\n[Status: 200, Size: 1203] staging.target.com\n[Status: 200, Size: 892] internal.target.com",
+    "use_case": "Find hidden virtual hosts that aren't in DNS \u2014 often contain dev/staging environments.",
+    "prerequisites": [
+      "Target IP",
+      "Wordlist"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Many requests with different Host headers"
+    ],
+    "remediation": [
+      "Don't host sensitive vhosts on public IPs"
+    ],
+    "common_mistakes": [
+      "All vhosts return same size"
+    ],
+    "alternatives": [
+      "gobuster vhost",
+      "wfuzz"
+    ],
+    "references": [
+      "https://github.com/ffuf/ffuf"
+    ],
+    "tags": [
+      "vhost",
+      "virtual-host",
+      "ffuf",
+      "hidden",
+      "discovery"
+    ]
+  },
+  {
+    "id": "feroxbuster-dir",
+    "tool": "feroxbuster",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "feroxbuster -u http://<target> -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -x php,txt,bak --smart",
+    "name": "Feroxbuster Directory Brute-Force",
+    "description": "Fast recursive directory/file discovery \u2014 Rust-based, faster than gobuster.",
+    "arguments": {
+      "-x": "Extensions to check",
+      "--smart": "Smart filtering"
+    },
+    "expected_output": "200  GET  /admin/config.php\n200  GET  /backup/db.sql.bak\n301  GET  /api/ \u2192 /api/v1/\n403  GET  /server-status",
+    "use_case": "Fast directory discovery with recursion \u2014 finds hidden files and backups.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Rapid HTTP requests to many paths"
+    ],
+    "remediation": [
+      "Remove sensitive files",
+      "Restrict directory access"
+    ],
+    "common_mistakes": [
+      "WAF blocks brute-force"
+    ],
+    "alternatives": [
+      "gobuster",
+      "dirsearch",
+      "dirb"
+    ],
+    "references": [
+      "https://github.com/epi052/feroxbuster"
+    ],
+    "tags": [
+      "feroxbuster",
+      "directory",
+      "brute-force",
+      "fast",
+      "recursive"
+    ]
+  },
+  {
+    "id": "whatweb-fingerprint",
+    "tool": "whatweb",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "whatweb -a 3 http://<target>",
+    "name": "WhatWeb Technology Fingerprinting",
+    "description": "Identifies web technologies \u2014 CMS, frameworks, servers, JavaScript libraries.",
+    "arguments": {
+      "-a 3": "Aggressive mode (more requests)"
+    },
+    "expected_output": "http://target [200 OK] Apache[2.4.49], WordPress[6.1], PHP[8.1], jQuery[3.6.0], Bootstrap",
+    "use_case": "Identify technology stack for targeted vulnerability research.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1592"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Multiple HTTP requests probing technology"
+    ],
+    "remediation": [
+      "Remove version headers",
+      "Custom error pages"
+    ],
+    "common_mistakes": [
+      "Heavy WAF blocking"
+    ],
+    "alternatives": [
+      "wappalyzer",
+      "builtwith",
+      "httpx -tech-detect"
+    ],
+    "references": [
+      "https://github.com/urbanadventurer/WhatWeb"
+    ],
+    "tags": [
+      "whatweb",
+      "fingerprint",
+      "technology",
+      "cms",
+      "identification"
+    ]
+  },
+  {
+    "id": "wafw00f-detect",
+    "tool": "wafw00f",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "wafw00f http://<target>",
+    "name": "WAF Detection",
+    "description": "Identifies Web Application Firewalls \u2014 important to know before attacking.",
+    "arguments": {},
+    "expected_output": "[*] Checking http://target\n[+] The site http://target is behind Cloudflare (Cloudflare Inc.)",
+    "use_case": "Identify WAF before testing \u2014 adjust techniques to bypass specific WAF.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "WAF probe requests"
+    ],
+    "remediation": [
+      "N/A \u2014 WAF is a defense"
+    ],
+    "common_mistakes": [
+      "WAF not detected (might still exist)"
+    ],
+    "alternatives": [
+      "nmap http-waf-detect",
+      "manual testing"
+    ],
+    "references": [
+      "https://github.com/EnableSecurity/wafw00f"
+    ],
+    "tags": [
+      "waf",
+      "detection",
+      "firewall",
+      "bypass",
+      "identification"
+    ]
+  },
+  {
+    "id": "amass-subdomain",
+    "tool": "amass",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "amass enum -d <domain> -passive -o subdomains.txt",
+    "name": "Amass Passive Subdomain Enumeration",
+    "description": "Discovers subdomains using passive sources \u2014 certificate transparency, DNS databases, archives.",
+    "arguments": {
+      "-passive": "No active probing",
+      "-o": "Output file"
+    },
+    "expected_output": "admin.target.com\napi.target.com\ndev.target.com\nstaging.target.com\nvpn.target.com\n[+] Found 47 subdomains",
+    "use_case": "Passive subdomain discovery \u2014 completely undetectable by target.",
+    "prerequisites": [
+      "Target domain"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Cannot detect \u2014 passive only"
+    ],
+    "remediation": [
+      "Monitor certificate transparency",
+      "Use wildcard certs"
+    ],
+    "common_mistakes": [
+      "Few results (small org)"
+    ],
+    "alternatives": [
+      "subfinder",
+      "crt.sh",
+      "SecurityTrails"
+    ],
+    "references": [
+      "https://github.com/owasp-amass/amass"
+    ],
+    "tags": [
+      "amass",
+      "subdomain",
+      "passive",
+      "undetectable",
+      "recon"
+    ]
+  },
+  {
+    "id": "httpx-probe",
+    "tool": "httpx",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "cat subdomains.txt | httpx -status-code -title -tech-detect -follow-redirects",
+    "name": "HTTPx Probe (Mass HTTP Analysis)",
+    "description": "Probes list of hosts for HTTP services \u2014 shows status, title, technology.",
+    "arguments": {
+      "-status-code": "Show status",
+      "-title": "Show page title",
+      "-tech-detect": "Detect technology"
+    },
+    "expected_output": "https://admin.target.com [200] [Admin Panel] [PHP,Apache]\nhttps://api.target.com [200] [API Docs] [Node.js]\nhttp://dev.target.com [401] [Login Required] [Nginx]",
+    "use_case": "Quickly identify live web services from subdomain list \u2014 prioritize targets.",
+    "prerequisites": [
+      "List of hosts/subdomains"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "HTTP requests to many hosts"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "Many false positives from CDN"
+    ],
+    "alternatives": [
+      "aquatone",
+      "eyewitness"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/httpx"
+    ],
+    "tags": [
+      "httpx",
+      "probe",
+      "mass",
+      "alive",
+      "web"
+    ]
+  },
+  {
+    "id": "rustscan-fast",
+    "tool": "rustscan",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "rustscan -a <target> --ulimit 5000 -- -sV -sC",
+    "name": "RustScan (Ultra-Fast Port Scanner)",
+    "description": "Scans all 65535 ports in seconds, then passes open ports to nmap for service detection.",
+    "arguments": {
+      "-a": "Target",
+      "--ulimit": "File descriptor limit",
+      "--": "Pass to nmap"
+    },
+    "expected_output": "Open 10.0.0.5:22,80,443,3306,8080\n[~] Running nmap on open ports...\n22/tcp ssh OpenSSH 8.9\n80/tcp http Apache 2.4",
+    "use_case": "Find open ports in seconds \u2014 then nmap only scans what's open (much faster workflow).",
+    "prerequisites": [
+      "rustscan installed"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Very fast SYN scan"
+    ],
+    "remediation": [
+      "Rate limiting",
+      "IDS"
+    ],
+    "common_mistakes": [
+      "Rate too high for target"
+    ],
+    "alternatives": [
+      "masscan",
+      "nmap -T4"
+    ],
+    "references": [
+      "https://github.com/RustScan/RustScan"
+    ],
+    "tags": [
+      "rustscan",
+      "fast",
+      "ports",
+      "all-ports",
+      "speed"
+    ]
+  },
+  {
+    "id": "gobuster-dns",
+    "tool": "gobuster",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "gobuster dns -d <domain> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 50",
+    "name": "Gobuster DNS Subdomain Brute-Force",
+    "description": "Active DNS subdomain brute-force \u2014 resolves each subdomain attempt.",
+    "arguments": {
+      "dns": "DNS mode",
+      "-d": "Domain",
+      "-t 50": "50 threads"
+    },
+    "expected_output": "Found: admin.target.com\nFound: mail.target.com\nFound: vpn.target.com\nFound: dev.target.com",
+    "use_case": "Active subdomain discovery \u2014 finds subdomains not in passive sources.",
+    "prerequisites": [
+      "Target domain",
+      "DNS resolution"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "High volume DNS queries"
+    ],
+    "remediation": [
+      "Wildcard DNS detection",
+      "Rate limiting"
+    ],
+    "common_mistakes": [
+      "Wildcard DNS returns all as valid"
+    ],
+    "alternatives": [
+      "ffuf",
+      "wfuzz",
+      "amass -active"
+    ],
+    "references": [
+      "https://github.com/OJ/gobuster"
+    ],
+    "tags": [
+      "gobuster",
+      "dns",
+      "subdomain",
+      "brute-force",
+      "active"
+    ]
+  }
+]

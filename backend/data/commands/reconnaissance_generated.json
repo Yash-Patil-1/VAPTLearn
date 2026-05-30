@@ -1,0 +1,518 @@
+[
+  {
+    "id": "nmap-smb-vuln-scripts",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smb-vuln* -p 445 <target>",
+    "name": "SMB Vulnerability Scripts",
+    "description": "Runs all SMB vulnerability detection scripts including EternalBlue (MS17-010), MS08-067, and other critical SMB flaws.",
+    "arguments": {
+      "--script smb-vuln*": "All SMB vuln scripts",
+      "-p 445": "SMB port"
+    },
+    "expected_output": "| smb-vuln-ms17-010:\n|   VULNERABLE:\n|   Remote Code Execution in SMBv1",
+    "use_case": "Check for critical SMB vulnerabilities that allow RCE.",
+    "prerequisites": [
+      "SMB port 445 open"
+    ],
+    "mitre_mapping": [
+      "T1190",
+      "T1210"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "IDS signatures for SMB exploit probes",
+      "SMB audit logs"
+    ],
+    "remediation": [
+      "Disable SMBv1",
+      "Apply MS17-010 patch",
+      "Block 445 at perimeter"
+    ],
+    "common_mistakes": [
+      "Not checking if SMBv1 is enabled"
+    ],
+    "alternatives": [
+      "netexec smb <target> -M ms17-010"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/smb-vuln-ms17-010.html"
+    ],
+    "tags": [
+      "smb",
+      "vulnerability",
+      "eternalblue",
+      "nse"
+    ]
+  },
+  {
+    "id": "nmap-dns-brute",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script dns-brute -p 53 <target>",
+    "name": "DNS Brute-Force (Nmap)",
+    "description": "Brute-forces subdomains using Nmap's dns-brute NSE script.",
+    "arguments": {
+      "--script dns-brute": "DNS brute-force",
+      "-p 53": "DNS port"
+    },
+    "expected_output": "| dns-brute:\n|   www.target.com - 10.0.0.1\n|   mail.target.com - 10.0.0.2",
+    "use_case": "Discover subdomains via DNS brute-force.",
+    "prerequisites": [
+      "DNS port 53 open",
+      "Target domain"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "High volume DNS queries",
+      "DNS rate limiting alerts"
+    ],
+    "remediation": [
+      "DNS rate limiting",
+      "Split-horizon DNS"
+    ],
+    "common_mistakes": [
+      "Not using custom wordlist"
+    ],
+    "alternatives": [
+      "subfinder",
+      "amass",
+      "dnsrecon"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/dns-brute.html"
+    ],
+    "tags": [
+      "dns",
+      "brute-force",
+      "subdomain",
+      "nse"
+    ]
+  },
+  {
+    "id": "nmap-ftp-anon",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script ftp-anon -p 21 <target>",
+    "name": "FTP Anonymous Login Check",
+    "description": "Checks if FTP server allows anonymous login \u2014 a common misconfiguration.",
+    "arguments": {
+      "--script ftp-anon": "Check anonymous FTP",
+      "-p 21": "FTP port"
+    },
+    "expected_output": "| ftp-anon: Anonymous FTP login allowed\n|   drwxr-xr-x  2 ftp ftp  4096 Jan 01 backup/",
+    "use_case": "Identify FTP servers allowing anonymous access \u2014 may contain sensitive files.",
+    "prerequisites": [
+      "FTP port 21 open"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "FTP login events",
+      "Anonymous access logs"
+    ],
+    "remediation": [
+      "Disable anonymous FTP",
+      "Restrict FTP access",
+      "Use SFTP instead"
+    ],
+    "common_mistakes": [
+      "Not checking file contents after finding anon access"
+    ],
+    "alternatives": [
+      "ftp <target> (manual)",
+      "netexec ftp <target> -u anonymous -p ''"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/ftp-anon.html"
+    ],
+    "tags": [
+      "ftp",
+      "anonymous",
+      "misconfiguration",
+      "nse"
+    ]
+  },
+  {
+    "id": "nmap-http-title",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script http-title -p 80,443,8080,8443 <target_range>",
+    "name": "HTTP Title Scan (Mass)",
+    "description": "Grabs HTTP page titles across multiple hosts/ports \u2014 quickly identifies web applications.",
+    "arguments": {
+      "--script http-title": "Get page title",
+      "-p 80,443,8080,8443": "Common web ports"
+    },
+    "expected_output": "| http-title: Apache2 Ubuntu Default Page\n| http-title: phpMyAdmin\n| http-title: Grafana",
+    "use_case": "Quickly identify what web apps are running across a network range.",
+    "prerequisites": [
+      "Web ports open"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Mass HTTP requests in logs"
+    ],
+    "remediation": [
+      "Remove default pages",
+      "Restrict admin panels"
+    ],
+    "common_mistakes": [
+      "Only scanning port 80 (miss 8080, 8443)"
+    ],
+    "alternatives": [
+      "httpx -title",
+      "aquatone"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/http-title.html"
+    ],
+    "tags": [
+      "http",
+      "title",
+      "web",
+      "mass-scan",
+      "identification"
+    ]
+  },
+  {
+    "id": "shodan-search",
+    "tool": "shodan",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "shodan search 'apache country:IN port:443'",
+    "name": "Shodan Search (CLI)",
+    "description": "Searches Shodan's database of internet-connected devices. Passive \u2014 doesn't touch the target.",
+    "arguments": {
+      "search": "Search query",
+      "country:IN": "Filter by country",
+      "port:443": "Filter by port"
+    },
+    "expected_output": "192.168.1.10  443  Apache/2.4.52\n10.0.0.5      443  nginx/1.18",
+    "use_case": "Find exposed services, IoT devices, and misconfigurations without active scanning.",
+    "prerequisites": [
+      "Shodan CLI installed",
+      "Shodan API key (free tier)"
+    ],
+    "mitre_mapping": [
+      "T1596"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 no target interaction"
+    ],
+    "remediation": [
+      "Remove unnecessary internet exposure",
+      "Use firewall rules"
+    ],
+    "common_mistakes": [
+      "Not combining with other OSINT sources"
+    ],
+    "alternatives": [
+      "censys search",
+      "zoomeye"
+    ],
+    "references": [
+      "https://www.shodan.io"
+    ],
+    "tags": [
+      "shodan",
+      "osint",
+      "passive",
+      "internet-scanning"
+    ]
+  },
+  {
+    "id": "httpx-probe",
+    "tool": "httpx",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "macos"
+    ],
+    "command": "cat subdomains.txt | httpx -status-code -title -tech-detect -o live.txt",
+    "name": "HTTP Probing & Tech Detection",
+    "description": "Probes a list of subdomains to find live web servers, their status codes, titles, and technologies.",
+    "arguments": {
+      "-status-code": "Show HTTP status",
+      "title": "Show page title",
+      "-tech-detect": "Detect technologies",
+      "-o": "Output file"
+    },
+    "expected_output": "https://api.target.com [200] [API Gateway] [Nginx]\nhttps://dev.target.com [403] [Forbidden] [Apache]",
+    "use_case": "After subdomain enumeration, identify which are live and what they're running.",
+    "prerequisites": [
+      "List of subdomains",
+      "httpx installed"
+    ],
+    "mitre_mapping": [
+      "T1595",
+      "T1592"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Multiple HTTP requests from single source"
+    ],
+    "remediation": [
+      "Remove unused subdomains",
+      "Restrict access to dev environments"
+    ],
+    "common_mistakes": [
+      "Not checking all ports (-p 80,443,8080,8443)"
+    ],
+    "alternatives": [
+      "aquatone",
+      "gowitness (screenshots)"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/httpx"
+    ],
+    "tags": [
+      "http",
+      "probing",
+      "alive",
+      "technology",
+      "subdomain"
+    ]
+  },
+  {
+    "id": "naabu-ports",
+    "tool": "naabu",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "naabu -host <target> -top-ports 1000 -silent",
+    "name": "Fast Port Discovery (Naabu)",
+    "description": "ProjectDiscovery's port scanner \u2014 faster than nmap for discovery, designed to feed into other tools.",
+    "arguments": {
+      "-host": "Target",
+      "top-ports 1000": "Top 1000 ports",
+      "-silent": "Only show results"
+    },
+    "expected_output": "192.168.1.10:22\n192.168.1.10:80\n192.168.1.10:443\n192.168.1.10:3306",
+    "use_case": "Rapid port discovery before detailed nmap scan. Integrates with httpx/nuclei pipeline.",
+    "prerequisites": [
+      "naabu installed",
+      "Root for SYN scan"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "High connection rate",
+      "IDS scan detection"
+    ],
+    "remediation": [
+      "Rate limiting",
+      "IDS/IPS"
+    ],
+    "common_mistakes": [
+      "Not following up with service detection"
+    ],
+    "alternatives": [
+      "masscan",
+      "rustscan",
+      "nmap -sS"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/naabu"
+    ],
+    "tags": [
+      "port-scan",
+      "fast",
+      "projectdiscovery",
+      "pipeline"
+    ]
+  },
+  {
+    "id": "whois-lookup",
+    "tool": "whois",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "macos"
+    ],
+    "command": "whois <domain>",
+    "name": "WHOIS Domain Lookup",
+    "description": "Queries domain registration information \u2014 registrar, creation date, nameservers, and sometimes contact info.",
+    "arguments": {
+      "<domain>": "Target domain name"
+    },
+    "expected_output": "Domain Name: EXAMPLE.COM\nRegistrar: GoDaddy\nCreation Date: 2005-01-01\nName Server: ns1.example.com",
+    "use_case": "Gather domain ownership info, registration dates, and infrastructure details.",
+    "prerequisites": [
+      "Target domain name"
+    ],
+    "mitre_mapping": [
+      "T1596.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 queries public WHOIS databases"
+    ],
+    "remediation": [
+      "Use WHOIS privacy protection",
+      "Redact sensitive contact info"
+    ],
+    "common_mistakes": [
+      "Not checking historical WHOIS (whoishistory.com)"
+    ],
+    "alternatives": [
+      "amass intel -whois",
+      "host <domain>"
+    ],
+    "references": [
+      "https://linux.die.net/man/1/whois"
+    ],
+    "tags": [
+      "whois",
+      "domain",
+      "registration",
+      "osint",
+      "passive"
+    ]
+  },
+  {
+    "id": "fierce-dns",
+    "tool": "fierce",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "fierce --domain <target_domain>",
+    "name": "DNS Reconnaissance (Fierce)",
+    "description": "Attempts zone transfer, then falls back to brute-force subdomain enumeration if transfer fails.",
+    "arguments": {
+      "--domain": "Target domain"
+    },
+    "expected_output": "Found: www.target.com (10.0.0.1)\nFound: mail.target.com (10.0.0.2)\nFound: vpn.target.com (10.0.0.3)",
+    "use_case": "Quick DNS recon that tries zone transfer first (fast) then brute-force (thorough).",
+    "prerequisites": [
+      "Target domain name"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Zone transfer attempts in DNS logs",
+      "Brute-force queries"
+    ],
+    "remediation": [
+      "Restrict zone transfers",
+      "DNS rate limiting"
+    ],
+    "common_mistakes": [
+      "Not trying zone transfer manually first (dig axfr)"
+    ],
+    "alternatives": [
+      "dnsrecon",
+      "dnsenum",
+      "subfinder"
+    ],
+    "references": [
+      "https://github.com/mschwager/fierce"
+    ],
+    "tags": [
+      "dns",
+      "zone-transfer",
+      "brute-force",
+      "subdomain"
+    ]
+  },
+  {
+    "id": "crt-sh-search",
+    "tool": "curl",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "macos"
+    ],
+    "command": "curl -s 'https://crt.sh/?q=%25.<domain>&output=json' | jq '.[].name_value' | sort -u",
+    "name": "Certificate Transparency Search",
+    "description": "Queries certificate transparency logs to find subdomains \u2014 completely passive, no target interaction.",
+    "arguments": {
+      "crt.sh": "CT log search engine",
+      "%25": "Wildcard (URL-encoded %)",
+      "jq": "Parse JSON output"
+    },
+    "expected_output": "www.target.com\napi.target.com\nstaging.target.com\ninternal.target.com",
+    "use_case": "Discover subdomains from SSL certificate registrations \u2014 often reveals internal/staging hosts.",
+    "prerequisites": [
+      "Target domain",
+      "curl + jq installed"
+    ],
+    "mitre_mapping": [
+      "T1596.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Completely passive \u2014 no target interaction"
+    ],
+    "remediation": [
+      "Monitor CT logs for unauthorized certificates",
+      "Remove old certificates"
+    ],
+    "common_mistakes": [
+      "Not combining with other subdomain sources"
+    ],
+    "alternatives": [
+      "subfinder (includes crt.sh)",
+      "certspotter"
+    ],
+    "references": [
+      "https://crt.sh"
+    ],
+    "tags": [
+      "certificate-transparency",
+      "passive",
+      "subdomain",
+      "osint",
+      "ssl"
+    ]
+  }
+]

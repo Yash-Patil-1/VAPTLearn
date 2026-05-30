@@ -1,0 +1,505 @@
+[
+  {
+    "id": "nuclei-takeover",
+    "tool": "nuclei",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nuclei -u http://<target> -t takeovers/",
+    "name": "Subdomain Takeover Check",
+    "description": "Detects dangling DNS records pointing to unclaimed services (S3, Heroku, GitHub Pages, etc.).",
+    "arguments": {
+      "-t takeovers/": "Takeover detection templates"
+    },
+    "expected_output": "[takeover] [high] http://old.target.com \u2192 GitHub Pages (unclaimed)",
+    "use_case": "Find subdomains pointing to decommissioned services that can be claimed by attackers.",
+    "prerequisites": [
+      "Subdomain list"
+    ],
+    "mitre_mapping": [
+      "T1584"
+    ],
+    "mitre_tactic": "Resource Development",
+    "detections": [
+      "DNS changes",
+      "New content on previously dead subdomains"
+    ],
+    "remediation": [
+      "Remove stale DNS records",
+      "Monitor for dangling CNAMEs"
+    ],
+    "common_mistakes": [
+      "Not checking all subdomains"
+    ],
+    "alternatives": [
+      "subjack",
+      "can-i-take-over-xyz"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/nuclei-templates"
+    ],
+    "tags": [
+      "takeover",
+      "subdomain",
+      "dangling",
+      "dns"
+    ]
+  },
+  {
+    "id": "arjun-params",
+    "tool": "arjun",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "arjun -u http://<target>/endpoint",
+    "name": "Hidden Parameter Discovery",
+    "description": "Dedicated tool for finding hidden HTTP parameters using smart heuristics.",
+    "arguments": {
+      "-u": "Target URL"
+    },
+    "expected_output": "[+] Found: debug, admin, token, api_key\n[+] 4 parameters discovered",
+    "use_case": "Find hidden parameters that may expose debug info or bypass authentication.",
+    "prerequisites": [
+      "Target URL"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual parameters in requests"
+    ],
+    "remediation": [
+      "Remove debug parameters",
+      "Input validation"
+    ],
+    "common_mistakes": [
+      "Not trying POST/JSON modes"
+    ],
+    "alternatives": [
+      "ffuf param fuzzing",
+      "paramspider"
+    ],
+    "references": [
+      "https://github.com/s0md3v/Arjun"
+    ],
+    "tags": [
+      "parameter",
+      "discovery",
+      "hidden",
+      "web"
+    ]
+  },
+  {
+    "id": "smuggler-http",
+    "tool": "smuggler",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "python3 smuggler.py -u http://<target>/",
+    "name": "HTTP Request Smuggling",
+    "description": "Tests for HTTP request smuggling vulnerabilities (CL.TE, TE.CL, TE.TE).",
+    "arguments": {
+      "-u": "Target URL"
+    },
+    "expected_output": "[+] CL.TE smuggling detected!\n[+] Potential for cache poisoning",
+    "use_case": "Detect request smuggling \u2014 can lead to cache poisoning, auth bypass, and request hijacking.",
+    "prerequisites": [
+      "HTTP/1.1 target behind reverse proxy"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Malformed Content-Length/Transfer-Encoding",
+      "Backend errors"
+    ],
+    "remediation": [
+      "Normalize HTTP parsing",
+      "Disable HTTP/1.1 where possible"
+    ],
+    "common_mistakes": [
+      "Target using HTTP/2 end-to-end"
+    ],
+    "alternatives": [
+      "burp turbo intruder",
+      "defparam"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/request-smuggling"
+    ],
+    "tags": [
+      "smuggling",
+      "http",
+      "cache-poisoning",
+      "proxy"
+    ]
+  },
+  {
+    "id": "cors-misconfiguration",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -s -I -H 'Origin: https://evil.com' http://<target>/api/ | grep -i access-control",
+    "name": "CORS Misconfiguration Test",
+    "description": "Tests if the server reflects arbitrary origins in CORS headers \u2014 allows cross-origin data theft.",
+    "arguments": {
+      "-H 'Origin: https://evil.com'": "Fake origin",
+      "grep access-control": "Check CORS headers"
+    },
+    "expected_output": "Access-Control-Allow-Origin: https://evil.com\nAccess-Control-Allow-Credentials: true",
+    "use_case": "If server reflects any origin with credentials, attackers can steal user data cross-origin.",
+    "prerequisites": [
+      "API endpoint"
+    ],
+    "mitre_mapping": [
+      "T1189"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual Origin headers",
+      "Cross-origin requests from unknown domains"
+    ],
+    "remediation": [
+      "Whitelist specific origins",
+      "Never reflect arbitrary origins with credentials"
+    ],
+    "common_mistakes": [
+      "Not testing with credentials flag"
+    ],
+    "alternatives": [
+      "burp scanner",
+      "corsy"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/cors"
+    ],
+    "tags": [
+      "cors",
+      "misconfiguration",
+      "cross-origin",
+      "api"
+    ]
+  },
+  {
+    "id": "crlf-injection",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -v 'http://<target>/redirect?url=http://target.com%0d%0aSet-Cookie:hacked=true'",
+    "name": "CRLF Injection Test",
+    "description": "Tests for HTTP header injection via CRLF characters (%0d%0a) in parameters.",
+    "arguments": {
+      "%0d%0a": "Carriage Return + Line Feed (header separator)"
+    },
+    "expected_output": "< HTTP/1.1 302 Found\n< Location: http://target.com\n< Set-Cookie: hacked=true",
+    "use_case": "Inject arbitrary HTTP headers \u2014 can set cookies, redirect, or enable XSS.",
+    "prerequisites": [
+      "Parameter reflected in HTTP headers"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "CRLF characters in request parameters",
+      "Unusual Set-Cookie headers"
+    ],
+    "remediation": [
+      "Sanitize CRLF from all input",
+      "Don't reflect user input in headers"
+    ],
+    "common_mistakes": [
+      "Not URL-encoding properly"
+    ],
+    "alternatives": [
+      "crlfuzz",
+      "burp scanner"
+    ],
+    "references": [
+      "https://owasp.org/www-community/vulnerabilities/CRLF_Injection"
+    ],
+    "tags": [
+      "crlf",
+      "header-injection",
+      "cookie",
+      "redirect"
+    ]
+  },
+  {
+    "id": "open-redirect",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -v 'http://<target>/login?next=https://evil.com'",
+    "name": "Open Redirect Test",
+    "description": "Tests if redirect parameters accept external URLs \u2014 used for phishing.",
+    "arguments": {
+      "next=https://evil.com": "External redirect URL"
+    },
+    "expected_output": "< HTTP/1.1 302 Found\n< Location: https://evil.com",
+    "use_case": "Open redirects enable convincing phishing \u2014 victim sees legitimate domain in link.",
+    "prerequisites": [
+      "URL parameter controlling redirects"
+    ],
+    "mitre_mapping": [
+      "T1566"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Redirects to external domains",
+      "Unusual redirect patterns"
+    ],
+    "remediation": [
+      "Whitelist redirect destinations",
+      "Validate redirect URLs server-side"
+    ],
+    "common_mistakes": [
+      "Not trying bypass techniques (//evil.com, /\\evil.com)"
+    ],
+    "alternatives": [
+      "openredirex",
+      "burp scanner"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/open-redirect"
+    ],
+    "tags": [
+      "redirect",
+      "phishing",
+      "bypass",
+      "url"
+    ]
+  },
+  {
+    "id": "graphql-introspection",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -s -X POST http://<target>/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{__schema{types{name,fields{name}}}}\"}'",
+    "name": "GraphQL Introspection",
+    "description": "Queries GraphQL schema to discover all types, fields, and mutations \u2014 full API mapping.",
+    "arguments": {
+      "__schema": "Introspection query"
+    },
+    "expected_output": "{\n  \"types\": [\n    {\"name\": \"User\", \"fields\": [{\"name\": \"id\"}, {\"name\": \"email\"}, {\"name\": \"password\"}]}\n  ]\n}",
+    "use_case": "Map the entire GraphQL API \u2014 find sensitive fields, mutations, and hidden functionality.",
+    "prerequisites": [
+      "GraphQL endpoint"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Introspection queries in logs"
+    ],
+    "remediation": [
+      "Disable introspection in production",
+      "Implement query depth limiting"
+    ],
+    "common_mistakes": [
+      "Introspection disabled (try field suggestion)"
+    ],
+    "alternatives": [
+      "graphql-voyager",
+      "InQL (Burp extension)"
+    ],
+    "references": [
+      "https://graphql.org/learn/introspection/"
+    ],
+    "tags": [
+      "graphql",
+      "introspection",
+      "api",
+      "schema",
+      "discovery"
+    ]
+  },
+  {
+    "id": "nosql-injection",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -X POST http://<target>/login -H 'Content-Type: application/json' -d '{\"username\":{\"$ne\":\"\"},\"password\":{\"$ne\":\"\"}}'",
+    "name": "NoSQL Injection",
+    "description": "Tests for MongoDB NoSQL injection using operator injection ($ne, $gt, $regex).",
+    "arguments": {
+      "$ne": "Not equal operator (bypasses auth)"
+    },
+    "expected_output": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"user\": \"admin\"\n}",
+    "use_case": "Bypass authentication in MongoDB-backed applications using operator injection.",
+    "prerequisites": [
+      "MongoDB backend",
+      "JSON input accepted"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual MongoDB operators in input",
+      "Auth bypass events"
+    ],
+    "remediation": [
+      "Input validation",
+      "Use parameterized queries",
+      "Sanitize $ operators"
+    ],
+    "common_mistakes": [
+      "Application doesn't use MongoDB"
+    ],
+    "alternatives": [
+      "nosqlmap",
+      "burp with NoSQL payloads"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/pentesting-web/nosql-injection"
+    ],
+    "tags": [
+      "nosql",
+      "mongodb",
+      "injection",
+      "authentication-bypass"
+    ]
+  },
+  {
+    "id": "prototype-pollution",
+    "tool": "node",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Test: POST /api/merge with body:\n{\"__proto__\":{\"isAdmin\":true}}",
+    "name": "Prototype Pollution",
+    "description": "Tests for JavaScript prototype pollution \u2014 can lead to RCE in Node.js applications.",
+    "arguments": {
+      "__proto__": "JavaScript prototype chain manipulation"
+    },
+    "expected_output": "# After pollution:\nGET /api/profile \u2192 {\"isAdmin\": true}",
+    "use_case": "Modify JavaScript object prototypes to escalate privileges or achieve RCE.",
+    "prerequisites": [
+      "Node.js/JavaScript backend",
+      "Object merge functionality"
+    ],
+    "mitre_mapping": [
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Unusual __proto__ in request bodies",
+      "Application behavior changes"
+    ],
+    "remediation": [
+      "Freeze prototypes",
+      "Validate input keys",
+      "Use Map instead of Object"
+    ],
+    "common_mistakes": [
+      "Application not using vulnerable merge"
+    ],
+    "alternatives": [
+      "ppfuzz",
+      "burp with proto payloads"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/prototype-pollution"
+    ],
+    "tags": [
+      "prototype",
+      "pollution",
+      "javascript",
+      "nodejs",
+      "rce"
+    ]
+  },
+  {
+    "id": "race-condition",
+    "tool": "turbo-intruder",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Burp Turbo Intruder: Send 20 requests simultaneously\n# Target: POST /api/transfer (amount=1000)\n# Goal: Transfer executes multiple times before balance check",
+    "name": "Race Condition Exploitation",
+    "description": "Exploits time-of-check-to-time-of-use (TOCTOU) vulnerabilities by sending concurrent requests.",
+    "arguments": {
+      "Turbo Intruder": "Burp extension for parallel requests"
+    },
+    "expected_output": "# Result: Balance deducted once, but transfer executed 5 times",
+    "use_case": "Exploit race conditions in financial transactions, coupon redemption, or vote systems.",
+    "prerequisites": [
+      "Endpoint with non-atomic operations",
+      "Burp Turbo Intruder"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Multiple identical requests in milliseconds",
+      "Inconsistent database state"
+    ],
+    "remediation": [
+      "Use database transactions",
+      "Implement idempotency keys",
+      "Mutex/locking"
+    ],
+    "common_mistakes": [
+      "Not sending enough concurrent requests"
+    ],
+    "alternatives": [
+      "racepwn",
+      "turbo intruder"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/race-conditions"
+    ],
+    "tags": [
+      "race-condition",
+      "toctou",
+      "concurrent",
+      "financial"
+    ]
+  }
+]

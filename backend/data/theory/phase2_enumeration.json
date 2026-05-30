@@ -1,0 +1,30 @@
+{
+  "phase_id": 2,
+  "title": "Enumeration — Extracting Actionable Intelligence",
+  "sections": [
+    {
+      "id": "enum-why",
+      "title": "Why Enumeration is Different from Recon",
+      "content": "Reconnaissance finds what exists. Enumeration extracts detailed information from what you found. If recon tells you 'port 445 is open', enumeration tells you 'SMB allows null sessions, domain is CORP.LOCAL, users include admin, jsmith, svc_backup, and the password policy requires 8 characters with lockout after 5 attempts.'\n\nEnumeration is where you transition from 'I know the target exists' to 'I know how to attack it.' Every piece of information extracted during enumeration directly informs your exploitation strategy.",
+      "key_concepts": ["Depth vs breadth", "Actionable intelligence", "Attack planning"]
+    },
+    {
+      "id": "enum-smb",
+      "title": "SMB/Windows Enumeration",
+      "content": "SMB (port 445) is the goldmine of internal pentesting. A single misconfigured SMB share can give you:\n- User lists (for password spraying)\n- Password policies (to avoid lockouts)\n- Share contents (credentials, configs, backups)\n- Group memberships (who is Domain Admin?)\n\n**Tools and when to use them:**\n- enum4linux-ng: First tool against any Windows target. Tries everything.\n- smbclient: Manual share browsing when you find readable shares\n- rpcclient: Detailed RPC enumeration (users, groups, policies)\n- crackmapexec/netexec: Multi-target enumeration at scale\n\n**Key insight:** Many organizations disable null sessions on DCs but forget about member servers. Always try multiple targets.",
+      "key_concepts": ["Null sessions", "Share enumeration", "User harvesting", "Password policy"]
+    },
+    {
+      "id": "enum-ad",
+      "title": "Active Directory Enumeration",
+      "content": "Active Directory is the backbone of enterprise networks. Understanding AD structure is essential:\n\n**What to enumerate:**\n- Users and their attributes (descriptions often contain passwords!)\n- Groups and memberships (who has privileged access?)\n- Computer objects (find targets for lateral movement)\n- GPOs (Group Policy — may reveal security settings)\n- Trusts (can you pivot to other domains?)\n- SPNs (Service Principal Names — targets for Kerberoasting)\n- ACLs (who can modify what? — path to privilege escalation)\n\n**BloodHound** is the game-changer. It collects all this data and visualizes attack paths from your current access to Domain Admin. Run SharpHound (Windows) or bloodhound-python (Linux) to collect, then analyze in the BloodHound GUI.\n\n**When you have no credentials:** Try null sessions, anonymous LDAP, or Kerberos user enumeration (kerbrute) which doesn't trigger lockouts.",
+      "key_concepts": ["AD structure", "BloodHound", "Attack paths", "SPNs", "ACLs"]
+    },
+    {
+      "id": "enum-web",
+      "title": "Web Application Enumeration",
+      "content": "Web enumeration goes beyond directory brute-force:\n\n1. **Technology Stack** — Identify CMS, framework, language, server. Each has known vulnerabilities.\n2. **Virtual Hosts** — Same IP may host multiple sites. Fuzz the Host header.\n3. **API Discovery** — Look for /api/, /swagger/, /graphql, /.well-known/\n4. **Hidden Files** — .git/, .env, backup.sql, config.php.bak, robots.txt\n5. **Parameters** — Arjun/param-miner find hidden parameters for injection testing\n6. **Authentication** — What auth mechanism? JWT? Sessions? OAuth? Each has different attacks.\n\n**The mindset:** Every piece of information narrows your attack. If you know it's WordPress 6.1 with Contact Form 7 plugin v5.1.3, you can search for specific CVEs instead of trying everything blindly.",
+      "key_concepts": ["Technology identification", "Hidden content", "API discovery", "Targeted attacks"]
+    }
+  ]
+}

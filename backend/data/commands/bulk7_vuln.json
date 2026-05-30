@@ -1,0 +1,393 @@
+[
+  {
+    "id": "nmap-script-ftp-vuln",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script ftp-vuln* -p 21 <target>",
+    "name": "FTP Vulnerability Scripts",
+    "description": "Checks for FTP vulnerabilities including backdoors and buffer overflows.",
+    "arguments": {
+      "--script ftp-vuln*": "All FTP vuln scripts"
+    },
+    "expected_output": "| ftp-vuln-cve2010-4221: VULNERABLE\n|   ProFTPD server buffer overflow",
+    "use_case": "Check FTP servers for known vulnerabilities.",
+    "prerequisites": [
+      "FTP port 21 open"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "FTP exploit probes"
+    ],
+    "remediation": [
+      "Update FTP software",
+      "Use SFTP instead"
+    ],
+    "common_mistakes": [
+      "FTP not vulnerable (updated)"
+    ],
+    "alternatives": [
+      "searchsploit proftpd"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "ftp",
+      "vulnerability",
+      "nse",
+      "buffer-overflow"
+    ]
+  },
+  {
+    "id": "nmap-script-ssh-vuln",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script ssh-auth-methods,ssh2-enum-algos -p 22 <target>",
+    "name": "SSH Security Audit",
+    "description": "Checks SSH authentication methods and algorithms for weak configurations.",
+    "arguments": {
+      "ssh-auth-methods": "Check auth types",
+      "ssh2-enum-algos": "List algorithms"
+    },
+    "expected_output": "| ssh-auth-methods: publickey, password\n| ssh2-enum-algos: diffie-hellman-group1-sha1 (WEAK)",
+    "use_case": "Identify weak SSH configurations \u2014 deprecated algorithms, password auth enabled.",
+    "prerequisites": [
+      "SSH port 22 open"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "SSH probing"
+    ],
+    "remediation": [
+      "Disable password auth",
+      "Remove weak algorithms",
+      "Use Ed25519 keys"
+    ],
+    "common_mistakes": [
+      "Not checking for weak key exchange"
+    ],
+    "alternatives": [
+      "ssh-audit",
+      "testssl.sh"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "ssh",
+      "algorithms",
+      "weak",
+      "audit",
+      "security"
+    ]
+  },
+  {
+    "id": "nmap-script-mysql-vuln",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script mysql-vuln* -p 3306 <target>",
+    "name": "MySQL Vulnerability Scripts",
+    "description": "Checks MySQL for known vulnerabilities and misconfigurations.",
+    "arguments": {
+      "--script mysql-vuln*": "All MySQL vuln scripts"
+    },
+    "expected_output": "| mysql-vuln-cve2012-2122: VULNERABLE\n|   Authentication bypass",
+    "use_case": "Check MySQL for known CVEs and auth bypass vulnerabilities.",
+    "prerequisites": [
+      "MySQL port 3306 open"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "MySQL exploit probes"
+    ],
+    "remediation": [
+      "Update MySQL",
+      "Restrict remote access"
+    ],
+    "common_mistakes": [
+      "MySQL not vulnerable"
+    ],
+    "alternatives": [
+      "searchsploit mysql"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "mysql",
+      "vulnerability",
+      "database",
+      "nse"
+    ]
+  },
+  {
+    "id": "testssl-heartbleed",
+    "tool": "testssl",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "testssl.sh --heartbleed <target>:443",
+    "name": "Heartbleed Check",
+    "description": "Specifically tests for the Heartbleed vulnerability (CVE-2014-0160).",
+    "arguments": {
+      "--heartbleed": "Test only Heartbleed"
+    },
+    "expected_output": "Heartbleed (CVE-2014-0160): not vulnerable",
+    "use_case": "Check if SSL/TLS is vulnerable to Heartbleed memory disclosure.",
+    "prerequisites": [
+      "HTTPS service"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Heartbleed probe patterns"
+    ],
+    "remediation": [
+      "Update OpenSSL",
+      "Revoke and reissue certificates"
+    ],
+    "common_mistakes": [
+      "Very rare now (most patched)"
+    ],
+    "alternatives": [
+      "nmap --script ssl-heartbleed"
+    ],
+    "references": [
+      "https://testssl.sh"
+    ],
+    "tags": [
+      "heartbleed",
+      "ssl",
+      "cve",
+      "memory-disclosure"
+    ]
+  },
+  {
+    "id": "nmap-script-rdp-vuln",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script rdp-vuln-ms12-020 -p 3389 <target>",
+    "name": "RDP Vulnerability Check (BlueKeep)",
+    "description": "Checks for critical RDP vulnerabilities including MS12-020 and BlueKeep.",
+    "arguments": {
+      "--script rdp-vuln-ms12-020": "RDP vulnerability check"
+    },
+    "expected_output": "| rdp-vuln-ms12-020: VULNERABLE\n|   Remote Desktop Protocol DoS/RCE",
+    "use_case": "Check for critical RDP vulnerabilities that allow remote code execution.",
+    "prerequisites": [
+      "RDP port 3389 open"
+    ],
+    "mitre_mapping": [
+      "T1210"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "RDP exploit probes"
+    ],
+    "remediation": [
+      "Patch RDP vulnerabilities",
+      "Enable NLA",
+      "Restrict RDP access"
+    ],
+    "common_mistakes": [
+      "Already patched"
+    ],
+    "alternatives": [
+      "metasploit bluekeep scanner"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "rdp",
+      "bluekeep",
+      "vulnerability",
+      "critical"
+    ]
+  },
+  {
+    "id": "nmap-script-smb-signing",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smb2-security-mode -p 445 <target_range>",
+    "name": "SMB Signing Check",
+    "description": "Checks if SMB signing is required \u2014 unsigned SMB enables relay attacks.",
+    "arguments": {
+      "--script smb2-security-mode": "Check SMB signing"
+    },
+    "expected_output": "| smb2-security-mode:\n|   Message signing enabled but not required",
+    "use_case": "Identify hosts without SMB signing \u2014 targets for NTLM relay attacks.",
+    "prerequisites": [
+      "SMB port 445 open"
+    ],
+    "mitre_mapping": [
+      "T1557"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "SMB signing probes"
+    ],
+    "remediation": [
+      "Enable and require SMB signing on all hosts"
+    ],
+    "common_mistakes": [
+      "Not scanning entire range"
+    ],
+    "alternatives": [
+      "netexec smb <range> --gen-relay-list"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "smb",
+      "signing",
+      "relay",
+      "ntlm",
+      "misconfiguration"
+    ]
+  },
+  {
+    "id": "nmap-script-http-shellshock",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script http-shellshock --script-args uri=/cgi-bin/status -p 80 <target>",
+    "name": "Shellshock Check",
+    "description": "Tests for Shellshock (CVE-2014-6271) in CGI scripts.",
+    "arguments": {
+      "--script http-shellshock": "Shellshock test",
+      "uri=/cgi-bin/status": "CGI script path"
+    },
+    "expected_output": "| http-shellshock: VULNERABLE\n|   CVE-2014-6271",
+    "use_case": "Check CGI scripts for Bash Shellshock vulnerability.",
+    "prerequisites": [
+      "HTTP with CGI scripts"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Shellshock payloads in User-Agent/headers"
+    ],
+    "remediation": [
+      "Update Bash",
+      "Remove unnecessary CGI scripts"
+    ],
+    "common_mistakes": [
+      "No CGI scripts present"
+    ],
+    "alternatives": [
+      "curl -A '() { :; }; echo vulnerable' http://target/cgi-bin/test"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/http-shellshock.html"
+    ],
+    "tags": [
+      "shellshock",
+      "cgi",
+      "bash",
+      "cve",
+      "rce"
+    ]
+  },
+  {
+    "id": "enum-ciphers",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script ssl-enum-ciphers -p 443 <target>",
+    "name": "SSL Cipher Enumeration",
+    "description": "Lists all supported SSL/TLS ciphers and grades them by strength.",
+    "arguments": {
+      "--script ssl-enum-ciphers": "Enumerate ciphers"
+    },
+    "expected_output": "| TLSv1.2:\n|   ciphers:\n|     TLS_RSA_WITH_AES_256_CBC_SHA - A\n|     TLS_RSA_WITH_RC4_128_SHA - F (WEAK)",
+    "use_case": "Identify weak ciphers that should be disabled.",
+    "prerequisites": [
+      "HTTPS service"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Cipher enumeration probes"
+    ],
+    "remediation": [
+      "Disable weak ciphers",
+      "Use TLS 1.3 only"
+    ],
+    "common_mistakes": [
+      "Not checking all ports with SSL"
+    ],
+    "alternatives": [
+      "testssl.sh",
+      "sslyze"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/ssl-enum-ciphers.html"
+    ],
+    "tags": [
+      "ssl",
+      "ciphers",
+      "weak",
+      "tls",
+      "audit"
+    ]
+  }
+]

@@ -1,0 +1,329 @@
+[
+  {
+    "id": "impacket-wmiexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-wmiexec <domain>/<user>:<pass>@<target>",
+    "name": "WMI Remote Execution",
+    "description": "Executes commands via WMI \u2014 less artifacts than PsExec, no service creation.",
+    "arguments": {
+      "<domain>/<user>:<pass>": "Credentials",
+      "@<target>": "Target IP"
+    },
+    "expected_output": "Impacket v0.11.0\n[*] SMBv3.0 dialect used\nC:\\>whoami\ncorp\\admin",
+    "use_case": "Stealthier alternative to PsExec \u2014 uses WMI for execution, fewer forensic artifacts.",
+    "prerequisites": [
+      "Valid credentials",
+      "WMI access (port 135 + dynamic)"
+    ],
+    "mitre_mapping": [
+      "T1047"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "WMI event logs (Event ID 5857)",
+      "Process creation from wmiprvse.exe"
+    ],
+    "remediation": [
+      "Monitor WMI execution",
+      "Restrict WMI access",
+      "Enable WMI logging"
+    ],
+    "common_mistakes": [
+      "Firewall blocking dynamic ports"
+    ],
+    "alternatives": [
+      "impacket-psexec",
+      "evil-winrm",
+      "impacket-smbexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "wmi",
+      "lateral-movement",
+      "stealth",
+      "remote-execution"
+    ]
+  },
+  {
+    "id": "impacket-getnpusers",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-GetNPUsers <domain>/ -usersfile users.txt -no-pass -dc-ip <dc_ip>",
+    "name": "AS-REP Roasting",
+    "description": "Finds accounts with Kerberos pre-authentication disabled and retrieves their AS-REP hashes for offline cracking.",
+    "arguments": {
+      "-usersfile": "List of usernames",
+      "-no-pass": "No password needed",
+      "-dc-ip": "Domain controller IP"
+    },
+    "expected_output": "$krb5asrep$23$svc_backup@CORP:abc123...hash...",
+    "use_case": "Find and crack accounts without pre-auth \u2014 no credentials needed, just valid usernames.",
+    "prerequisites": [
+      "Valid username list",
+      "Network access to DC port 88"
+    ],
+    "mitre_mapping": [
+      "T1558.004"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Kerberos AS-REQ without pre-auth (Event 4768)",
+      "Unusual TGT requests"
+    ],
+    "remediation": [
+      "Enable pre-authentication on all accounts",
+      "Monitor for AS-REP requests",
+      "Use strong passwords on service accounts"
+    ],
+    "common_mistakes": [
+      "Not trying all discovered usernames",
+      "Forgetting to crack the hash after"
+    ],
+    "alternatives": [
+      "Rubeus asreproast",
+      "kerbrute (also finds these)"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "asrep-roast",
+      "kerberos",
+      "pre-auth",
+      "hash",
+      "credential"
+    ]
+  },
+  {
+    "id": "impacket-kerberoast",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-GetUserSPNs <domain>/<user>:<pass> -dc-ip <dc_ip> -request",
+    "name": "Kerberoasting",
+    "description": "Requests TGS tickets for service accounts and saves them for offline cracking. Any domain user can do this.",
+    "arguments": {
+      "-dc-ip": "Domain controller",
+      "-request": "Request TGS tickets for cracking"
+    },
+    "expected_output": "$krb5tgs$23$*svc_sql$CORP...:hash_for_cracking",
+    "use_case": "Extract service account password hashes \u2014 any authenticated user can perform this attack.",
+    "prerequisites": [
+      "Any valid domain credentials",
+      "Network access to DC"
+    ],
+    "mitre_mapping": [
+      "T1558.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "TGS requests for multiple SPNs (Event 4769)",
+      "RC4 encryption in Kerberos traffic"
+    ],
+    "remediation": [
+      "Use AES encryption for service accounts",
+      "Long random passwords for SPNs",
+      "Monitor for mass TGS requests",
+      "Use gMSA accounts"
+    ],
+    "common_mistakes": [
+      "Not cracking with rules (hashcat -m 13100)",
+      "Missing service accounts with weak passwords"
+    ],
+    "alternatives": [
+      "Rubeus kerberoast",
+      "PowerView Get-DomainSPNTicket"
+    ],
+    "references": [
+      "https://attack.mitre.org/techniques/T1558/003/"
+    ],
+    "tags": [
+      "kerberoast",
+      "spn",
+      "service-account",
+      "tgs",
+      "credential"
+    ]
+  },
+  {
+    "id": "evil-winrm-shell",
+    "tool": "evil-winrm",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "evil-winrm -i <target> -u <user> -p <pass>",
+    "name": "WinRM Shell Access",
+    "description": "Gets an interactive PowerShell session via WinRM (port 5985/5986). Supports pass-the-hash.",
+    "arguments": {
+      "-i": "Target IP",
+      "-u": "Username",
+      "-p": "Password (or -H for hash)"
+    },
+    "expected_output": "*Evil-WinRM* PS C:\\Users\\admin> whoami\ncorp\\admin\n*Evil-WinRM* PS C:\\Users\\admin>",
+    "use_case": "Get interactive PowerShell on Windows when WinRM is enabled (common in modern AD).",
+    "prerequisites": [
+      "WinRM port 5985 open",
+      "Valid credentials or hash",
+      "User in Remote Management Users group"
+    ],
+    "mitre_mapping": [
+      "T1021.006"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "WinRM connection logs (Event 6)",
+      "PowerShell script block logging"
+    ],
+    "remediation": [
+      "Restrict WinRM access",
+      "Enable PowerShell logging",
+      "Limit Remote Management Users group"
+    ],
+    "common_mistakes": [
+      "Target not in Remote Management Users group",
+      "WinRM not enabled"
+    ],
+    "alternatives": [
+      "impacket-psexec",
+      "impacket-wmiexec",
+      "Enter-PSSession (native)"
+    ],
+    "references": [
+      "https://github.com/Hackplayers/evil-winrm"
+    ],
+    "tags": [
+      "winrm",
+      "powershell",
+      "shell",
+      "lateral-movement",
+      "remote"
+    ]
+  },
+  {
+    "id": "certipy-find",
+    "tool": "certipy",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "certipy find -u <user>@<domain> -p <pass> -dc-ip <dc_ip> -vulnerable",
+    "name": "AD Certificate Services Enumeration",
+    "description": "Finds vulnerable certificate templates in Active Directory Certificate Services (AD CS) for privilege escalation.",
+    "arguments": {
+      "-u": "Domain user",
+      "-p": "Password",
+      "-dc-ip": "DC IP",
+      "-vulnerable": "Only show exploitable templates"
+    },
+    "expected_output": "[*] Found vulnerable template: ESC1\n    Template: UserAuth\n    Enrollee can specify SAN\n    \u2192 Can impersonate any user!",
+    "use_case": "Discover AD CS misconfigurations (ESC1-ESC8) that allow domain privilege escalation.",
+    "prerequisites": [
+      "Valid domain credentials",
+      "AD CS deployed in environment"
+    ],
+    "mitre_mapping": [
+      "T1649"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Certificate enrollment events (Event 4886, 4887)",
+      "Unusual certificate requests"
+    ],
+    "remediation": [
+      "Audit certificate templates",
+      "Remove dangerous permissions",
+      "Disable SAN specification for users"
+    ],
+    "common_mistakes": [
+      "Not checking all ESC variants",
+      "Missing CA server in environment"
+    ],
+    "alternatives": [
+      "Certify.exe (Windows)",
+      "certi.py"
+    ],
+    "references": [
+      "https://github.com/ly4k/Certipy"
+    ],
+    "tags": [
+      "adcs",
+      "certificate",
+      "esc1",
+      "privilege-escalation",
+      "template"
+    ]
+  },
+  {
+    "id": "netexec-pass-spray",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <dc_ip> -u users.txt -p 'Password123!' --continue-on-success",
+    "name": "Password Spraying",
+    "description": "Tries one password against many users \u2014 avoids lockout by not trying multiple passwords per user.",
+    "arguments": {
+      "-u users.txt": "Username list",
+      "-p": "Single password",
+      "--continue-on-success": "Don't stop at first hit"
+    },
+    "expected_output": "SMB  10.0.0.1  445  DC01  [+] CORP\\j.smith:Password123!",
+    "use_case": "Test a common password against all domain users \u2014 safer than brute-force (avoids lockout).",
+    "prerequisites": [
+      "Username list",
+      "Knowledge of password policy (lockout threshold)"
+    ],
+    "mitre_mapping": [
+      "T1110.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Multiple auth attempts with same password",
+      "Event 4625 from single source"
+    ],
+    "remediation": [
+      "Account lockout policy",
+      "Password complexity requirements",
+      "MFA",
+      "Monitor spray patterns"
+    ],
+    "common_mistakes": [
+      "Exceeding lockout threshold",
+      "Not waiting between attempts",
+      "Using locked-out accounts"
+    ],
+    "alternatives": [
+      "sprayhound",
+      "kerbrute passwordspray",
+      "Invoke-DomainPasswordSpray"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "password-spray",
+      "brute-force",
+      "credentials",
+      "active-directory"
+    ]
+  }
+]

@@ -1,0 +1,366 @@
+[
+  {
+    "id": "vq-wireless-01",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What command puts a wireless interface into monitor mode using airmon-ng?",
+    "correct_answers": [
+      "airmon-ng start wlan0",
+      "airmon-ng start wlan0mon",
+      "sudo airmon-ng start wlan0"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "airmon-ng start wlan0 enables monitor mode on the wireless interface, allowing it to capture all wireless frames in range rather than only those addressed to it. The interface is typically renamed to wlan0mon.",
+    "hints": [
+      "Use airmon-ng with the start action on your wireless interface"
+    ]
+  },
+  {
+    "id": "vq-wireless-02",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What airodump-ng command captures packets from a specific access point on channel 6?",
+    "correct_answers": [
+      "airodump-ng -c 6 --bssid AA:BB:CC:DD:EE:FF -w capture wlan0mon",
+      "airodump-ng --bssid BSSID -c 6 -w output wlan0mon",
+      "airodump-ng -c 6 --bssid target -w cap wlan0mon"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "airodump-ng captures wireless traffic. The -c flag sets the channel, --bssid targets a specific AP, and -w specifies the output file prefix. The monitor mode interface is the last argument.",
+    "hints": [
+      "Specify channel (-c), target BSSID (--bssid), and output file (-w)"
+    ]
+  },
+  {
+    "id": "vq-wireless-03",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What aireplay-ng command sends deauthentication packets to force a client to reconnect?",
+    "correct_answers": [
+      "aireplay-ng -0 10 -a BSSID -c CLIENT wlan0mon",
+      "aireplay-ng --deauth 10 -a BSSID -c CLIENT wlan0mon",
+      "aireplay-ng -0 0 -a BSSID wlan0mon"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "aireplay-ng -0 sends deauth frames. The number after -0 is the count (0=continuous). -a is the AP BSSID, -c targets a specific client. This forces reconnection to capture the WPA handshake.",
+    "hints": [
+      "Use -0 for deauth attack, -a for AP, -c for client"
+    ]
+  },
+  {
+    "id": "vq-wireless-04",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What aircrack-ng command cracks a captured WPA handshake using a wordlist?",
+    "correct_answers": [
+      "aircrack-ng -w /usr/share/wordlists/rockyou.txt capture.cap",
+      "aircrack-ng -w wordlist.txt -b BSSID capture.cap",
+      "aircrack-ng -w rockyou.txt capture-01.cap"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "aircrack-ng -w specifies the wordlist to use against the captured handshake file (.cap). It tests each password by computing the PMK and comparing against the captured 4-way handshake.",
+    "hints": [
+      "Use -w for wordlist and provide the capture file"
+    ]
+  },
+  {
+    "id": "vq-wireless-05",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is a PMKID attack and why is it advantageous over capturing a full WPA handshake?",
+    "correct_answers": [
+      "PMKID is extracted from the first message of the 4-way handshake (AP beacon/association), so no client deauthentication or connected client is needed",
+      "Captures PMKID from AP without needing a client to be connected",
+      "Extracts the PMKID from the AP's RSN IE without requiring a full handshake or deauth"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The PMKID attack (discovered 2018) extracts the PMKID from the AP's first EAPOL message or RSN information element. Unlike traditional WPA cracking, it doesn't require capturing a full 4-way handshake, meaning no client needs to be connected or deauthenticated.",
+    "hints": [
+      "This attack doesn't require a connected client or deauthentication"
+    ]
+  },
+  {
+    "id": "vq-wireless-06",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You want to perform an evil twin attack against a corporate WPA2-Enterprise network. What components do you need to set up?",
+    "correct_answers": [
+      "A rogue AP with the same SSID, a RADIUS server to capture credentials (hostapd-wpe or eaphammer), and optionally a deauth attack on the real AP",
+      "Fake AP with same SSID, fake RADIUS server, deauth legitimate AP",
+      "hostapd-wpe or eaphammer to create rogue AP with RADIUS that captures credentials"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "An evil twin against WPA2-Enterprise requires: 1) Rogue AP matching the target SSID (hostapd), 2) Fake RADIUS server to capture EAP credentials (hostapd-wpe/eaphammer), 3) Deauth attack to force clients to reconnect to your AP. Captured credentials can be cracked offline.",
+    "hints": [
+      "You need to impersonate both the AP and the authentication server"
+    ]
+  },
+  {
+    "id": "vq-wireless-07",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "easy",
+    "question": "Why is WEP considered insecure?",
+    "correct_answers": [
+      "WEP uses RC4 with weak IV implementation allowing statistical attacks to recover the key with enough captured packets",
+      "Weak IVs in RC4 encryption allow key recovery",
+      "Short initialization vectors and flawed RC4 key scheduling make it crackable in minutes"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WEP uses RC4 encryption with 24-bit initialization vectors (IVs) that repeat frequently. Statistical attacks (FMS, PTW) exploit weak IVs to recover the key. With enough captured packets (typically 40,000-85,000), the key can be cracked in minutes.",
+    "hints": [
+      "The encryption uses short, repeating values that leak key information"
+    ]
+  },
+  {
+    "id": "vq-wireless-08",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What hcxdumptool command captures PMKID hashes from nearby access points?",
+    "correct_answers": [
+      "hcxdumptool -i wlan0mon -o capture.pcapng --enable_status=1",
+      "hcxdumptool -i wlan0mon -o output.pcapng",
+      "hcxdumptool -i wlan0 -o capture.pcapng --active_beacon --enable_status=15"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "hcxdumptool captures PMKID and EAPOL frames from access points. The output .pcapng file can be converted with hcxpcapngtool to a format crackable by hashcat (mode 22000).",
+    "hints": [
+      "Use -i for interface and -o for output file in pcapng format"
+    ]
+  },
+  {
+    "id": "vq-wireless-09",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You captured a WPA2 handshake but rockyou.txt didn't crack it. What are your next steps?",
+    "correct_answers": [
+      "Try rule-based attacks, create custom wordlists based on the target (company name, location), use hashcat with masks, or try larger wordlists",
+      "Use hashcat rules, generate custom wordlist with CeWL, try mask attacks",
+      "Apply rules to wordlist, create targeted wordlist, use mask/hybrid attacks",
+      "CeWL the company website, apply hashcat rules, try mask attacks"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Next steps: 1) Apply rule sets (best64, dive) to existing wordlists, 2) Generate custom wordlists with CeWL (scrape company website), 3) Use mask attacks for common patterns, 4) Try hybrid attacks (wordlist + mask), 5) Use larger wordlists or online cracking services.",
+    "hints": [
+      "Think about targeted wordlists and advanced cracking techniques"
+    ]
+  },
+  {
+    "id": "vq-wireless-10",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is the difference between WPA2-Personal (PSK) and WPA2-Enterprise, and which is more secure?",
+    "correct_answers": [
+      "WPA2-Personal uses a shared pre-shared key for all users while WPA2-Enterprise uses individual credentials authenticated via RADIUS/802.1X. Enterprise is more secure.",
+      "PSK uses one shared password, Enterprise uses per-user credentials with RADIUS. Enterprise is more secure.",
+      "Personal has one key for everyone, Enterprise authenticates each user individually via 802.1X/RADIUS"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WPA2-Personal (PSK) uses a single shared password for all users - if compromised, all traffic is at risk. WPA2-Enterprise uses 802.1X with a RADIUS server for individual user authentication, providing unique session keys, user accountability, and certificate-based validation.",
+    "hints": [
+      "One uses a shared password, the other authenticates each user individually"
+    ]
+  },
+  {
+    "id": "vq-wireless-11",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What tool performs a WPS Pixie Dust attack to recover the WPS PIN offline?",
+    "correct_answers": [
+      "reaver -i wlan0mon -b BSSID -K",
+      "reaver -i wlan0mon -b BSSID --pixie-dust",
+      "bully -b BSSID -d -i wlan0mon",
+      "reaver -K 1"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The Pixie Dust attack (reaver -K or bully -d) exploits weak random number generation in WPS implementations to recover the PIN offline from a single exchange. It's much faster than online brute-force (seconds vs hours) and works against many router chipsets.",
+    "hints": [
+      "Use reaver with the -K flag or bully with -d for the offline PIN recovery attack"
+    ]
+  },
+  {
+    "id": "vq-wireless-12",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is a Karma attack and how does it exploit wireless clients?",
+    "correct_answers": [
+      "A Karma attack responds to all probe requests from clients, impersonating any network they're looking for to trick them into connecting",
+      "Responds to client probe requests for any SSID, making clients connect to the attacker's AP",
+      "Exploits clients probing for previously connected networks by answering all probe requests with a rogue AP"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Karma attacks exploit the WiFi probe request mechanism. Clients broadcast probes for previously connected networks. A Karma-enabled rogue AP responds to ALL probe requests, claiming to be whatever network the client is looking for, causing automatic connection.",
+    "hints": [
+      "Clients broadcast the names of networks they want to connect to - what if someone always answers?"
+    ]
+  },
+  {
+    "id": "vq-wireless-13",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A corporate network uses 802.1X (WPA2-Enterprise) with PEAP-MSCHAPv2. How would you attempt to bypass this authentication?",
+    "correct_answers": [
+      "Set up a rogue AP with hostapd-wpe or eaphammer to capture PEAP credentials, then crack the MSCHAPv2 challenge/response offline",
+      "Evil twin with fake RADIUS to capture MSCHAPv2 hashes, crack offline with hashcat -m 5500",
+      "Use eaphammer or hostapd-wpe to create evil twin, capture EAP credentials, crack MSCHAPv2 hash"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "PEAP-MSCHAPv2 is vulnerable if clients don't validate the server certificate. Create a rogue AP with hostapd-wpe/eaphammer that presents a fake certificate. If clients accept it, they send MSCHAPv2 challenge/response which can be cracked offline (hashcat -m 5500).",
+    "hints": [
+      "The weakness is in client certificate validation - if clients accept any cert, you can capture credentials"
+    ]
+  },
+  {
+    "id": "vq-wireless-14",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is a WiFi Pineapple and what attacks does it facilitate?",
+    "correct_answers": [
+      "A dedicated wireless auditing device that automates rogue AP, evil twin, Karma, and man-in-the-middle attacks",
+      "Hardware platform for wireless pentesting that performs evil twin, Karma, captive portal, and MITM attacks",
+      "A Hak5 device designed for wireless penetration testing with automated evil twin and credential capture capabilities"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The WiFi Pineapple (by Hak5) is a dedicated wireless auditing platform with multiple radios. It automates: evil twin attacks, Karma/PineAP (responding to all probes), captive portal credential harvesting, MITM attacks, and client deauthentication. It has a web interface for easy management.",
+    "hints": [
+      "A commercial hardware device specifically designed for wireless penetration testing"
+    ]
+  },
+  {
+    "id": "vq-wireless-15",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Bettercap command performs ARP spoofing to intercept traffic between a target and the gateway?",
+    "correct_answers": [
+      "set arp.spoof.targets TARGET_IP; arp.spoof on",
+      "bettercap -iface wlan0 -eval 'set arp.spoof.targets TARGET; arp.spoof on'",
+      "arp.spoof on",
+      "set arp.spoof.fullduplex true; set arp.spoof.targets TARGET; arp.spoof on"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Bettercap's ARP spoofing module poisons the ARP cache of targets and the gateway, redirecting traffic through the attacker. Set arp.spoof.fullduplex true for bidirectional spoofing. Combine with net.sniff for credential capture or http.proxy for injection.",
+    "hints": [
+      "Set the target IP and enable the arp.spoof module"
+    ]
+  },
+  {
+    "id": "vq-wireless-16",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "How can an attacker evade wireless intrusion detection systems (WIDS) during an evil twin attack?",
+    "correct_answers": [
+      "Use the same BSSID as the legitimate AP, match channel and signal strength, perform gradual deauth, and use directional antennas to limit detection range",
+      "Clone the legitimate AP's MAC/BSSID, match its configuration, use low-power targeted deauth",
+      "Spoof the legitimate AP's BSSID, use same channel, minimize deauth frames, employ directional antennas"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WIDS evasion: clone the legitimate AP's BSSID/MAC, match channel and encryption settings, use directional antennas to limit exposure, minimize deauth frames (targeted vs broadcast), gradually increase signal strength, and time attacks during high-traffic periods.",
+    "hints": [
+      "Make your rogue AP indistinguishable from the legitimate one to the detection system"
+    ]
+  },
+  {
+    "id": "vq-wireless-17",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is the WPA3 Dragonblood vulnerability and what attacks does it enable?",
+    "correct_answers": [
+      "Dragonblood exploits weaknesses in WPA3's SAE/Dragonfly handshake allowing side-channel attacks to recover the password and downgrade attacks to WPA2",
+      "Side-channel and downgrade attacks against WPA3's Dragonfly handshake that can leak the password",
+      "Vulnerabilities in WPA3-SAE enabling timing side-channels, cache-based attacks, and transition mode downgrades"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Dragonblood (CVE-2019-9494/9495) found vulnerabilities in WPA3's SAE (Simultaneous Authentication of Equals) handshake: timing side-channels leak password info, cache-based attacks recover the password, and transition mode allows downgrade to WPA2 for offline dictionary attacks.",
+    "hints": [
+      "These attacks target the new handshake mechanism that was supposed to make WPA3 more secure"
+    ]
+  },
+  {
+    "id": "vq-wireless-18",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You suspect a rogue access point in your network. What tools and techniques would you use to detect it?",
+    "correct_answers": [
+      "Use airodump-ng to scan for unknown BSSIDs, compare against authorized AP list, check for duplicate SSIDs with different MACs, use WIDS/WIPS",
+      "Scan with airodump-ng, compare BSSIDs to inventory, look for duplicate SSIDs, check signal strength anomalies",
+      "Monitor with kismet or airodump-ng, compare against known AP inventory, detect MAC spoofing via fingerprinting"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Rogue AP detection: scan with airodump-ng/kismet, compare BSSIDs against authorized inventory, look for duplicate SSIDs with different MACs, analyze signal strength patterns, use 802.11 fingerprinting to detect MAC spoofing, and deploy WIDS/WIPS solutions for continuous monitoring.",
+    "hints": [
+      "Compare what you see in the air against what should be there"
+    ]
+  },
+  {
+    "id": "vq-wireless-19",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A network uses client isolation (AP isolation) to prevent client-to-client communication. How might you bypass this?",
+    "correct_answers": [
+      "Route traffic through the gateway/router using ARP spoofing at layer 3, or exploit IPv6 if only IPv4 isolation is configured",
+      "Use layer 3 routing through the default gateway, exploit IPv6 neighbor discovery, or use VLAN hopping if applicable",
+      "ARP spoof the gateway to redirect client traffic through you, or use IPv6 which may not be isolated"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Client isolation bypass techniques: route traffic through the gateway (layer 3 bypass), exploit IPv6 if only IPv4 is isolated, use ARP spoofing against the gateway, exploit VLAN misconfigurations, or use broadcast/multicast traffic that may not be filtered.",
+    "hints": [
+      "Client isolation often only works at layer 2 - think about layer 3 alternatives"
+    ]
+  },
+  {
+    "id": "vq-wireless-20",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What tool captures and analyzes wireless frames for forensic investigation of WiFi attacks?",
+    "correct_answers": [
+      "wireshark",
+      "Wireshark with a monitor mode interface",
+      "tshark -i wlan0mon",
+      "kismet"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Wireshark/tshark captures and decodes 802.11 frames for forensic analysis. With a monitor mode interface, it captures management frames (deauth, probe), data frames, and can decrypt traffic with the PSK. Kismet provides passive wireless monitoring and logging for forensic review.",
+    "hints": [
+      "The most popular network protocol analyzer, used with a monitor mode interface"
+    ]
+  }
+]

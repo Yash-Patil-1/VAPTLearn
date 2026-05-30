@@ -1,0 +1,297 @@
+[
+  {
+    "id": "pspy-monitor",
+    "tool": "pspy",
+    "category": "privilege_escalation",
+    "phase": 5,
+    "os": [
+      "linux"
+    ],
+    "command": "./pspy64",
+    "name": "pspy Process Monitor",
+    "description": "Monitors processes without root \u2014 reveals cron jobs and background tasks.",
+    "arguments": {},
+    "expected_output": "CMD: UID=0 PID=1234 | /bin/bash /opt/backup.sh\nCMD: UID=0 PID=1235 | /usr/bin/python3 /root/cleanup.py",
+    "use_case": "Discover root cron jobs and processes without needing root access.",
+    "prerequisites": [
+      "Transfer pspy to target"
+    ],
+    "mitre_mapping": [
+      "T1057"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "New binary execution"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "Binary blocked by AppArmor"
+    ],
+    "alternatives": [
+      "ps aux",
+      "top"
+    ],
+    "references": [
+      "https://github.com/DominicBreuker/pspy"
+    ],
+    "tags": [
+      "pspy",
+      "process",
+      "monitor",
+      "cron",
+      "no-root"
+    ]
+  },
+  {
+    "id": "aquatone-screenshot",
+    "tool": "aquatone",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "cat subdomains.txt | aquatone -ports 80,443,8080",
+    "name": "Aquatone Web Screenshot",
+    "description": "Takes screenshots of discovered web services \u2014 visual recon at scale.",
+    "arguments": {
+      "-ports": "Ports to check"
+    },
+    "expected_output": "[*] Processed 47 hosts\n[*] Screenshots saved to aquatone_report/\n[*] Report: aquatone_report.html",
+    "use_case": "Visual reconnaissance \u2014 quickly identify interesting targets from large subdomain lists.",
+    "prerequisites": [
+      "Subdomain list",
+      "aquatone installed"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "HTTP requests to many hosts"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "Many hosts behind CDN"
+    ],
+    "alternatives": [
+      "eyewitness",
+      "gowitness"
+    ],
+    "references": [
+      "https://github.com/michenriksen/aquatone"
+    ],
+    "tags": [
+      "aquatone",
+      "screenshot",
+      "visual",
+      "recon",
+      "web"
+    ]
+  },
+  {
+    "id": "seatbelt-enum",
+    "tool": "seatbelt",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Seatbelt.exe -group=all -full",
+    "name": "Seatbelt (Windows Enumeration)",
+    "description": "Comprehensive Windows security enumeration \u2014 checks credentials, configs, protections.",
+    "arguments": {
+      "-group=all": "Run all checks",
+      "-full": "Full output"
+    },
+    "expected_output": "[*] Checking CredentialManager...\n[+] Saved credentials found: CORP\\admin\n[*] Checking AutoLogon...\n[+] DefaultPassword: Welcome1!",
+    "use_case": "Post-exploitation Windows enumeration \u2014 finds credentials, misconfigs, and attack paths.",
+    "prerequisites": [
+      "Shell on Windows"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      ".NET assembly execution",
+      "Enumeration activity"
+    ],
+    "remediation": [
+      "Remove stored credentials",
+      "Enable Credential Guard"
+    ],
+    "common_mistakes": [
+      "AV blocks Seatbelt"
+    ],
+    "alternatives": [
+      "winPEAS",
+      "SharpUp",
+      "PowerUp"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Seatbelt"
+    ],
+    "tags": [
+      "seatbelt",
+      "enumeration",
+      "windows",
+      "credentials",
+      "post-exploitation"
+    ]
+  },
+  {
+    "id": "sharphound-ingestor",
+    "tool": "sharphound",
+    "category": "active_directory",
+    "phase": 2,
+    "os": [
+      "windows"
+    ],
+    "command": "SharpHound.exe -c All --stealth --outputdirectory C:\\temp\\",
+    "name": "SharpHound Stealth Collection",
+    "description": "Collects BloodHound data with stealth options \u2014 avoids detection.",
+    "arguments": {
+      "--stealth": "Stealth mode (slower, less noise)"
+    },
+    "expected_output": "[+] Stealth mode: Using LDAP only\n[+] Collected 1500 users, 200 groups\n[+] Saved to C:\\temp\\bloodhound.zip",
+    "use_case": "Stealthy AD data collection \u2014 uses only LDAP queries instead of noisy session enumeration.",
+    "prerequisites": [
+      "Domain user",
+      "Domain-joined machine"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP queries (less detectable in stealth)"
+    ],
+    "remediation": [
+      "Monitor LDAP query patterns"
+    ],
+    "common_mistakes": [
+      "Stealth mode misses session data"
+    ],
+    "alternatives": [
+      "bloodhound-python",
+      "ADExplorer"
+    ],
+    "references": [
+      "https://github.com/SpecterOps/BloodHound"
+    ],
+    "tags": [
+      "sharphound",
+      "stealth",
+      "bloodhound",
+      "collection",
+      "quiet"
+    ]
+  },
+  {
+    "id": "crackmapexec-secrets",
+    "tool": "netexec",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <target> -u admin -p pass --sam --lsa --ntds",
+    "name": "NetExec Credential Dump",
+    "description": "Dumps SAM, LSA secrets, and NTDS from target \u2014 all credentials at once.",
+    "arguments": {
+      "--sam": "Dump SAM",
+      "--lsa": "Dump LSA secrets",
+      "--ntds": "Dump NTDS (DC only)"
+    },
+    "expected_output": "SAM:\nAdministrator:500:aad3b435...:fc525c96...\n\nLSA:\nDPAPI_SYSTEM: ...\n\nNTDS:\nkrbtgt:502:...",
+    "use_case": "One-command credential dump \u2014 SAM for local, LSA for service accounts, NTDS for entire domain.",
+    "prerequisites": [
+      "Admin credentials",
+      "SMB access"
+    ],
+    "mitre_mapping": [
+      "T1003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "LSASS access",
+      "Registry access",
+      "Volume shadow copy"
+    ],
+    "remediation": [
+      "Credential Guard",
+      "LSASS protection"
+    ],
+    "common_mistakes": [
+      "Credential Guard enabled"
+    ],
+    "alternatives": [
+      "secretsdump.py",
+      "mimikatz"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "netexec",
+      "dump",
+      "sam",
+      "lsa",
+      "ntds",
+      "credentials"
+    ]
+  },
+  {
+    "id": "subfinder-passive",
+    "tool": "subfinder",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "subfinder -d <domain> -all -o subs.txt",
+    "name": "Subfinder Passive Subdomain Discovery",
+    "description": "Fast passive subdomain enumeration using multiple sources \u2014 completely silent.",
+    "arguments": {
+      "-all": "Use all sources",
+      "-o": "Output file"
+    },
+    "expected_output": "[+] api.target.com\n[+] dev.target.com\n[+] staging.target.com\n[+] Found 89 subdomains",
+    "use_case": "Fast passive subdomain discovery \u2014 uses certificate transparency, DNS databases, web archives.",
+    "prerequisites": [
+      "Target domain"
+    ],
+    "mitre_mapping": [
+      "T1590.002"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Cannot detect \u2014 passive only"
+    ],
+    "remediation": [
+      "Monitor certificate transparency"
+    ],
+    "common_mistakes": [
+      "Few passive sources configured"
+    ],
+    "alternatives": [
+      "amass",
+      "crt.sh",
+      "SecurityTrails"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/subfinder"
+    ],
+    "tags": [
+      "subfinder",
+      "passive",
+      "subdomain",
+      "fast",
+      "silent"
+    ]
+  }
+]

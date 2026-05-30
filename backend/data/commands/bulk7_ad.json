@@ -1,0 +1,245 @@
+[
+  {
+    "id": "impacket-samrdump",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-samrdump <domain>/<user>:<pass>@<target>",
+    "name": "SAM-R User Dump",
+    "description": "Dumps user information via SAM-R protocol \u2014 alternative to LDAP enumeration.",
+    "arguments": {
+      "<domain>/<user>:<pass>@<target>": "Credentials"
+    },
+    "expected_output": "Found user: Administrator (500)\nFound user: Guest (501)\nFound user: svc_sql (1103)",
+    "use_case": "Enumerate domain users via SAM-R when LDAP is restricted.",
+    "prerequisites": [
+      "Valid credentials",
+      "RPC access"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SAM-R queries"
+    ],
+    "remediation": [
+      "Restrict SAM-R access"
+    ],
+    "common_mistakes": [
+      "RPC blocked"
+    ],
+    "alternatives": [
+      "rpcclient",
+      "netexec --users"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "samr",
+      "users",
+      "enumeration",
+      "rpc"
+    ]
+  },
+  {
+    "id": "impacket-reg",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-reg <domain>/<user>:<pass>@<target> query -keyName HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "name": "Remote Registry Query",
+    "description": "Queries remote Windows registry \u2014 find persistence mechanisms and configurations.",
+    "arguments": {
+      "query": "Query mode",
+      "-keyName": "Registry path"
+    },
+    "expected_output": "RunKey1: C:\\Users\\admin\\malware.exe\nRunKey2: C:\\Windows\\System32\\legitimate.exe",
+    "use_case": "Check remote registry for persistence mechanisms, installed software, and configurations.",
+    "prerequisites": [
+      "Admin credentials",
+      "Remote Registry service running"
+    ],
+    "mitre_mapping": [
+      "T1012"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Remote registry access events"
+    ],
+    "remediation": [
+      "Disable Remote Registry service",
+      "Monitor registry access"
+    ],
+    "common_mistakes": [
+      "Remote Registry disabled"
+    ],
+    "alternatives": [
+      "reg query (local)",
+      "PowerShell Get-ItemProperty"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "registry",
+      "remote",
+      "persistence",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "impacket-services",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-services <domain>/<user>:<pass>@<target> list",
+    "name": "Remote Service Enumeration",
+    "description": "Lists all Windows services on a remote host \u2014 find vulnerable or suspicious services.",
+    "arguments": {
+      "list": "List all services"
+    },
+    "expected_output": "[*] VulnService - C:\\Program Files\\Vuln\\svc.exe - AUTO_START\n[*] Suspicious - C:\\temp\\backdoor.exe - AUTO_START",
+    "use_case": "Enumerate services for unquoted paths, weak permissions, or suspicious binaries.",
+    "prerequisites": [
+      "Admin credentials",
+      "SMB access"
+    ],
+    "mitre_mapping": [
+      "T1007"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Service enumeration via RPC"
+    ],
+    "remediation": [
+      "Audit services regularly",
+      "Remove unnecessary services"
+    ],
+    "common_mistakes": [
+      "Not checking service binary permissions"
+    ],
+    "alternatives": [
+      "sc query (local)",
+      "netexec --services"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "services",
+      "enumeration",
+      "remote",
+      "windows"
+    ]
+  },
+  {
+    "id": "impacket-atexec",
+    "tool": "impacket",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-atexec <domain>/<user>:<pass>@<target> 'whoami'",
+    "name": "AT Exec (Task Scheduler)",
+    "description": "Executes commands via Windows Task Scheduler \u2014 another lateral movement method.",
+    "arguments": {
+      "'whoami'": "Command to execute"
+    },
+    "expected_output": "[*] Creating task...\n[*] Running task...\nnt authority\\system",
+    "use_case": "Execute commands via scheduled tasks \u2014 different artifact than PsExec/WMI.",
+    "prerequisites": [
+      "Admin credentials",
+      "Task Scheduler accessible"
+    ],
+    "mitre_mapping": [
+      "T1053.005"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Scheduled task creation (Event 4698)",
+      "Task execution events"
+    ],
+    "remediation": [
+      "Monitor task creation",
+      "Restrict remote task scheduling"
+    ],
+    "common_mistakes": [
+      "Task Scheduler service disabled"
+    ],
+    "alternatives": [
+      "impacket-wmiexec",
+      "impacket-psexec"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "task-scheduler",
+      "execution",
+      "lateral-movement",
+      "at"
+    ]
+  },
+  {
+    "id": "powerview-acl",
+    "tool": "powerview",
+    "category": "active_directory",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Import-Module .\\PowerView.ps1; Find-InterestingDomainAcl -ResolveGUIDs | ?{$_.IdentityReferenceName -match 'helpdesk'}",
+    "name": "PowerView ACL Enumeration",
+    "description": "Finds interesting ACL permissions for a specific group \u2014 GenericAll, WriteDACL, etc.",
+    "arguments": {
+      "Find-InterestingDomainAcl": "Find exploitable ACLs",
+      "-ResolveGUIDs": "Show readable names"
+    },
+    "expected_output": "ObjectDN: CN=Domain Admins\nActiveDirectoryRights: GenericAll\nIdentityReference: CORP\\helpdesk",
+    "use_case": "Find ACL-based attack paths \u2014 permissions that allow privilege escalation without exploits.",
+    "prerequisites": [
+      "PowerShell access",
+      "PowerView loaded"
+    ],
+    "mitre_mapping": [
+      "T1069"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "PowerShell script execution",
+      "LDAP ACL queries"
+    ],
+    "remediation": [
+      "Audit ACLs",
+      "Remove unnecessary permissions"
+    ],
+    "common_mistakes": [
+      "AMSI blocks PowerView"
+    ],
+    "alternatives": [
+      "bloodhound (visual)",
+      "aclpwn"
+    ],
+    "references": [
+      "https://github.com/PowerShellMafia/PowerSploit"
+    ],
+    "tags": [
+      "acl",
+      "permissions",
+      "powerview",
+      "attack-path"
+    ]
+  }
+]

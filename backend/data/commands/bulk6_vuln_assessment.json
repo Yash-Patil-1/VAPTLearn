@@ -1,0 +1,250 @@
+[
+  {
+    "id": "openvas-scan",
+    "tool": "openvas",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "gvm-cli --gmp-username admin --gmp-password pass socket --socketpath /run/gvmd/gvmd.sock --xml '<create_task>...'",
+    "name": "OpenVAS Vulnerability Scan",
+    "description": "Full vulnerability assessment using OpenVAS/Greenbone \u2014 enterprise-grade scanner.",
+    "arguments": {
+      "gvm-cli": "GVM command line",
+      "create_task": "Create scan task"
+    },
+    "expected_output": "High: CVE-2021-44228 (Log4Shell) - CVSS 10.0\nMedium: CVE-2023-1234 - CVSS 6.5",
+    "use_case": "Comprehensive vulnerability scanning with detailed CVE reporting.",
+    "prerequisites": [
+      "OpenVAS/GVM installed",
+      "Target accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Vulnerability scan traffic patterns",
+      "Multiple exploit probes"
+    ],
+    "remediation": [
+      "Patch identified vulnerabilities",
+      "Prioritize by CVSS"
+    ],
+    "common_mistakes": [
+      "Not updating NVT feeds before scanning"
+    ],
+    "alternatives": [
+      "Nessus",
+      "Qualys",
+      "nuclei"
+    ],
+    "references": [
+      "https://www.greenbone.net"
+    ],
+    "tags": [
+      "openvas",
+      "vulnerability",
+      "scanner",
+      "enterprise",
+      "cve"
+    ]
+  },
+  {
+    "id": "nmap-vulners-scan",
+    "tool": "nmap",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sV --script vulners --script-args mincvss=7.0 -p <ports> <target>",
+    "name": "CVE Lookup (High Severity)",
+    "description": "Checks service versions against Vulners database \u2014 filters for CVSS 7.0+.",
+    "arguments": {
+      "--script vulners": "Vulners CVE database",
+      "mincvss=7.0": "Only show high/critical"
+    },
+    "expected_output": "| vulners:\n|   CVE-2021-44228  10.0\n|   CVE-2023-22515  9.8",
+    "use_case": "Quick high-severity CVE check without a full vulnerability scanner.",
+    "prerequisites": [
+      "Service versions detected (-sV)"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Version probing"
+    ],
+    "remediation": [
+      "Patch critical CVEs immediately"
+    ],
+    "common_mistakes": [
+      "Not running -sV first"
+    ],
+    "alternatives": [
+      "nuclei -severity critical,high",
+      "searchsploit"
+    ],
+    "references": [
+      "https://github.com/vulnersCom/nmap-vulners"
+    ],
+    "tags": [
+      "cve",
+      "high-severity",
+      "vulners",
+      "quick-check"
+    ]
+  },
+  {
+    "id": "searchsploit-nmap",
+    "tool": "searchsploit",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "searchsploit --nmap scan_results.xml",
+    "name": "SearchSploit from Nmap XML",
+    "description": "Automatically searches ExploitDB for all services found in an Nmap XML scan.",
+    "arguments": {
+      "--nmap": "Parse Nmap XML output"
+    },
+    "expected_output": "Apache 2.4.49 - Path Traversal\nOpenSSH 8.2 - Username Enumeration",
+    "use_case": "Automatically find exploits for all discovered services in one command.",
+    "prerequisites": [
+      "Nmap XML output (-oX)",
+      "exploitdb installed"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "N/A \u2014 local search"
+    ],
+    "remediation": [
+      "Patch services"
+    ],
+    "common_mistakes": [
+      "Not saving nmap output as XML"
+    ],
+    "alternatives": [
+      "nmap --script vulners"
+    ],
+    "references": [
+      "https://www.exploit-db.com"
+    ],
+    "tags": [
+      "exploitdb",
+      "nmap",
+      "automated",
+      "matching"
+    ]
+  },
+  {
+    "id": "nikto-ssl",
+    "tool": "nikto",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "nikto -h https://<target> -ssl",
+    "name": "Nikto HTTPS Scan",
+    "description": "Scans HTTPS targets for vulnerabilities, misconfigurations, and outdated software.",
+    "arguments": {
+      "-h": "Target",
+      "-ssl": "Force SSL/TLS"
+    },
+    "expected_output": "+ SSL Info: Subject: /CN=target.com\n+ /admin/: Admin panel found\n+ Outdated: Apache/2.4.49",
+    "use_case": "Web vulnerability scan over HTTPS \u2014 checks SSL config too.",
+    "prerequisites": [
+      "HTTPS service running"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Nikto user-agent",
+      "Probe patterns"
+    ],
+    "remediation": [
+      "Update software",
+      "Remove sensitive paths"
+    ],
+    "common_mistakes": [
+      "Forgetting -ssl flag for HTTPS"
+    ],
+    "alternatives": [
+      "nuclei",
+      "testssl.sh"
+    ],
+    "references": [
+      "https://github.com/sullo/nikto"
+    ],
+    "tags": [
+      "nikto",
+      "https",
+      "ssl",
+      "vulnerability"
+    ]
+  },
+  {
+    "id": "wapiti-scan",
+    "tool": "wapiti",
+    "category": "vulnerability_assessment",
+    "phase": 3,
+    "os": [
+      "linux"
+    ],
+    "command": "wapiti -u http://<target>/ -f html -o report/",
+    "name": "Wapiti Web Vulnerability Scanner",
+    "description": "Black-box web vulnerability scanner \u2014 tests for XSS, SQLi, SSRF, XXE, and more.",
+    "arguments": {
+      "-u": "Target URL",
+      "-f html": "Report format",
+      "-o": "Output directory"
+    },
+    "expected_output": "[*] Launching module sql\n[!] SQL Injection found in parameter 'id'\n[*] Launching module xss\n[!] XSS found in parameter 'search'",
+    "use_case": "Automated web app vulnerability scanning with detailed HTML reports.",
+    "prerequisites": [
+      "Web application accessible"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "High request volume",
+      "Malicious payloads in logs"
+    ],
+    "remediation": [
+      "Fix identified vulnerabilities",
+      "WAF"
+    ],
+    "common_mistakes": [
+      "Not reviewing the HTML report"
+    ],
+    "alternatives": [
+      "nuclei",
+      "zap",
+      "burp scanner"
+    ],
+    "references": [
+      "https://wapiti-scanner.github.io"
+    ],
+    "tags": [
+      "wapiti",
+      "scanner",
+      "xss",
+      "sqli",
+      "automated"
+    ]
+  }
+]

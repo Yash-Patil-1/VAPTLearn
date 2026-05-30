@@ -1,0 +1,370 @@
+[
+  {
+    "id": "vq-enum-01",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What command enumerates SMB shares on a target using smbclient?",
+    "correct_answers": [
+      "smbclient -L //target",
+      "smbclient -L \\\\target",
+      "smbclient -L //target -N",
+      "smbclient -N -L //target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "smbclient -L lists available shares on the target. The -N flag specifies no password (null session).",
+    "hints": [
+      "Use the -L flag to list shares"
+    ]
+  },
+  {
+    "id": "vq-enum-02",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What tool performs automated enumeration of SMB users, shares, and policies on Windows/Samba hosts?",
+    "correct_answers": [
+      "enum4linux",
+      "enum4linux-ng",
+      "enum4linux -a target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "enum4linux is a tool for enumerating information from Windows and Samba systems including users, shares, group membership, and password policies.",
+    "hints": [
+      "Named after the enumeration it performs on port 445/139"
+    ]
+  },
+  {
+    "id": "vq-enum-03",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command performs a DNS zone transfer against a target domain?",
+    "correct_answers": [
+      "dig axfr domain.com @ns.domain.com",
+      "dig axfr @ns domain.com",
+      "host -t axfr domain.com ns.domain.com",
+      "dig axfr"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "dig axfr attempts a full DNS zone transfer which, if misconfigured, reveals all DNS records for the domain.",
+    "hints": [
+      "Use dig with the zone transfer record type"
+    ]
+  },
+  {
+    "id": "vq-enum-04",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What gobuster command brute-forces web directories using a common wordlist?",
+    "correct_answers": [
+      "gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt",
+      "gobuster dir -u http://target -w wordlist.txt",
+      "gobuster dir -w wordlist -u http://target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "gobuster dir mode brute-forces directories and files. The -u flag specifies the URL and -w the wordlist.",
+    "hints": [
+      "gobuster has a 'dir' mode for directory brute-forcing"
+    ]
+  },
+  {
+    "id": "vq-enum-05",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What ldapsearch command performs an anonymous bind to enumerate the base naming context of an LDAP server?",
+    "correct_answers": [
+      "ldapsearch -x -H ldap://target -s base namingcontexts",
+      "ldapsearch -x -h target -s base namingcontexts",
+      "ldapsearch -x -H ldap://target -b '' -s base '(objectclass=*)' namingcontexts"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "ldapsearch with -x (simple auth), -s base (base scope), and namingcontexts retrieves the root DSE which reveals the domain structure.",
+    "hints": [
+      "Use simple authentication (-x) and query the base scope for naming contexts"
+    ]
+  },
+  {
+    "id": "vq-enum-06",
+    "topic_id": "enumeration",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You discover port 161/UDP is open on a target. What protocol does this indicate and what tool would you use to extract system information?",
+    "correct_answers": [
+      "SNMP - snmpwalk",
+      "snmpwalk",
+      "snmpwalk -v2c -c public target",
+      "onesixtyone"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Port 161/UDP is SNMP. snmpwalk can enumerate the MIB tree if you know the community string (commonly 'public'). onesixtyone can brute-force community strings.",
+    "hints": [
+      "This is a management protocol commonly using community strings like 'public'"
+    ]
+  },
+  {
+    "id": "vq-enum-07",
+    "topic_id": "enumeration",
+    "type": "theory",
+    "difficulty": "easy",
+    "question": "What is the difference between active and passive enumeration?",
+    "correct_answers": [
+      "Active enumeration directly interacts with the target while passive uses publicly available information without touching the target",
+      "Active sends packets to the target, passive does not",
+      "Active interacts with target systems, passive uses OSINT"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Active enumeration involves direct interaction with target systems (port scanning, banner grabbing) which may be detected. Passive enumeration gathers information from public sources (DNS records, WHOIS, certificate transparency) without alerting the target.",
+    "hints": [
+      "Think about whether the target can detect your activity"
+    ]
+  },
+  {
+    "id": "vq-enum-08",
+    "topic_id": "enumeration",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have valid domain credentials but no admin access. What tool and technique would you use to enumerate all domain users, groups, and ACLs in Active Directory?",
+    "correct_answers": [
+      "bloodhound",
+      "sharphound",
+      "BloodHound with SharpHound collector",
+      "bloodhound-python"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "BloodHound with its SharpHound (Windows) or bloodhound-python (Linux) collector can map AD relationships, ACLs, group memberships, and attack paths using standard domain user privileges.",
+    "hints": [
+      "This tool visualizes AD attack paths as a graph"
+    ]
+  },
+  {
+    "id": "vq-enum-09",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command uses rpcclient to enumerate domain users via a null session?",
+    "correct_answers": [
+      "rpcclient -U '' -N target -c 'enumdomusers'",
+      "rpcclient -U '' target -N -c enumdomusers",
+      "rpcclient -U '' -N target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "rpcclient with empty username (-U '') and no password (-N) attempts a null session. The enumdomusers command lists all domain users if null sessions are permitted.",
+    "hints": [
+      "Use rpcclient with null credentials and the enumdomusers command"
+    ]
+  },
+  {
+    "id": "vq-enum-10",
+    "topic_id": "enumeration",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is LLMNR/NBT-NS poisoning and why is it useful during internal enumeration?",
+    "correct_answers": [
+      "LLMNR and NBT-NS are name resolution protocols that broadcast queries on the local network. By responding to these queries, an attacker can capture NTLMv2 hashes.",
+      "Poisoning local name resolution to capture hashes",
+      "Responding to broadcast name queries to intercept authentication hashes"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "When DNS fails, Windows falls back to LLMNR/NBT-NS which broadcast name queries on the local subnet. An attacker running Responder can answer these queries and capture NTLMv2 hashes from authenticating clients.",
+    "hints": [
+      "These are fallback name resolution protocols in Windows environments"
+    ]
+  },
+  {
+    "id": "vq-enum-11",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command enumerates NFS shares available on a target system?",
+    "correct_answers": [
+      "showmount -e target",
+      "showmount -e 10.10.10.10",
+      "nmap --script nfs-showmount target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "showmount -e lists exported NFS shares on the target. If shares are accessible, they can be mounted locally to access files. Nmap's nfs-showmount script provides similar functionality.",
+    "hints": [
+      "Use showmount with the -e flag to list exports"
+    ]
+  },
+  {
+    "id": "vq-enum-12",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command enumerates valid SMTP users using the VRFY method?",
+    "correct_answers": [
+      "smtp-user-enum -M VRFY -U users.txt -t target",
+      "smtp-user-enum -M VRFY -u admin -t target",
+      "nmap --script smtp-enum-users target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "smtp-user-enum uses SMTP commands (VRFY, EXPN, RCPT TO) to check if usernames exist on the mail server. VRFY directly verifies a user, while RCPT TO checks if mail can be delivered to that user.",
+    "hints": [
+      "A tool specifically designed for SMTP user enumeration with different methods"
+    ]
+  },
+  {
+    "id": "vq-enum-13",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What tool identifies web technologies, frameworks, and CMS platforms running on a website?",
+    "correct_answers": [
+      "whatweb",
+      "whatweb http://target",
+      "wappalyzer",
+      "whatweb -a 3 http://target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WhatWeb identifies web technologies including CMS (WordPress, Joomla), frameworks, JavaScript libraries, web servers, and embedded devices. The -a flag sets aggression level (1=stealthy, 3=aggressive).",
+    "hints": [
+      "A command-line tool that fingerprints web technologies"
+    ]
+  },
+  {
+    "id": "vq-enum-14",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What gobuster command discovers virtual hosts on a web server?",
+    "correct_answers": [
+      "gobuster vhost -u http://target -w wordlist.txt",
+      "gobuster vhost -u http://target -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+      "gobuster vhost -u http://target -w wordlist.txt --append-domain"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "gobuster vhost mode brute-forces virtual hostnames by sending requests with different Host headers. This discovers hidden subdomains/vhosts that resolve to the same IP but serve different content.",
+    "hints": [
+      "gobuster has a 'vhost' mode that fuzzes the Host header"
+    ]
+  },
+  {
+    "id": "vq-enum-15",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What ffuf command discovers hidden API endpoints using a wordlist?",
+    "correct_answers": [
+      "ffuf -u http://target/api/FUZZ -w wordlist.txt",
+      "ffuf -u http://target/api/FUZZ -w /usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt",
+      "ffuf -w wordlist.txt -u http://target/api/v1/FUZZ -mc 200,301"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "ffuf (Fuzz Faster U Fool) is a fast web fuzzer. The FUZZ keyword marks where wordlist entries are inserted. Use -mc to match specific status codes and -fc to filter unwanted ones.",
+    "hints": [
+      "Use FUZZ as the placeholder in the URL where wordlist entries are substituted"
+    ]
+  },
+  {
+    "id": "vq-enum-16",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command performs DNS subdomain brute-forcing using a wordlist?",
+    "correct_answers": [
+      "dnsenum domain.com",
+      "dnsrecon -d domain.com -D wordlist.txt -t brt",
+      "gobuster dns -d domain.com -w wordlist.txt",
+      "fierce --domain domain.com"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "DNS subdomain enumeration can be done with multiple tools: dnsenum automates zone transfers and brute-forcing, dnsrecon with -t brt does brute-force, gobuster dns mode fuzzes subdomains, and fierce performs DNS reconnaissance.",
+    "hints": [
+      "Several tools can brute-force subdomains by querying DNS for each wordlist entry"
+    ]
+  },
+  {
+    "id": "vq-enum-17",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What Nmap flag performs service version detection and banner grabbing?",
+    "correct_answers": [
+      "nmap -sV target",
+      "-sV",
+      "nmap -sV -sC target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The -sV flag enables service/version detection by sending probes and analyzing responses to determine the service, application name, and version number running on each open port.",
+    "hints": [
+      "A single flag that enables version detection on discovered services"
+    ]
+  },
+  {
+    "id": "vq-enum-18",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command brute-forces SNMP community strings on a target?",
+    "correct_answers": [
+      "onesixtyone -c community.txt target",
+      "onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt target",
+      "hydra -P community.txt target snmp",
+      "nmap --script snmp-brute target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "onesixtyone is a fast SNMP community string brute-forcer. It sends SNMP requests with different community strings from a wordlist. Common defaults include 'public' (read) and 'private' (read-write).",
+    "hints": [
+      "A tool named after the SNMP port number (161)"
+    ]
+  },
+  {
+    "id": "vq-enum-19",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command enumerates RPC services and their program numbers on a target?",
+    "correct_answers": [
+      "rpcinfo -p target",
+      "rpcinfo target",
+      "nmap --script rpcinfo target",
+      "rpcinfo -s target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "rpcinfo queries the RPC portmapper (port 111) to list registered RPC services, their program numbers, versions, and ports. This reveals services like NFS, NIS, and rusersd.",
+    "hints": [
+      "Query the portmapper service on port 111"
+    ]
+  },
+  {
+    "id": "vq-enum-20",
+    "topic_id": "enumeration",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What Impacket tool enumerates valid Kerberos usernames without authentication?",
+    "correct_answers": [
+      "kerbrute userenum -d domain.com userlist.txt",
+      "kerbrute userenum --dc dc-ip -d domain userlist.txt",
+      "nmap --script krb5-enum-users --script-args krb5-enum-users.realm='domain.com' target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Kerbrute performs Kerberos user enumeration by sending AS-REQ messages. Valid usernames return a different error (KDC_ERR_PREAUTH_REQUIRED) than invalid ones (KDC_ERR_C_PRINCIPAL_UNKNOWN), allowing username validation without authentication.",
+    "hints": [
+      "Kerberos returns different error codes for valid vs invalid usernames"
+    ]
+  }
+]

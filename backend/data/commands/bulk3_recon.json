@@ -1,0 +1,249 @@
+[
+  {
+    "id": "nmap-script-http-vuln",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script 'http-vuln*' -p 80,443 <target>",
+    "name": "HTTP Vulnerability Scripts",
+    "description": "Runs all HTTP vulnerability scripts \u2014 checks for Shellshock, Slowloris, etc.",
+    "arguments": {
+      "--script 'http-vuln*'": "All HTTP vuln scripts"
+    },
+    "expected_output": "| http-vuln-cve2014-6271 (Shellshock): VULNERABLE",
+    "use_case": "Check for web server vulnerabilities without a full scanner.",
+    "prerequisites": [
+      "HTTP ports open"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Exploit probe patterns in WAF"
+    ],
+    "remediation": [
+      "Patch web servers",
+      "WAF rules"
+    ],
+    "common_mistakes": [
+      "Not checking HTTPS separately"
+    ],
+    "alternatives": [
+      "nuclei",
+      "nikto"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "http",
+      "vulnerability",
+      "shellshock",
+      "nse"
+    ]
+  },
+  {
+    "id": "nmap-firewall-detect",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sA -p 80,443 <target>",
+    "name": "ACK Scan (Firewall Detection)",
+    "description": "Determines if ports are filtered by a firewall \u2014 ACK packets bypass stateless firewalls.",
+    "arguments": {
+      "-sA": "ACK scan (detects filtering)"
+    },
+    "expected_output": "PORT   STATE      SERVICE\n80/tcp unfiltered http\n443/tcp filtered  https",
+    "use_case": "Determine which ports are filtered by firewalls vs actually closed.",
+    "prerequisites": [
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "ACK packets without prior SYN"
+    ],
+    "remediation": [
+      "Stateful firewalls",
+      "IDS"
+    ],
+    "common_mistakes": [
+      "Confusing 'unfiltered' with 'open'"
+    ],
+    "alternatives": [
+      "nmap -sW (Window scan)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-port-scanning-techniques.html"
+    ],
+    "tags": [
+      "firewall",
+      "detection",
+      "ack",
+      "filtering"
+    ]
+  },
+  {
+    "id": "nmap-traceroute",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --traceroute -p 80 <target>",
+    "name": "Network Path Discovery",
+    "description": "Maps the network path to target \u2014 identifies routers, firewalls, and network hops.",
+    "arguments": {
+      "--traceroute": "Trace route to target"
+    },
+    "expected_output": "TRACEROUTE (using port 80/tcp)\nHOP RTT     ADDRESS\n1   1.00ms  192.168.1.1\n2   5.00ms  10.0.0.1\n3   15.0ms  target.com",
+    "use_case": "Map network topology and identify intermediate devices.",
+    "prerequisites": [
+      "Target reachable"
+    ],
+    "mitre_mapping": [
+      "T1018"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Traceroute packets (TTL manipulation)"
+    ],
+    "remediation": [
+      "Block ICMP time-exceeded at perimeter"
+    ],
+    "common_mistakes": [
+      "Not using TCP traceroute (ICMP often blocked)"
+    ],
+    "alternatives": [
+      "traceroute",
+      "mtr",
+      "tcptraceroute"
+    ],
+    "references": [
+      "https://nmap.org/book/man-traceroute.html"
+    ],
+    "tags": [
+      "traceroute",
+      "topology",
+      "path",
+      "network"
+    ]
+  },
+  {
+    "id": "sherlock-osint",
+    "tool": "sherlock",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "sherlock <username>",
+    "name": "Username OSINT Search",
+    "description": "Searches 300+ social media sites for a username \u2014 maps a person's online presence.",
+    "arguments": {
+      "<username>": "Target username to search"
+    },
+    "expected_output": "[+] GitHub: https://github.com/target\n[+] Twitter: https://twitter.com/target\n[+] LinkedIn: https://linkedin.com/in/target",
+    "use_case": "Map a target's social media presence for social engineering or information gathering.",
+    "prerequisites": [
+      "Target username"
+    ],
+    "mitre_mapping": [
+      "T1589"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 queries public sites"
+    ],
+    "remediation": [
+      "Use different usernames per platform",
+      "Privacy settings"
+    ],
+    "common_mistakes": [
+      "False positives (common usernames)"
+    ],
+    "alternatives": [
+      "maigret (more sites)",
+      "whatsmyname.app"
+    ],
+    "references": [
+      "https://github.com/sherlock-project/sherlock"
+    ],
+    "tags": [
+      "osint",
+      "username",
+      "social-media",
+      "passive"
+    ]
+  },
+  {
+    "id": "spiderfoot-scan",
+    "tool": "spiderfoot",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "spiderfoot -s <target_domain> -t all",
+    "name": "SpiderFoot OSINT Automation",
+    "description": "Automated OSINT collection \u2014 queries 200+ data sources for comprehensive target intelligence.",
+    "arguments": {
+      "-s": "Target (domain, IP, email, name)",
+      "-t all": "All module types"
+    },
+    "expected_output": "[*] Querying 200+ sources...\n[+] Found 45 subdomains\n[+] Found 12 email addresses\n[+] Found 3 leaked credentials",
+    "use_case": "Comprehensive automated OSINT \u2014 combines dozens of tools into one scan.",
+    "prerequisites": [
+      "Target identifier",
+      "Internet access"
+    ],
+    "mitre_mapping": [
+      "T1589",
+      "T1590",
+      "T1596"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 queries third-party sources"
+    ],
+    "remediation": [
+      "Monitor for data exposure",
+      "OSINT awareness training"
+    ],
+    "common_mistakes": [
+      "Scan takes very long with 'all' modules"
+    ],
+    "alternatives": [
+      "recon-ng",
+      "maltego",
+      "theHarvester"
+    ],
+    "references": [
+      "https://github.com/smicallef/spiderfoot"
+    ],
+    "tags": [
+      "osint",
+      "automated",
+      "comprehensive",
+      "intelligence"
+    ]
+  }
+]

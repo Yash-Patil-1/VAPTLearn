@@ -1,0 +1,247 @@
+[
+  {
+    "id": "ftp-bounce",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -b <ftp_server> <target>",
+    "name": "FTP Bounce Scan",
+    "description": "Uses an FTP server to scan another host \u2014 the FTP server acts as a proxy.",
+    "arguments": {
+      "-b": "FTP bounce scan via specified server"
+    },
+    "expected_output": "PORT   STATE SERVICE\n80/tcp open  http (via FTP bounce)",
+    "use_case": "Scan hosts behind firewalls using a misconfigured FTP server as a relay.",
+    "prerequisites": [
+      "FTP server allowing PORT command to other hosts"
+    ],
+    "mitre_mapping": [
+      "T1090"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Unusual FTP PORT commands",
+      "FTP data connections to third parties"
+    ],
+    "remediation": [
+      "Disable FTP bounce (modern servers do by default)"
+    ],
+    "common_mistakes": [
+      "Very rare \u2014 most FTP servers patched"
+    ],
+    "alternatives": [
+      "nmap -sS (direct scan)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-port-scanning-techniques.html"
+    ],
+    "tags": [
+      "ftp",
+      "bounce",
+      "proxy",
+      "scan",
+      "evasion"
+    ]
+  },
+  {
+    "id": "ike-scan",
+    "tool": "ike-scan",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "ike-scan <target>",
+    "name": "IKE/VPN Gateway Detection",
+    "description": "Detects IPSec VPN gateways and identifies their configuration.",
+    "arguments": {
+      "<target>": "Target IP"
+    },
+    "expected_output": "192.168.1.1\tMain Mode Handshake returned\n\tAuth=PSK, Enc=3DES, Hash=SHA1",
+    "use_case": "Discover VPN gateways and their encryption settings \u2014 weak configs may be exploitable.",
+    "prerequisites": [
+      "UDP port 500 open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "IKE probes on port 500"
+    ],
+    "remediation": [
+      "Use strong VPN configurations",
+      "Restrict VPN access"
+    ],
+    "common_mistakes": [
+      "Not trying aggressive mode (ike-scan -A)"
+    ],
+    "alternatives": [
+      "nmap --script ike-version"
+    ],
+    "references": [
+      "https://github.com/royhills/ike-scan"
+    ],
+    "tags": [
+      "vpn",
+      "ipsec",
+      "ike",
+      "gateway",
+      "detection"
+    ]
+  },
+  {
+    "id": "smtp-commands",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smtp-commands -p 25 <target>",
+    "name": "SMTP Command Enumeration",
+    "description": "Discovers supported SMTP commands \u2014 VRFY and EXPN enable user enumeration.",
+    "arguments": {
+      "--script smtp-commands": "Check supported commands"
+    },
+    "expected_output": "| smtp-commands: mail.target.com\n|   VRFY, EXPN, ETRN, SIZE, HELP",
+    "use_case": "Identify if SMTP server supports VRFY/EXPN for user enumeration.",
+    "prerequisites": [
+      "SMTP port 25 open"
+    ],
+    "mitre_mapping": [
+      "T1589"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "SMTP command probing"
+    ],
+    "remediation": [
+      "Disable VRFY and EXPN"
+    ],
+    "common_mistakes": [
+      "Not following up with user enumeration"
+    ],
+    "alternatives": [
+      "smtp-user-enum",
+      "swaks"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/smtp-commands.html"
+    ],
+    "tags": [
+      "smtp",
+      "commands",
+      "vrfy",
+      "expn",
+      "mail"
+    ]
+  },
+  {
+    "id": "oracle-sid",
+    "tool": "odat",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "odat sidguesser -s <target> -p 1521",
+    "name": "Oracle SID Guessing",
+    "description": "Brute-forces Oracle database SIDs \u2014 needed before connecting to Oracle.",
+    "arguments": {
+      "-s": "Target",
+      "-p": "Port (1521)"
+    },
+    "expected_output": "[+] SID found: ORCL\n[+] SID found: XE",
+    "use_case": "Discover Oracle database SIDs for further enumeration and exploitation.",
+    "prerequisites": [
+      "Oracle port 1521 open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Multiple TNS connection attempts"
+    ],
+    "remediation": [
+      "Use complex SID names",
+      "Restrict TNS listener access"
+    ],
+    "common_mistakes": [
+      "Not trying common SIDs (ORCL, XE, PROD)"
+    ],
+    "alternatives": [
+      "nmap --script oracle-sid-brute",
+      "tnscmd10g"
+    ],
+    "references": [
+      "https://github.com/quentinhardy/odat"
+    ],
+    "tags": [
+      "oracle",
+      "sid",
+      "database",
+      "brute-force"
+    ]
+  },
+  {
+    "id": "mssql-enum",
+    "tool": "impacket",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-mssqlclient <domain>/<user>:<pass>@<target> -windows-auth",
+    "name": "MSSQL Client Connection",
+    "description": "Connects to Microsoft SQL Server with Windows authentication for enumeration.",
+    "arguments": {
+      "-windows-auth": "Use Windows/domain authentication"
+    },
+    "expected_output": "SQL> SELECT @@version;\nMicrosoft SQL Server 2019\nSQL> SELECT name FROM sys.databases;",
+    "use_case": "Connect to MSSQL for enumeration \u2014 check for xp_cmdshell, linked servers, impersonation.",
+    "prerequisites": [
+      "MSSQL port 1433 open",
+      "Valid credentials"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "SQL login events",
+      "Unusual queries"
+    ],
+    "remediation": [
+      "Restrict SQL access",
+      "Disable xp_cmdshell",
+      "Least privilege"
+    ],
+    "common_mistakes": [
+      "Not checking xp_cmdshell",
+      "Missing linked servers"
+    ],
+    "alternatives": [
+      "sqsh",
+      "dbeaver",
+      "netexec mssql"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "mssql",
+      "database",
+      "windows-auth",
+      "enumeration"
+    ]
+  }
+]

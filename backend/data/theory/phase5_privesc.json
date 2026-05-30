@@ -1,0 +1,24 @@
+{
+  "phase_id": 5,
+  "title": "Privilege Escalation — From User to Root/SYSTEM",
+  "sections": [
+    {
+      "id": "privesc-why",
+      "title": "Why Privilege Escalation Matters",
+      "content": "Initial access usually gives you a low-privilege shell — a web server user, a service account, or a standard domain user. Privilege escalation takes you from limited access to full control.\n\n**Why you need it:**\n- Read sensitive files (shadow, SAM, NTDS)\n- Install persistence mechanisms\n- Access other systems (lateral movement often requires admin)\n- Demonstrate full compromise in your report\n\n**The two types:**\n1. **Vertical** — Low user → root/SYSTEM (escalate privileges)\n2. **Horizontal** — User A → User B (same privilege level, different access)\n\nBoth matter. Sometimes horizontal movement to a service account gives you access to databases that vertical escalation on the current host wouldn't.",
+      "key_concepts": ["Vertical vs horizontal", "Full compromise", "Access expansion"]
+    },
+    {
+      "id": "privesc-linux",
+      "title": "Linux Privilege Escalation",
+      "content": "**Systematic approach (run LinPEAS first, then investigate findings):**\n\n1. **SUID/SGID binaries** — Find with: find / -perm -4000 2>/dev/null\n   - Check each against GTFOBins\n   - Custom SUID binaries are often vulnerable\n\n2. **Capabilities** — getcap -r / 2>/dev/null\n   - cap_setuid on python/perl = instant root\n   - Often overlooked by admins\n\n3. **Cron jobs** — cat /etc/crontab, ls /etc/cron.*\n   - Writable scripts run by root = inject reverse shell\n   - Use pspy to find hidden cron jobs\n\n4. **Sudo misconfigurations** — sudo -l\n   - NOPASSWD entries → check GTFOBins\n   - LD_PRELOAD in env_keep → shared library injection\n\n5. **Kernel exploits** — Last resort\n   - Dirty Pipe (5.8-5.16), PwnKit (universal), DirtyCow (older)\n   - Risk: may crash the system\n\n6. **Writable files** — /etc/passwd writable? Add a root user. /etc/shadow readable? Crack hashes.\n\n**Key principle:** Always enumerate before exploiting. LinPEAS/manual checks first, kernel exploits last.",
+      "key_concepts": ["SUID", "Capabilities", "Cron", "Sudo", "Kernel exploits", "GTFOBins"]
+    },
+    {
+      "id": "privesc-windows",
+      "title": "Windows Privilege Escalation",
+      "content": "**Systematic approach (run WinPEAS/Seatbelt first):**\n\n1. **Service misconfigurations**\n   - Unquoted service paths: spaces in path without quotes\n   - Modifiable services: change binary path to your payload\n   - Weak service permissions: restart service with your binary\n\n2. **Token impersonation (Potato attacks)**\n   - SeImpersonatePrivilege → JuicyPotato/PrintSpoofer/GodPotato\n   - Common on IIS, SQL Server, and service accounts\n   - Instant SYSTEM from service context\n\n3. **Registry keys**\n   - AlwaysInstallElevated: install MSI as SYSTEM\n   - AutoLogon credentials in registry\n   - Saved credentials in Credential Manager\n\n4. **Scheduled tasks** — writable scripts run by SYSTEM\n\n5. **DLL hijacking** — Missing DLLs in writable directories\n\n6. **Credential harvesting**\n   - Mimikatz (if already admin on another box)\n   - SAM/SYSTEM backup files\n   - Unattended install files (unattend.xml)\n\n**Key insight:** On Windows, the path from service account to SYSTEM is often trivial (Potato attacks). The harder part is usually getting from standard user to local admin.",
+      "key_concepts": ["Services", "Potato attacks", "Registry", "DLL hijacking", "Credentials"]
+    }
+  ]
+}

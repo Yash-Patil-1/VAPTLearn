@@ -1,0 +1,250 @@
+[
+  {
+    "id": "nmap-scan-timing",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sS -T0 --max-retries 1 --scan-delay 5s <target>",
+    "name": "Paranoid Timing Scan",
+    "description": "Extremely slow scan to avoid IDS detection \u2014 one probe every 5+ seconds.",
+    "arguments": {
+      "-T0": "Paranoid timing",
+      "--scan-delay 5s": "Wait between probes"
+    },
+    "expected_output": "(Very slow output \u2014 takes hours)",
+    "use_case": "Evade IDS on highly monitored targets \u2014 patience required.",
+    "prerequisites": [
+      "Root",
+      "Lots of time"
+    ],
+    "mitre_mapping": [
+      "T1046",
+      "T1205"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Very difficult to detect",
+      "Blends with normal traffic"
+    ],
+    "remediation": [
+      "Behavioral analysis",
+      "Long-term traffic monitoring"
+    ],
+    "common_mistakes": [
+      "Takes too long for engagement timeline"
+    ],
+    "alternatives": [
+      "nmap -T2 (polite, faster compromise)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-performance.html"
+    ],
+    "tags": [
+      "stealth",
+      "slow",
+      "evasion",
+      "paranoid",
+      "timing"
+    ]
+  },
+  {
+    "id": "nmap-source-port",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "nmap -sS --source-port 53 -p- <target>",
+    "name": "Source Port Manipulation",
+    "description": "Scans using source port 53 (DNS) \u2014 some firewalls allow DNS traffic through.",
+    "arguments": {
+      "--source-port 53": "Use port 53 as source"
+    },
+    "expected_output": "PORT   STATE SERVICE\n80/tcp open  http (via source port 53)",
+    "use_case": "Bypass firewalls that allow DNS (port 53) traffic unconditionally.",
+    "prerequisites": [
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1046",
+      "T1205"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Traffic from port 53 that isn't DNS"
+    ],
+    "remediation": [
+      "Stateful firewalls",
+      "Deep packet inspection"
+    ],
+    "common_mistakes": [
+      "Firewall does DPI (detects non-DNS)"
+    ],
+    "alternatives": [
+      "nmap -D (decoys)",
+      "nmap --data-length (pad packets)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-bypass-firewalls-ids.html"
+    ],
+    "tags": [
+      "source-port",
+      "firewall-bypass",
+      "dns",
+      "evasion"
+    ]
+  },
+  {
+    "id": "nmap-ipv6",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -6 -sV -p- <ipv6_target>",
+    "name": "IPv6 Scan",
+    "description": "Scans IPv6 addresses \u2014 often overlooked and less protected than IPv4.",
+    "arguments": {
+      "-6": "IPv6 mode"
+    },
+    "expected_output": "PORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 8.9\n80/tcp open  http    Apache 2.4",
+    "use_case": "Scan IPv6 addresses \u2014 many organizations forget to firewall IPv6.",
+    "prerequisites": [
+      "IPv6 target address",
+      "IPv6 connectivity"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "IPv6 scanning activity"
+    ],
+    "remediation": [
+      "Apply same firewall rules to IPv6",
+      "Disable IPv6 if not needed"
+    ],
+    "common_mistakes": [
+      "No IPv6 connectivity"
+    ],
+    "alternatives": [
+      "nmap -6 --script discovery"
+    ],
+    "references": [
+      "https://nmap.org/book/man-port-scanning-techniques.html"
+    ],
+    "tags": [
+      "ipv6",
+      "scanning",
+      "overlooked",
+      "network"
+    ]
+  },
+  {
+    "id": "masscan-banner",
+    "tool": "masscan",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "masscan -p80,443,8080 <range>/24 --banners --rate 1000",
+    "name": "Masscan with Banner Grabbing",
+    "description": "Fast port scan with banner grabbing \u2014 identifies services at scale.",
+    "arguments": {
+      "--banners": "Grab service banners",
+      "--rate": "Packets per second"
+    },
+    "expected_output": "Banner on port 80/tcp: HTTP/1.1 200 OK\\r\\nServer: nginx",
+    "use_case": "Rapid service identification across large networks.",
+    "prerequisites": [
+      "Root",
+      "Network range"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "High packet rate"
+    ],
+    "remediation": [
+      "Rate limiting",
+      "IDS"
+    ],
+    "common_mistakes": [
+      "Rate too high for network"
+    ],
+    "alternatives": [
+      "nmap -sV (more accurate)"
+    ],
+    "references": [
+      "https://github.com/robertdavidgraham/masscan"
+    ],
+    "tags": [
+      "masscan",
+      "banner",
+      "fast",
+      "large-network"
+    ]
+  },
+  {
+    "id": "cloud-enum",
+    "tool": "cloud_enum",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "cloud_enum -k <company_name> -l results.txt",
+    "name": "Cloud Resource Enumeration",
+    "description": "Discovers cloud resources (S3 buckets, Azure blobs, GCP buckets) for a company.",
+    "arguments": {
+      "-k": "Keyword/company name",
+      "-l": "Output file"
+    },
+    "expected_output": "[+] S3 Bucket: company-backups.s3.amazonaws.com (PUBLIC)\n[+] Azure Blob: company.blob.core.windows.net",
+    "use_case": "Find exposed cloud storage buckets that may contain sensitive data.",
+    "prerequisites": [
+      "Company name/keywords"
+    ],
+    "mitre_mapping": [
+      "T1530"
+    ],
+    "mitre_tactic": "Collection",
+    "detections": [
+      "Passive \u2014 queries cloud providers"
+    ],
+    "remediation": [
+      "Secure bucket permissions",
+      "Enable logging"
+    ],
+    "common_mistakes": [
+      "No cloud resources found"
+    ],
+    "alternatives": [
+      "s3scanner",
+      "grayhatwarfare.com"
+    ],
+    "references": [
+      "https://github.com/initstring/cloud_enum"
+    ],
+    "tags": [
+      "cloud",
+      "s3",
+      "azure",
+      "gcp",
+      "bucket",
+      "storage"
+    ]
+  }
+]

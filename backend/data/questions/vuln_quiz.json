@@ -1,0 +1,368 @@
+[
+  {
+    "id": "vq-vuln-01",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What Nmap script scans for known vulnerabilities on a target?",
+    "correct_answers": [
+      "nmap --script vuln target",
+      "nmap --script=vuln",
+      "--script vuln"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The --script vuln category runs all NSE scripts that check for known vulnerabilities including SMB exploits, SSL issues, and web vulnerabilities.",
+    "hints": [
+      "Use the --script flag with a vulnerability category"
+    ]
+  },
+  {
+    "id": "vq-vuln-02",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What tool scans a web server for known vulnerabilities, misconfigurations, and outdated software?",
+    "correct_answers": [
+      "nikto",
+      "nikto -h http://target",
+      "nikto -host target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Nikto is an open-source web server scanner that checks for dangerous files, outdated server software, version-specific problems, and server configuration issues.",
+    "hints": [
+      "A classic web server vulnerability scanner starting with 'n'"
+    ]
+  },
+  {
+    "id": "vq-vuln-03",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command runs Nuclei with all templates against a target URL?",
+    "correct_answers": [
+      "nuclei -u http://target",
+      "nuclei -u http://target -t /path/to/templates",
+      "nuclei -target http://target",
+      "nuclei -l urls.txt"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Nuclei is a fast template-based vulnerability scanner. The -u flag specifies a single target, -l for a list. It uses YAML templates from the nuclei-templates repository to detect vulnerabilities, misconfigurations, and exposures.",
+    "hints": [
+      "Use -u for a single URL target"
+    ]
+  },
+  {
+    "id": "vq-vuln-04",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What testssl.sh command checks a server for SSL/TLS vulnerabilities including Heartbleed and POODLE?",
+    "correct_answers": [
+      "testssl.sh target:443",
+      "testssl target:443",
+      "testssl.sh --full target:443",
+      "./testssl.sh target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "testssl.sh is a command-line tool that checks TLS/SSL ciphers, protocols, and cryptographic flaws. It tests for Heartbleed, POODLE, BEAST, CRIME, DROWN, and other known vulnerabilities.",
+    "hints": [
+      "Run the script against the target's HTTPS port"
+    ]
+  },
+  {
+    "id": "vq-vuln-05",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the difference between a vulnerability scan and a penetration test?",
+    "correct_answers": [
+      "A vulnerability scan identifies potential vulnerabilities automatically while a penetration test actively exploits them to prove impact",
+      "Vuln scan finds weaknesses, pentest exploits them",
+      "Scanning identifies issues, pentesting validates exploitability and demonstrates impact"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Vulnerability scanning is automated identification of potential weaknesses (often with false positives). Penetration testing goes further by manually validating, exploiting, and demonstrating real-world impact of vulnerabilities.",
+    "hints": [
+      "One identifies, the other proves exploitability"
+    ]
+  },
+  {
+    "id": "vq-vuln-06",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "easy",
+    "question": "What does CVSS stand for and what does it measure?",
+    "correct_answers": [
+      "Common Vulnerability Scoring System - measures the severity of vulnerabilities on a 0-10 scale",
+      "Common Vulnerability Scoring System",
+      "CVSS rates vulnerability severity from 0 to 10"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "CVSS (Common Vulnerability Scoring System) provides a standardized 0-10 severity rating for vulnerabilities based on exploitability, impact, and environmental factors. Scores: 0-3.9 Low, 4-6.9 Medium, 7-8.9 High, 9-10 Critical.",
+    "hints": [
+      "A standardized scoring system with a 0-10 scale"
+    ]
+  },
+  {
+    "id": "vq-vuln-07",
+    "topic_id": "vulnerability_assessment",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your Nessus scan shows 500+ findings. How do you prioritize remediation?",
+    "correct_answers": [
+      "Prioritize by CVSS score, exploitability, asset criticality, and whether public exploits exist",
+      "Filter by critical/high CVSS, check for public exploits, consider asset value",
+      "Sort by severity, check exploit availability, prioritize internet-facing and critical assets"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Prioritize by: 1) CVSS severity (Critical/High first), 2) Exploit availability (known public exploits), 3) Asset criticality (internet-facing, contains sensitive data), 4) Ease of remediation. Remove false positives through validation.",
+    "hints": [
+      "Consider severity, exploitability, and business impact together"
+    ]
+  },
+  {
+    "id": "vq-vuln-08",
+    "topic_id": "vulnerability_assessment",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You need to scan a network without being detected by IDS. What Nmap techniques reduce detection?",
+    "correct_answers": [
+      "Slow scan timing (-T1/-T2), fragment packets (-f), decoy scans (-D), randomize hosts (--randomize-hosts)",
+      "Use -T1 or -T2 timing, packet fragmentation, decoys",
+      "-sS -T1 -f --randomize-hosts",
+      "Slow timing, fragmentation, source port spoofing"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Evasion techniques: slow timing (-T1/T2), packet fragmentation (-f), decoy addresses (-D), randomize host order (--randomize-hosts), source port manipulation (--source-port 53), and idle/zombie scans (-sI).",
+    "hints": [
+      "Reduce speed, fragment packets, and use decoys"
+    ]
+  },
+  {
+    "id": "vq-vuln-09",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is the difference between authenticated and unauthenticated vulnerability scanning?",
+    "correct_answers": [
+      "Authenticated scans log into the target with credentials to check internal configurations, while unauthenticated scans only test externally visible services",
+      "Authenticated uses credentials for deeper checks, unauthenticated only sees external attack surface",
+      "Credentialed scans check patches and configs from inside, non-credentialed only probe exposed services"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Authenticated (credentialed) scans log into targets to check installed patches, configurations, and local vulnerabilities with fewer false positives. Unauthenticated scans only probe externally accessible services, missing internal issues but simulating an external attacker's view.",
+    "hints": [
+      "One has login access to check inside the system, the other only sees what's exposed"
+    ]
+  },
+  {
+    "id": "vq-vuln-10",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What Nuclei command scans for critical and high severity vulnerabilities only, with rate limiting?",
+    "correct_answers": [
+      "nuclei -u target -severity critical,high -rate-limit 100",
+      "nuclei -u target -s critical,high -rl 100",
+      "nuclei -u target -severity critical,high",
+      "nuclei -severity critical,high -rate-limit 100"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "The -severity flag filters templates by severity level (info, low, medium, high, critical). Rate limiting (-rate-limit/-rl) controls requests per second to avoid overwhelming targets or triggering WAF blocks.",
+    "hints": [
+      "Use -severity to filter and -rate-limit to control speed"
+    ]
+  },
+  {
+    "id": "vq-vuln-11",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What WPScan command enumerates WordPress plugins, themes, and users with API token?",
+    "correct_answers": [
+      "wpscan --url http://target -e ap,at,u --api-token TOKEN",
+      "wpscan --url http://target --enumerate ap,at,u",
+      "wpscan --url http://target -e vp,vt,u"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WPScan is a WordPress security scanner. The -e flag enumerates: ap (all plugins), vp (vulnerable plugins), at (all themes), vt (vulnerable themes), u (users). The --api-token enables vulnerability data lookup from the WPScan database.",
+    "hints": [
+      "Use -e or --enumerate with plugin, theme, and user flags"
+    ]
+  },
+  {
+    "id": "vq-vuln-12",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command starts the OpenVAS vulnerability scanner and accesses its web interface?",
+    "correct_answers": [
+      "gvm-start",
+      "sudo gvm-start",
+      "openvas-start",
+      "sudo greenbone-security-assistant-start"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "OpenVAS (now Greenbone Vulnerability Management/GVM) is started with gvm-start which launches the scanner daemon and web interface (Greenbone Security Assistant) typically on https://127.0.0.1:9392. Initial setup requires gvm-setup.",
+    "hints": [
+      "The command starts the GVM/OpenVAS services including the web interface"
+    ]
+  },
+  {
+    "id": "vq-vuln-13",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the advantage of a Nessus credentialed scan over an unauthenticated scan?",
+    "correct_answers": [
+      "Credentialed scans log into targets to check installed patches, local configurations, and internal vulnerabilities with fewer false positives",
+      "Can check patch levels, local configs, and find more vulnerabilities with fewer false positives",
+      "Authenticates to the system to assess internal state, missing patches, and misconfigurations that external scans miss"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Credentialed scans authenticate to targets (SSH/WinRM/SMB) to check: installed patches, local user accounts, file permissions, registry settings, and running services. This finds 50-80% more vulnerabilities than unauthenticated scans with significantly fewer false positives.",
+    "hints": [
+      "Think about what you can see from inside a system vs. only probing externally"
+    ]
+  },
+  {
+    "id": "vq-vuln-14",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command uses sslscan to audit SSL/TLS ciphers and protocols on a target?",
+    "correct_answers": [
+      "sslscan target:443",
+      "sslscan target",
+      "sslscan --no-failed target:443"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "sslscan tests SSL/TLS services to identify supported protocols (SSLv3, TLS 1.0-1.3), cipher suites, certificate details, and vulnerabilities like Heartbleed. The --no-failed flag hides rejected ciphers for cleaner output.",
+    "hints": [
+      "Run the tool against the target's HTTPS port"
+    ]
+  },
+  {
+    "id": "vq-vuln-15",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What Prowler command scans an AWS account for security misconfigurations?",
+    "correct_answers": [
+      "prowler aws",
+      "prowler aws --severity critical high",
+      "prowler aws -M csv json-ocsf",
+      "python prowler.py -M csv"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Prowler is an open-source cloud security tool that audits AWS (and Azure/GCP) against CIS benchmarks, PCI-DSS, HIPAA, and other frameworks. It checks IAM, S3, EC2, RDS, and other services for misconfigurations and security issues.",
+    "hints": [
+      "An open-source tool that audits cloud accounts against security benchmarks"
+    ]
+  },
+  {
+    "id": "vq-vuln-16",
+    "topic_id": "vulnerability_assessment",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Trivy command scans a Docker container image for known vulnerabilities?",
+    "correct_answers": [
+      "trivy image nginx:latest",
+      "trivy image target-image:tag",
+      "trivy image --severity HIGH,CRITICAL myapp:latest"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Trivy scans container images, filesystems, and git repositories for vulnerabilities, misconfigurations, and secrets. 'trivy image' scans a container image's OS packages and application dependencies against vulnerability databases.",
+    "hints": [
+      "Use 'trivy image' followed by the image name and tag"
+    ]
+  },
+  {
+    "id": "vq-vuln-17",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What factors should be considered when prioritizing vulnerability remediation beyond CVSS score?",
+    "correct_answers": [
+      "Exploit availability, asset criticality, network exposure, compensating controls, business impact, and threat intelligence context",
+      "Public exploit existence, asset value, internet-facing vs internal, compensating controls, threat actor activity",
+      "Exploitability in the wild, business criticality of affected asset, network segmentation, and available compensating controls"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Beyond CVSS: exploit availability (EPSS score, public PoC), asset criticality (crown jewels vs. test systems), network exposure (internet-facing vs. segmented), compensating controls (WAF, EDR), threat intelligence (active exploitation in the wild), and remediation complexity/risk.",
+    "hints": [
+      "CVSS alone doesn't account for real-world exploitability or business context"
+    ]
+  },
+  {
+    "id": "vq-vuln-18",
+    "topic_id": "vulnerability_assessment",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A vulnerability scanner reports a critical finding but you suspect it's a false positive. How do you validate it?",
+    "correct_answers": [
+      "Manually verify by attempting to exploit the vulnerability, check the service version, review the scanner's detection logic, and compare with other tools",
+      "Manually confirm by checking the actual version, attempting exploitation in a safe manner, or using a second scanner",
+      "Verify service version, attempt manual exploitation, cross-reference with another scanner, check if patch is actually installed"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "False positive validation: 1) Check actual service version/patch level, 2) Attempt manual exploitation, 3) Review scanner's detection method (version-based vs. exploit-based), 4) Cross-reference with another tool, 5) Check if compensating controls mitigate it.",
+    "hints": [
+      "Don't trust the scanner blindly - verify the finding manually"
+    ]
+  },
+  {
+    "id": "vq-vuln-19",
+    "topic_id": "vulnerability_assessment",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is compliance scanning and how does it differ from vulnerability scanning?",
+    "correct_answers": [
+      "Compliance scanning checks systems against security standards/benchmarks (CIS, PCI-DSS, HIPAA) while vulnerability scanning identifies known security flaws",
+      "Compliance checks adherence to security policies and standards, vulnerability scanning finds exploitable weaknesses",
+      "Compliance scanning verifies configuration against baselines like CIS benchmarks, vuln scanning finds CVEs and security bugs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Compliance scanning verifies systems meet specific security standards (CIS benchmarks, PCI-DSS, HIPAA, NIST) by checking configurations, policies, and controls. Vulnerability scanning identifies known security flaws (CVEs). A system can be compliant but still vulnerable, or non-compliant but secure.",
+    "hints": [
+      "One checks against standards/policies, the other finds security flaws"
+    ]
+  },
+  {
+    "id": "vq-vuln-20",
+    "topic_id": "vulnerability_assessment",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "How would you test if network segmentation between the corporate LAN and PCI cardholder data environment is properly implemented?",
+    "correct_answers": [
+      "Attempt to access CDE resources from the corporate LAN using port scanning, service access, and lateral movement techniques to verify firewall rules block unauthorized traffic",
+      "Scan from corporate LAN to CDE to verify only authorized ports/protocols are accessible, test firewall rules, attempt unauthorized access",
+      "Port scan CDE from corporate network, test ACLs, verify only required communication paths exist, attempt to bypass segmentation"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Network segmentation testing: 1) Port scan CDE from corporate LAN to verify blocked ports, 2) Test all firewall rules for unauthorized paths, 3) Attempt lateral movement between segments, 4) Verify only documented communication flows work, 5) Test from multiple network locations. PCI-DSS requires annual segmentation testing.",
+    "hints": [
+      "Try to reach the protected network from the untrusted network and verify controls block unauthorized access"
+    ]
+  }
+]

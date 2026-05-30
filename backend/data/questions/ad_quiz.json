@@ -1,0 +1,378 @@
+[
+  {
+    "id": "vq-ad-01",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What impacket tool performs Kerberoasting from Linux?",
+    "correct_answers": [
+      "GetUserSPNs.py",
+      "GetUserSPNs",
+      "impacket-GetUserSPNs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "GetUserSPNs.py -request -dc-ip <DC> domain/user:pass extracts TGS hashes for offline cracking.",
+    "hints": [
+      "GetUser...SPNs"
+    ]
+  },
+  {
+    "id": "vq-ad-02",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command performs a DCSync attack using secretsdump?",
+    "correct_answers": [
+      "secretsdump.py",
+      "secretsdump",
+      "impacket-secretsdump"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "secretsdump.py domain/admin:pass@DC_IP dumps all domain hashes via DCSync (replication).",
+    "hints": [
+      "secretsdump from impacket"
+    ]
+  },
+  {
+    "id": "vq-ad-03",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have a domain user account but need Domain Admin. BloodHound shows a path through a user who has GenericAll on the Domain Admins group. What do you do?",
+    "correct_answers": [
+      "add to group",
+      "modify membership",
+      "net group",
+      "add user to domain admins"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "GenericAll on a group = full control. Add your compromised user (or a new user) to Domain Admins using net group or PowerView.",
+    "hints": [
+      "GenericAll = full control over the object"
+    ]
+  },
+  {
+    "id": "vq-ad-04",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What tool collects BloodHound data from a Linux machine?",
+    "correct_answers": [
+      "bloodhound-python",
+      "bloodhound.py"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "bloodhound-python -u user -p pass -d domain.local -ns DC_IP -c all collects all AD data for BloodHound.",
+    "hints": [
+      "Python version of SharpHound"
+    ]
+  },
+  {
+    "id": "vq-ad-05",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is Kerberoasting and why is it effective?",
+    "correct_answers": [
+      "request tgs",
+      "service account",
+      "offline crack",
+      "no detection",
+      "spn"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Kerberoasting requests TGS tickets for service accounts (which have SPNs). The ticket is encrypted with the service account's password hash \u2014 crack offline with no failed login attempts or detection.",
+    "hints": [
+      "Offline cracking of service account passwords"
+    ]
+  },
+  {
+    "id": "vq-ad-06",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You captured an NTLMv2 hash with Responder but can't crack it. SMB signing is disabled on a file server. What's your next move?",
+    "correct_answers": [
+      "relay",
+      "ntlmrelayx",
+      "ntlm relay",
+      "relay to file server"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Relay the captured authentication to the file server using ntlmrelayx.py. Since SMB signing is disabled, the relay will succeed and give you a shell.",
+    "hints": [
+      "Don't crack \u2014 relay instead"
+    ]
+  },
+  {
+    "id": "vq-ad-07",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Rubeus command performs AS-REP roasting?",
+    "correct_answers": [
+      "Rubeus.exe asreproast",
+      "rubeus asreproast",
+      "asreproast"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Rubeus.exe asreproast finds accounts without pre-authentication and extracts crackable AS-REP hashes.",
+    "hints": [
+      "Rubeus asreproast"
+    ]
+  },
+  {
+    "id": "vq-ad-08",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "Explain the difference between a Golden Ticket and a Silver Ticket.",
+    "correct_answers": [
+      "krbtgt vs service",
+      "tgt vs tgs",
+      "all access vs one service",
+      "dc vs no dc"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Golden Ticket forges a TGT using krbtgt hash \u2014 gives access to EVERYTHING and touches the DC. Silver Ticket forges a TGS for ONE specific service using the service account hash \u2014 doesn't touch the DC (stealthier).",
+    "hints": [
+      "One is universal, one is targeted"
+    ]
+  },
+  {
+    "id": "vq-ad-09",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command uses certipy to find vulnerable AD CS templates?",
+    "correct_answers": [
+      "certipy find",
+      "certipy find -vulnerable",
+      "-vulnerable"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "certipy find -u user@domain -p pass -dc-ip DC -vulnerable identifies exploitable certificate templates.",
+    "hints": [
+      "certipy find with -vulnerable flag"
+    ]
+  },
+  {
+    "id": "vq-ad-10",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You're on an internal network with no credentials. How do you get your first domain account?",
+    "correct_answers": [
+      "responder",
+      "llmnr",
+      "mitm6",
+      "ntlm",
+      "poison",
+      "relay"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Run Responder to poison LLMNR/NBT-NS and capture NTLMv2 hashes from Windows machines making typo'd network requests. Crack or relay the hashes.",
+    "hints": [
+      "Poison name resolution"
+    ]
+  },
+  {
+    "id": "vq-ad-11",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What hashcat mode cracks Kerberos 5 TGS-REP (Kerberoast) hashes?",
+    "correct_answers": [
+      "13100",
+      "hashcat -m 13100"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "hashcat -m 13100 for Kerberos 5 TGS-REP etype 23 (RC4). Use -m 19700 for etype 17/18 (AES).",
+    "hints": [
+      "13100"
+    ]
+  },
+  {
+    "id": "vq-ad-12",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is NTLM relay and what conditions must be met for it to work?",
+    "correct_answers": [
+      "smb signing disabled",
+      "forward auth",
+      "no signing",
+      "relay to another target"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "NTLM relay forwards captured authentication to another target. Requirements: SMB signing must be disabled on the target, and the relayed user must have admin rights on the target.",
+    "hints": [
+      "Signing disabled + admin rights on target"
+    ]
+  },
+  {
+    "id": "vq-ad-13",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "After compromising a workstation, you find the user is a member of 'Backup Operators'. How can you escalate to Domain Admin?",
+    "correct_answers": [
+      "backup sam",
+      "ntds",
+      "shadow copy",
+      "backup privilege",
+      "diskshadow"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Backup Operators can read any file including NTDS.dit. Use diskshadow/wbadmin to create a shadow copy of the DC's C: drive, then extract NTDS.dit and SYSTEM hive to dump all domain hashes.",
+    "hints": [
+      "Backup privilege = read anything"
+    ]
+  },
+  {
+    "id": "vq-ad-14",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What netexec command sprays a password across domain users?",
+    "correct_answers": [
+      "netexec smb",
+      "--continue-on-success",
+      "nxc smb",
+      "-u users.txt -p"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "netexec smb DC_IP -u users.txt -p 'Password1!' --continue-on-success sprays one password against all users.",
+    "hints": [
+      "netexec smb with user list and password"
+    ]
+  },
+  {
+    "id": "vq-ad-15",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is PetitPotam and why is it dangerous?",
+    "correct_answers": [
+      "coerce",
+      "force authentication",
+      "ntlm",
+      "dc authenticates",
+      "relay to adcs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "PetitPotam coerces a DC to authenticate to an attacker-controlled server via EFS RPC. Combined with NTLM relay to AD CS, it gives instant Domain Admin by obtaining a DC certificate.",
+    "hints": [
+      "Force DC to authenticate to you"
+    ]
+  },
+  {
+    "id": "vq-ad-16",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What impacket tool gives you a shell using only an NTLM hash (pass-the-hash)?",
+    "correct_answers": [
+      "psexec.py",
+      "wmiexec.py",
+      "smbexec.py",
+      "-hashes"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "psexec.py -hashes :NTLM_HASH domain/user@target or wmiexec.py with -hashes flag for pass-the-hash.",
+    "hints": [
+      "impacket tools with -hashes flag"
+    ]
+  },
+  {
+    "id": "vq-ad-17",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have Domain Admin but the client wants you to demonstrate persistence. What technique survives a password reset of all accounts?",
+    "correct_answers": [
+      "golden ticket",
+      "skeleton key",
+      "dsrm",
+      "dcsync",
+      "krbtgt"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "A Golden Ticket (using krbtgt hash) persists until krbtgt is reset TWICE. Skeleton Key patches LSASS on the DC. DSRM backdoor uses the DC's local admin. All survive normal password resets.",
+    "hints": [
+      "krbtgt-based persistence"
+    ]
+  },
+  {
+    "id": "vq-ad-18",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What tool enumerates AD users via Kerberos without triggering lockouts?",
+    "correct_answers": [
+      "kerbrute",
+      "kerbrute userenum"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "kerbrute userenum --dc DC_IP -d domain.local users.txt enumerates valid users via Kerberos pre-auth without lockout risk.",
+    "hints": [
+      "kerbrute"
+    ]
+  },
+  {
+    "id": "vq-ad-19",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the difference between Pass-the-Hash and Pass-the-Ticket?",
+    "correct_answers": [
+      "ntlm vs kerberos",
+      "hash vs ticket",
+      "pth vs ptt"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Pass-the-Hash uses NTLM hash for authentication (works when NTLM is allowed). Pass-the-Ticket uses a Kerberos ticket (TGT/TGS) \u2014 works even when NTLM is disabled.",
+    "hints": [
+      "NTLM vs Kerberos authentication"
+    ]
+  },
+  {
+    "id": "vq-ad-20",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "BloodHound shows your compromised user has 'WriteDACL' on another user who is a Domain Admin. How do you exploit this?",
+    "correct_answers": [
+      "modify acl",
+      "grant dcsync",
+      "add genericall",
+      "change permissions",
+      "give yourself rights"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WriteDACL lets you modify the target's ACL. Grant yourself GenericAll or DCSync rights on that user, then reset their password or perform DCSync.",
+    "hints": [
+      "Modify their permissions to give yourself access"
+    ]
+  }
+]

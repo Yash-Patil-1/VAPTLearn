@@ -1,0 +1,398 @@
+[
+  {
+    "id": "nmap-script-vnc",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script vnc-info,vnc-brute -p 5900 <target>",
+    "name": "VNC Enumeration",
+    "description": "Checks VNC authentication and attempts brute-force with common passwords.",
+    "arguments": {
+      "vnc-info": "Get VNC info",
+      "vnc-brute": "Brute-force VNC"
+    },
+    "expected_output": "| vnc-info: Protocol version 3.8\n| vnc-brute: password - Valid credentials",
+    "use_case": "Enumerate and brute-force VNC \u2014 often has weak or no authentication.",
+    "prerequisites": [
+      "VNC port 5900 open"
+    ],
+    "mitre_mapping": [
+      "T1021"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "VNC connection attempts",
+      "Brute-force patterns"
+    ],
+    "remediation": [
+      "Strong VNC passwords",
+      "Restrict VNC access",
+      "Use SSH tunneling"
+    ],
+    "common_mistakes": [
+      "VNC not running"
+    ],
+    "alternatives": [
+      "hydra vnc",
+      "vncviewer"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "vnc",
+      "brute-force",
+      "remote-desktop",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "nmap-script-telnet",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script telnet-ntlm-info,telnet-encryption -p 23 <target>",
+    "name": "Telnet Enumeration",
+    "description": "Extracts NTLM info and checks encryption on Telnet services.",
+    "arguments": {
+      "telnet-ntlm-info": "Get NTLM/domain info",
+      "telnet-encryption": "Check encryption"
+    },
+    "expected_output": "| telnet-ntlm-info:\n|   NetBIOS: DC01\n|   Domain: CORP\n|   DNS: dc01.corp.local",
+    "use_case": "Extract domain information from Telnet NTLM authentication.",
+    "prerequisites": [
+      "Telnet port 23 open"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Telnet connection attempts"
+    ],
+    "remediation": [
+      "Disable Telnet",
+      "Use SSH instead"
+    ],
+    "common_mistakes": [
+      "Telnet not running (good!)"
+    ],
+    "alternatives": [
+      "manual telnet connection"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "telnet",
+      "ntlm",
+      "domain",
+      "legacy"
+    ]
+  },
+  {
+    "id": "nmap-script-pop3",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script pop3-capabilities,pop3-ntlm-info -p 110 <target>",
+    "name": "POP3 Mail Enumeration",
+    "description": "Enumerates POP3 mail server capabilities and NTLM information.",
+    "arguments": {
+      "pop3-capabilities": "Server capabilities",
+      "pop3-ntlm-info": "NTLM/domain info"
+    },
+    "expected_output": "| pop3-capabilities: USER, UIDL, TOP, SASL\n| pop3-ntlm-info: Domain: CORP",
+    "use_case": "Enumerate mail servers for capabilities and domain information.",
+    "prerequisites": [
+      "POP3 port 110 open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "POP3 enumeration"
+    ],
+    "remediation": [
+      "Restrict POP3 access",
+      "Use IMAPS"
+    ],
+    "common_mistakes": [
+      "POP3 not running"
+    ],
+    "alternatives": [
+      "manual telnet to port 110"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "pop3",
+      "mail",
+      "enumeration",
+      "ntlm"
+    ]
+  },
+  {
+    "id": "nmap-script-imap",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script imap-capabilities,imap-ntlm-info -p 143 <target>",
+    "name": "IMAP Mail Enumeration",
+    "description": "Enumerates IMAP server capabilities and extracts NTLM domain info.",
+    "arguments": {
+      "imap-capabilities": "Server features",
+      "imap-ntlm-info": "Domain info"
+    },
+    "expected_output": "| imap-capabilities: IMAP4rev1, AUTH=PLAIN, IDLE\n| imap-ntlm-info: Domain: CORP",
+    "use_case": "Enumerate IMAP mail servers.",
+    "prerequisites": [
+      "IMAP port 143 open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "IMAP enumeration"
+    ],
+    "remediation": [
+      "Use IMAPS (993)",
+      "Restrict access"
+    ],
+    "common_mistakes": [
+      "IMAP not running"
+    ],
+    "alternatives": [
+      "manual connection"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "imap",
+      "mail",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "nmap-script-mongodb",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script mongodb-info,mongodb-databases -p 27017 <target>",
+    "name": "MongoDB Enumeration",
+    "description": "Enumerates MongoDB databases \u2014 often unauthenticated.",
+    "arguments": {
+      "mongodb-info": "Server info",
+      "mongodb-databases": "List databases"
+    },
+    "expected_output": "| mongodb-databases:\n|   admin - 64.0KB\n|   users - 128.0KB\n|   production - 512.0KB",
+    "use_case": "Find unauthenticated MongoDB instances and enumerate databases.",
+    "prerequisites": [
+      "MongoDB port 27017 open"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "MongoDB connections from unusual IPs"
+    ],
+    "remediation": [
+      "Enable authentication",
+      "Bind to localhost",
+      "Firewall rules"
+    ],
+    "common_mistakes": [
+      "Authentication enabled"
+    ],
+    "alternatives": [
+      "mongosh",
+      "mongo CLI"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "mongodb",
+      "nosql",
+      "database",
+      "unauthenticated"
+    ]
+  },
+  {
+    "id": "nmap-script-cassandra",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script cassandra-info -p 9042 <target>",
+    "name": "Cassandra Enumeration",
+    "description": "Enumerates Apache Cassandra database information.",
+    "arguments": {
+      "cassandra-info": "Get cluster info"
+    },
+    "expected_output": "| cassandra-info:\n|   Cluster: ProductionCluster\n|   Version: 4.0.1",
+    "use_case": "Discover Cassandra clusters and their configuration.",
+    "prerequisites": [
+      "Cassandra port 9042 open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Cassandra connection attempts"
+    ],
+    "remediation": [
+      "Enable authentication",
+      "Restrict access"
+    ],
+    "common_mistakes": [
+      "Auth required"
+    ],
+    "alternatives": [
+      "cqlsh"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "cassandra",
+      "database",
+      "cluster",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "nmap-script-elasticsearch",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script http-elasticsearch-info -p 9200 <target>",
+    "name": "Elasticsearch Enumeration",
+    "description": "Enumerates Elasticsearch cluster \u2014 often exposed without authentication.",
+    "arguments": {
+      "http-elasticsearch-info": "Get cluster info"
+    },
+    "expected_output": "| http-elasticsearch-info:\n|   Cluster: production\n|   Version: 7.17.0\n|   Indices: 45",
+    "use_case": "Find exposed Elasticsearch instances \u2014 may contain sensitive indexed data.",
+    "prerequisites": [
+      "Elasticsearch port 9200 open"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Elasticsearch queries from unusual IPs"
+    ],
+    "remediation": [
+      "Enable X-Pack security",
+      "Restrict access",
+      "Authentication"
+    ],
+    "common_mistakes": [
+      "Authentication enabled"
+    ],
+    "alternatives": [
+      "curl http://target:9200/_cat/indices"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "elasticsearch",
+      "search",
+      "database",
+      "exposed"
+    ]
+  },
+  {
+    "id": "nmap-script-docker",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "nmap --script docker-version -p 2375,2376 <target>",
+    "name": "Docker API Enumeration",
+    "description": "Checks for exposed Docker API \u2014 unauthenticated access = instant root.",
+    "arguments": {
+      "docker-version": "Get Docker info",
+      "2375/2376": "Docker API ports"
+    },
+    "expected_output": "| docker-version:\n|   Version: 24.0.5\n|   API: 1.43\n|   OS: linux",
+    "use_case": "Find exposed Docker APIs \u2014 can create privileged containers for host escape.",
+    "prerequisites": [
+      "Docker API port open"
+    ],
+    "mitre_mapping": [
+      "T1610"
+    ],
+    "mitre_tactic": "Execution",
+    "detections": [
+      "Docker API access from external IP"
+    ],
+    "remediation": [
+      "Don't expose Docker API",
+      "Use TLS authentication",
+      "Firewall"
+    ],
+    "common_mistakes": [
+      "API not exposed (good!)"
+    ],
+    "alternatives": [
+      "curl http://target:2375/version",
+      "docker -H tcp://target:2375 ps"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/"
+    ],
+    "tags": [
+      "docker",
+      "api",
+      "container",
+      "exposed",
+      "root"
+    ]
+  }
+]

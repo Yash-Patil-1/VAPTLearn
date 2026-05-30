@@ -1,0 +1,30 @@
+{
+  "phase_id": 1,
+  "title": "Reconnaissance — The Foundation of Every Engagement",
+  "sections": [
+    {
+      "id": "recon-why",
+      "title": "Why Reconnaissance Matters",
+      "content": "Reconnaissance is the most critical phase of penetration testing. Without thorough recon, you're attacking blind — wasting time on hardened targets while missing easy wins. Professional pentesters spend 60-70% of their time on recon because the quality of your intelligence directly determines the success of exploitation.\n\nThink of it like a burglar casing a building: they don't just run at the front door. They observe schedules, identify cameras, find unlocked windows, and map escape routes. In pentesting, recon reveals the attack surface — every exposed service, every forgotten subdomain, every leaked credential is a potential entry point.",
+      "key_concepts": ["Attack surface mapping", "OSINT", "Passive vs Active recon", "Scope definition"]
+    },
+    {
+      "id": "recon-passive-vs-active",
+      "title": "Passive vs Active Reconnaissance",
+      "content": "**Passive recon** gathers information without directly touching the target. The target has zero visibility into your activities. Sources include: DNS records, certificate transparency logs, WHOIS, social media, job postings, GitHub repos, Shodan/Censys, and cached pages.\n\n**Active recon** directly interacts with the target — port scans, banner grabs, directory brute-force. The target CAN detect this. IDS/IPS may alert, firewalls may block, and logs will record your activity.\n\n**When to use which:**\n- Always start passive — it's free intelligence with zero risk\n- Move to active only after exhausting passive sources\n- During red team engagements, minimize active recon to avoid detection\n- In standard pentests, active recon is expected and acceptable",
+      "key_concepts": ["Passive OSINT", "Active scanning", "Detection risk", "Red team vs pentest"]
+    },
+    {
+      "id": "recon-methodology",
+      "title": "Reconnaissance Methodology",
+      "content": "Follow this systematic approach:\n\n1. **Scope Definition** — What are you allowed to test? IP ranges, domains, out-of-scope systems\n2. **Passive OSINT** — Subdomains (crt.sh, subfinder), emails (theHarvester), leaked creds (dehashed), tech stack (Wappalyzer)\n3. **DNS Enumeration** — Zone transfers, subdomain brute-force, record types (MX, TXT, SPF)\n4. **Network Mapping** — Port scanning (nmap), service detection, OS fingerprinting\n5. **Web Recon** — Directory discovery, virtual hosts, technology fingerprinting, WAF detection\n6. **Documentation** — Record everything. A missed finding during recon means a missed vulnerability later.\n\nThe output of recon feeds directly into the next phases. Every open port is a potential vulnerability. Every subdomain is a potential target. Every technology identified narrows your exploit search.",
+      "key_concepts": ["Systematic approach", "Scope", "Documentation", "Feed into exploitation"]
+    },
+    {
+      "id": "recon-tools-when",
+      "title": "Choosing the Right Tool",
+      "content": "**For subdomain discovery:**\n- Start with subfinder/amass (passive, fast)\n- Then gobuster/ffuf DNS (active brute-force)\n- Verify with httpx (which are alive?)\n\n**For port scanning:**\n- Quick scan: rustscan (all ports in seconds) → nmap (service detection on open ports)\n- Stealth scan: nmap -sS -T2 (slower but less detectable)\n- Full assessment: nmap -sV -sC -p- (comprehensive but noisy)\n\n**For web recon:**\n- Technology: whatweb, wappalyzer\n- Directories: feroxbuster, gobuster\n- WAF: wafw00f (know what you're up against)\n\n**Key principle:** Use the least noisy tool that gets the job done. In a red team engagement, a single aggressive nmap scan can burn your IP. In a standard pentest, speed matters more than stealth.",
+      "key_concepts": ["Tool selection", "Noise level", "Engagement type", "Efficiency"]
+    }
+  ]
+}

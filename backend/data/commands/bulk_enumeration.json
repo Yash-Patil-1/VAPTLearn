@@ -1,0 +1,403 @@
+[
+  {
+    "id": "nmap-smb-shares",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smb-enum-shares,smb-ls -p 445 <target>",
+    "name": "SMB Share Listing with Contents",
+    "description": "Enumerates SMB shares AND lists files in accessible shares.",
+    "arguments": {
+      "smb-enum-shares": "List shares",
+      "smb-ls": "List files in shares"
+    },
+    "expected_output": "| ADMIN$ - Remote Admin (NO ACCESS)\n| SharedDocs - (READ)\n|   backup.zip\n|   passwords.xlsx",
+    "use_case": "Find readable shares and identify sensitive files without manual connection.",
+    "prerequisites": [
+      "SMB port 445 open"
+    ],
+    "mitre_mapping": [
+      "T1135",
+      "T1039"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SMB enumeration in audit logs"
+    ],
+    "remediation": [
+      "Restrict share permissions",
+      "Remove sensitive files from shares"
+    ],
+    "common_mistakes": [
+      "Not listing file contents"
+    ],
+    "alternatives": [
+      "smbclient",
+      "smbmap -R"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/smb-enum-shares.html"
+    ],
+    "tags": [
+      "smb",
+      "shares",
+      "files",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "enum4linux-ng",
+    "tool": "enum4linux-ng",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "enum4linux-ng -A <target>",
+    "name": "Enum4linux-ng (Modern)",
+    "description": "Python rewrite of enum4linux with better output formatting and additional checks.",
+    "arguments": {
+      "-A": "All enumeration (users, shares, groups, policies, OS)"
+    },
+    "expected_output": "Users:\n  administrator (RID: 500)\n  guest (RID: 501)\nShares:\n  IPC$, ADMIN$, SharedDocs",
+    "use_case": "Modern replacement for enum4linux \u2014 better parsing, JSON output, more reliable.",
+    "prerequisites": [
+      "SMB/RPC access"
+    ],
+    "mitre_mapping": [
+      "T1087",
+      "T1135"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "RPC enumeration calls",
+      "Multiple SMB queries"
+    ],
+    "remediation": [
+      "Disable null sessions",
+      "Restrict RPC access"
+    ],
+    "common_mistakes": [
+      "Using old enum4linux instead of -ng"
+    ],
+    "alternatives": [
+      "enum4linux",
+      "netexec --users"
+    ],
+    "references": [
+      "https://github.com/cddmp/enum4linux-ng"
+    ],
+    "tags": [
+      "smb",
+      "enumeration",
+      "users",
+      "modern",
+      "python"
+    ]
+  },
+  {
+    "id": "onesixtyone-snmp",
+    "tool": "onesixtyone",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp.txt <target>",
+    "name": "SNMP Community String Brute-Force",
+    "description": "Brute-forces SNMP community strings \u2014 finds non-default strings that reveal system info.",
+    "arguments": {
+      "-c": "Community string wordlist",
+      "<target>": "Target IP"
+    },
+    "expected_output": "192.168.1.10 [backup] Linux server 5.4.0\n192.168.1.10 [internal] Hardware: x86",
+    "use_case": "Discover non-default SNMP community strings that may expose sensitive system information.",
+    "prerequisites": [
+      "SNMP port 161/UDP open"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Multiple SNMP auth failures",
+      "Brute-force patterns on port 161"
+    ],
+    "remediation": [
+      "Use SNMPv3",
+      "Change default community strings",
+      "Restrict SNMP access"
+    ],
+    "common_mistakes": [
+      "Only trying 'public' and 'private'"
+    ],
+    "alternatives": [
+      "snmpwalk",
+      "snmp-check"
+    ],
+    "references": [
+      "https://github.com/trailofbits/onesixtyone"
+    ],
+    "tags": [
+      "snmp",
+      "brute-force",
+      "community-string",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "ldapdomaindump",
+    "tool": "ldapdomaindump",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "ldapdomaindump -u '<domain>\\<user>' -p '<pass>' <dc_ip>",
+    "name": "LDAP Domain Dump",
+    "description": "Dumps all AD objects (users, groups, computers, policies) via LDAP into HTML/JSON reports.",
+    "arguments": {
+      "-u": "Domain\\username",
+      "-p": "Password",
+      "<dc_ip>": "Domain controller"
+    },
+    "expected_output": "[*] Dumping domain info...\n[+] domain_users.html\n[+] domain_groups.html\n[+] domain_computers.html",
+    "use_case": "Get a complete picture of the AD environment \u2014 users, groups, computers, GPOs.",
+    "prerequisites": [
+      "Valid domain credentials",
+      "LDAP port 389 open"
+    ],
+    "mitre_mapping": [
+      "T1087.002",
+      "T1069.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Large LDAP query volume",
+      "Enumeration of all objects"
+    ],
+    "remediation": [
+      "Restrict LDAP access",
+      "Monitor bulk queries"
+    ],
+    "common_mistakes": [
+      "Not reviewing the HTML reports thoroughly"
+    ],
+    "alternatives": [
+      "bloodhound-python",
+      "ldapsearch",
+      "windapsearch"
+    ],
+    "references": [
+      "https://github.com/dirkjanm/ldapdomaindump"
+    ],
+    "tags": [
+      "ldap",
+      "domain",
+      "dump",
+      "users",
+      "groups",
+      "computers"
+    ]
+  },
+  {
+    "id": "finger-enum",
+    "tool": "finger",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "finger @<target>",
+    "name": "Finger User Enumeration",
+    "description": "Queries the finger service (port 79) for logged-in users and user information.",
+    "arguments": {
+      "@<target>": "Query all users on target"
+    },
+    "expected_output": "Login    Name         TTY  Idle  When\nroot     root         pts/0  1d  Mon 09:00\nadmin    Admin User   pts/1  2h  Mon 14:00",
+    "use_case": "Enumerate users on systems running the finger daemon \u2014 rare but still found on legacy systems.",
+    "prerequisites": [
+      "Finger port 79 open"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Finger queries in service logs"
+    ],
+    "remediation": [
+      "Disable finger service",
+      "Block port 79"
+    ],
+    "common_mistakes": [
+      "Not checking if finger is running (rare service)"
+    ],
+    "alternatives": [
+      "nmap --script finger",
+      "rusers"
+    ],
+    "references": [
+      "https://linux.die.net/man/1/finger"
+    ],
+    "tags": [
+      "finger",
+      "users",
+      "legacy",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "ident-scan",
+    "tool": "ident-scan",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "nmap --script auth-owners -p <ports> <target>",
+    "name": "Ident Service Enumeration",
+    "description": "Queries the ident service (port 113) to identify which user owns each running service.",
+    "arguments": {
+      "--script auth-owners": "Query ident for process owners"
+    },
+    "expected_output": "22/tcp open ssh    owner: root\n80/tcp open http   owner: www-data\n3306/tcp open mysql owner: mysql",
+    "use_case": "Identify which user account runs each service \u2014 useful for targeting specific accounts.",
+    "prerequisites": [
+      "Ident port 113 open (rare)"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Ident queries in logs"
+    ],
+    "remediation": [
+      "Disable ident service"
+    ],
+    "common_mistakes": [
+      "Service rarely available on modern systems"
+    ],
+    "alternatives": [
+      "nmap -sV (version detection shows some info)"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/auth-owners.html"
+    ],
+    "tags": [
+      "ident",
+      "users",
+      "service-owner",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "redis-enum",
+    "tool": "redis-cli",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "redis-cli -h <target> INFO",
+    "name": "Redis Enumeration",
+    "description": "Connects to Redis and retrieves server information \u2014 often unauthenticated.",
+    "arguments": {
+      "-h": "Target host",
+      "INFO": "Get server information"
+    },
+    "expected_output": "# Server\nredis_version:6.2.6\nos:Linux 5.4.0\n# Keyspace\ndb0:keys=1523",
+    "use_case": "Check for unauthenticated Redis \u2014 can lead to RCE via config set or module loading.",
+    "prerequisites": [
+      "Redis port 6379 open",
+      "No authentication (common misconfiguration)"
+    ],
+    "mitre_mapping": [
+      "T1190"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Redis connection from unauthorized IP"
+    ],
+    "remediation": [
+      "Require authentication (requirepass)",
+      "Bind to localhost only",
+      "Disable dangerous commands"
+    ],
+    "common_mistakes": [
+      "Not trying to write files (config set dir/dbfilename)"
+    ],
+    "alternatives": [
+      "nmap --script redis-info"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/network-services-pentesting/6379-pentesting-redis"
+    ],
+    "tags": [
+      "redis",
+      "database",
+      "unauthenticated",
+      "rce"
+    ]
+  },
+  {
+    "id": "mysql-enum",
+    "tool": "mysql",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "mysql -h <target> -u root -p'' -e 'SELECT user,host FROM mysql.user;'",
+    "name": "MySQL Enumeration",
+    "description": "Connects to MySQL and enumerates users \u2014 tests for empty root password.",
+    "arguments": {
+      "-h": "Target host",
+      "-u root": "Username",
+      "-p''": "Empty password",
+      "-e": "Execute query"
+    },
+    "expected_output": "user    host\nroot    localhost\nroot    %\nadmin   %",
+    "use_case": "Check for MySQL with weak/empty credentials \u2014 common in development environments.",
+    "prerequisites": [
+      "MySQL port 3306 open",
+      "Weak or empty credentials"
+    ],
+    "mitre_mapping": [
+      "T1078"
+    ],
+    "mitre_tactic": "Initial Access",
+    "detections": [
+      "Failed MySQL auth attempts",
+      "Successful auth from unusual IP"
+    ],
+    "remediation": [
+      "Set strong root password",
+      "Restrict remote root access",
+      "Use mysql_secure_installation"
+    ],
+    "common_mistakes": [
+      "Not trying common passwords",
+      "Missing UDF for RCE"
+    ],
+    "alternatives": [
+      "nmap --script mysql-enum",
+      "hydra mysql"
+    ],
+    "references": [
+      "https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-mysql"
+    ],
+    "tags": [
+      "mysql",
+      "database",
+      "credentials",
+      "enumeration"
+    ]
+  }
+]

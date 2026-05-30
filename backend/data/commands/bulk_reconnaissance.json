@@ -1,0 +1,516 @@
+[
+  {
+    "id": "nmap-syn-scan",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sS -p- -T4 <target>",
+    "name": "SYN Scan All Ports",
+    "description": "Half-open SYN scan on all 65535 ports with aggressive timing.",
+    "arguments": {
+      "-sS": "SYN scan",
+      "-p-": "All ports",
+      "-T4": "Aggressive timing"
+    },
+    "expected_output": "PORT     STATE SERVICE\n22/tcp   open  ssh\n80/tcp   open  http\n3306/tcp open  mysql",
+    "use_case": "Fast full port scan \u2014 default for most engagements.",
+    "prerequisites": [
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "SYN flood detection",
+      "Sequential port access patterns"
+    ],
+    "remediation": [
+      "Host firewalls",
+      "IDS/IPS",
+      "Rate limiting"
+    ],
+    "common_mistakes": [
+      "Not saving output (-oA)",
+      "Scanning without root"
+    ],
+    "alternatives": [
+      "masscan",
+      "rustscan"
+    ],
+    "references": [
+      "https://nmap.org/book/man-port-scanning-techniques.html"
+    ],
+    "tags": [
+      "syn",
+      "full-scan",
+      "tcp",
+      "ports"
+    ]
+  },
+  {
+    "id": "nmap-version-intensity",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sV --version-intensity 5 -p <ports> <target>",
+    "name": "Version Detection (High Intensity)",
+    "description": "Aggressive version probing \u2014 sends more probes for accurate identification.",
+    "arguments": {
+      "-sV": "Version detection",
+      "--version-intensity 5": "Max probe level (0-9)"
+    },
+    "expected_output": "22/tcp open ssh OpenSSH 8.9p1 Ubuntu 3ubuntu0.4",
+    "use_case": "Identify exact service versions for exploit matching.",
+    "prerequisites": [
+      "Open ports known"
+    ],
+    "mitre_mapping": [
+      "T1046",
+      "T1592"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "Multiple service probes per port",
+      "Unusual banner grabbing"
+    ],
+    "remediation": [
+      "Minimize exposed services",
+      "Use non-standard banners"
+    ],
+    "common_mistakes": [
+      "Using default intensity (misses some services)"
+    ],
+    "alternatives": [
+      "nmap -sV --version-all (even more aggressive)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-version-detection.html"
+    ],
+    "tags": [
+      "version",
+      "service",
+      "identification",
+      "banner"
+    ]
+  },
+  {
+    "id": "nmap-output-all",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "nmap -sV -sC -p- -oA scan_results <target>",
+    "name": "Save Scan in All Formats",
+    "description": "Saves output in normal, XML, and grepable formats for later analysis.",
+    "arguments": {
+      "-oA": "Output all formats (creates .nmap, .xml, .gnmap)"
+    },
+    "expected_output": "Saved: scan_results.nmap, scan_results.xml, scan_results.gnmap",
+    "use_case": "Always save scan results \u2014 needed for reporting and tool integration.",
+    "prerequisites": [
+      "Target accessible"
+    ],
+    "mitre_mapping": [
+      "T1046"
+    ],
+    "mitre_tactic": "Discovery",
+    "detections": [
+      "N/A \u2014 output format only"
+    ],
+    "remediation": [
+      "N/A"
+    ],
+    "common_mistakes": [
+      "Forgetting to save output",
+      "Not using XML for tool import"
+    ],
+    "alternatives": [
+      "nmap -oX (XML only)",
+      "nmap -oG (grepable only)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-output.html"
+    ],
+    "tags": [
+      "output",
+      "save",
+      "xml",
+      "reporting"
+    ]
+  },
+  {
+    "id": "nmap-decoy-scan",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "nmap -sS -D RND:5 <target>",
+    "name": "Decoy Scan (IDS Evasion)",
+    "description": "Sends packets from spoofed source IPs alongside real scan to confuse IDS.",
+    "arguments": {
+      "-D RND:5": "Use 5 random decoy IPs",
+      "-sS": "SYN scan"
+    },
+    "expected_output": "Nmap scan report (with decoys active)",
+    "use_case": "Evade IDS by making it harder to identify the real scanner.",
+    "prerequisites": [
+      "Root privileges",
+      "Understanding of target's IDS"
+    ],
+    "mitre_mapping": [
+      "T1046",
+      "T1205"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Multiple source IPs scanning same target",
+      "Decoy IP analysis"
+    ],
+    "remediation": [
+      "Stateful IDS",
+      "Source IP validation"
+    ],
+    "common_mistakes": [
+      "Decoy IPs must be alive (or IDS ignores them)"
+    ],
+    "alternatives": [
+      "nmap --source-port 53 (source port manipulation)"
+    ],
+    "references": [
+      "https://nmap.org/book/man-bypass-firewalls-ids.html"
+    ],
+    "tags": [
+      "decoy",
+      "evasion",
+      "ids-bypass",
+      "stealth"
+    ]
+  },
+  {
+    "id": "nmap-idle-scan",
+    "tool": "nmap",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "nmap -sI <zombie_ip> <target>",
+    "name": "Idle/Zombie Scan",
+    "description": "Completely blind scan using a zombie host \u2014 your IP never touches the target.",
+    "arguments": {
+      "-sI": "Idle scan using zombie host",
+      "<zombie_ip>": "IP of idle host with predictable IP ID"
+    },
+    "expected_output": "PORT   STATE SERVICE\n80/tcp open  http (via zombie)",
+    "use_case": "Ultimate stealth \u2014 target only sees traffic from the zombie, not you.",
+    "prerequisites": [
+      "Zombie host with predictable IP ID sequence",
+      "Root privileges"
+    ],
+    "mitre_mapping": [
+      "T1046",
+      "T1205"
+    ],
+    "mitre_tactic": "Defense Evasion",
+    "detections": [
+      "Unusual traffic from zombie host",
+      "IP ID analysis"
+    ],
+    "remediation": [
+      "Randomize IP ID sequences",
+      "Monitor for idle scan patterns"
+    ],
+    "common_mistakes": [
+      "Finding a suitable zombie (must have incremental IP IDs)"
+    ],
+    "alternatives": [
+      "nmap -sS -D (decoy scan \u2014 easier)"
+    ],
+    "references": [
+      "https://nmap.org/book/idlescan.html"
+    ],
+    "tags": [
+      "idle-scan",
+      "zombie",
+      "stealth",
+      "anonymous"
+    ]
+  },
+  {
+    "id": "assetfinder-subdomains",
+    "tool": "assetfinder",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux",
+      "windows",
+      "macos"
+    ],
+    "command": "assetfinder --subs-only <domain>",
+    "name": "Quick Subdomain Discovery",
+    "description": "Fast, simple subdomain finder using certificate transparency and other passive sources.",
+    "arguments": {
+      "--subs-only": "Only output subdomains (not related domains)"
+    },
+    "expected_output": "api.target.com\ndev.target.com\nstaging.target.com",
+    "use_case": "Fastest passive subdomain discovery \u2014 good for quick initial recon.",
+    "prerequisites": [
+      "Target domain"
+    ],
+    "mitre_mapping": [
+      "T1590"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 no target interaction"
+    ],
+    "remediation": [
+      "Remove unused subdomains",
+      "Monitor CT logs"
+    ],
+    "common_mistakes": [
+      "Not combining with other tools for completeness"
+    ],
+    "alternatives": [
+      "subfinder",
+      "amass",
+      "findomain"
+    ],
+    "references": [
+      "https://github.com/tomnomnom/assetfinder"
+    ],
+    "tags": [
+      "subdomain",
+      "passive",
+      "fast",
+      "ct-logs"
+    ]
+  },
+  {
+    "id": "gau-urls",
+    "tool": "gau",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "gau <domain> | grep -E '\\.(php|asp|jsp|js)' | sort -u",
+    "name": "Get All URLs (Historical)",
+    "description": "Fetches known URLs from Wayback Machine, Common Crawl, and AlienVault OTX.",
+    "arguments": {
+      "<domain>": "Target domain",
+      "grep": "Filter interesting extensions",
+      "sort -u": "Deduplicate"
+    },
+    "expected_output": "http://target.com/admin/config.php\nhttp://target.com/api/v1/users.js",
+    "use_case": "Find historical endpoints, parameters, and forgotten files from web archives.",
+    "prerequisites": [
+      "Target domain",
+      "Internet access"
+    ],
+    "mitre_mapping": [
+      "T1596.003"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Passive \u2014 queries archives, not target"
+    ],
+    "remediation": [
+      "Remove old endpoints",
+      "Implement access controls"
+    ],
+    "common_mistakes": [
+      "Not checking if URLs are still live (pipe to httpx)"
+    ],
+    "alternatives": [
+      "waybackurls",
+      "katana (active crawler)"
+    ],
+    "references": [
+      "https://github.com/lc/gau"
+    ],
+    "tags": [
+      "urls",
+      "historical",
+      "archive",
+      "passive",
+      "endpoints"
+    ]
+  },
+  {
+    "id": "katana-crawl",
+    "tool": "katana",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "katana -u http://<target> -d 3 -jc -o urls.txt",
+    "name": "Web Crawler (Active)",
+    "description": "Actively crawls a website extracting URLs, JavaScript endpoints, and form actions.",
+    "arguments": {
+      "-u": "Target URL",
+      "-d 3": "Crawl depth 3",
+      "-jc": "JavaScript crawling",
+      "-o": "Output file"
+    },
+    "expected_output": "http://target.com/api/v2/users\nhttp://target.com/admin/dashboard\nhttp://target.com/uploads/",
+    "use_case": "Active crawling discovers endpoints that passive methods miss \u2014 especially JS-rendered content.",
+    "prerequisites": [
+      "Target web server accessible"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Crawler user-agent in logs",
+      "High request volume from single IP"
+    ],
+    "remediation": [
+      "Rate limiting",
+      "robots.txt (won't stop determined crawlers)"
+    ],
+    "common_mistakes": [
+      "Not enabling JS crawling (-jc)",
+      "Setting depth too low"
+    ],
+    "alternatives": [
+      "gospider",
+      "hakrawler",
+      "burp spider"
+    ],
+    "references": [
+      "https://github.com/projectdiscovery/katana"
+    ],
+    "tags": [
+      "crawler",
+      "active",
+      "javascript",
+      "endpoints",
+      "spider"
+    ]
+  },
+  {
+    "id": "testssl-scan",
+    "tool": "testssl",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "testssl.sh <target>:443",
+    "name": "SSL/TLS Configuration Audit",
+    "description": "Comprehensive SSL/TLS testing \u2014 checks protocols, ciphers, vulnerabilities (Heartbleed, POODLE, etc.).",
+    "arguments": {
+      "<target>:443": "Target host and port"
+    },
+    "expected_output": "Testing protocols...\n SSLv3     not offered\n TLS 1.0   offered (deprecated)\n TLS 1.2   offered\n TLS 1.3   offered\nVulnerabilities:\n Heartbleed: not vulnerable\n POODLE:    VULNERABLE",
+    "use_case": "Audit SSL/TLS configuration for weak protocols, ciphers, and known vulnerabilities.",
+    "prerequisites": [
+      "HTTPS service running"
+    ],
+    "mitre_mapping": [
+      "T1595",
+      "T1040"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "SSL probe patterns in logs"
+    ],
+    "remediation": [
+      "Disable TLS 1.0/1.1",
+      "Use strong cipher suites",
+      "Enable HSTS"
+    ],
+    "common_mistakes": [
+      "Not checking all ports with SSL",
+      "Missing client certificate issues"
+    ],
+    "alternatives": [
+      "sslscan",
+      "nmap --script ssl-enum-ciphers",
+      "sslyze"
+    ],
+    "references": [
+      "https://testssl.sh"
+    ],
+    "tags": [
+      "ssl",
+      "tls",
+      "certificate",
+      "vulnerability",
+      "crypto"
+    ]
+  },
+  {
+    "id": "eyewitness-screenshot",
+    "tool": "eyewitness",
+    "category": "reconnaissance",
+    "phase": 1,
+    "os": [
+      "linux"
+    ],
+    "command": "eyewitness --web -f urls.txt --no-prompt -d screenshots/",
+    "name": "Web Screenshot Capture",
+    "description": "Takes screenshots of web pages from a URL list \u2014 visual identification of applications at scale.",
+    "arguments": {
+      "--web": "Web mode",
+      "-f": "URL file",
+      "--no-prompt": "Non-interactive",
+      "-d": "Output directory"
+    },
+    "expected_output": "[*] Capturing: http://target.com \u2192 screenshot saved\n[*] Report generated: screenshots/report.html",
+    "use_case": "Visually identify web applications across many hosts \u2014 faster than visiting each manually.",
+    "prerequisites": [
+      "URL list",
+      "Chrome/Chromium installed"
+    ],
+    "mitre_mapping": [
+      "T1595"
+    ],
+    "mitre_tactic": "Reconnaissance",
+    "detections": [
+      "Multiple HTTP requests from single source"
+    ],
+    "remediation": [
+      "N/A \u2014 reconnaissance tool"
+    ],
+    "common_mistakes": [
+      "Not reviewing all screenshots",
+      "Missing non-standard ports"
+    ],
+    "alternatives": [
+      "gowitness",
+      "aquatone",
+      "webscreenshot"
+    ],
+    "references": [
+      "https://github.com/RedSiege/EyeWitness"
+    ],
+    "tags": [
+      "screenshot",
+      "visual",
+      "web",
+      "identification",
+      "mass"
+    ]
+  }
+]
