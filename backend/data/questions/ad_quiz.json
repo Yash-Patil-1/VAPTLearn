@@ -86,7 +86,7 @@
     ],
     "validation_type": "contains_any",
     "required_keywords": [],
-    "explanation": "Kerberoasting requests TGS tickets for service accounts (which have SPNs). The ticket is encrypted with the service account's password hash \u2014 crack offline with no failed login attempts or detection.",
+    "explanation": "Kerberoasting requests TGS tickets for service accounts (which have SPNs). The ticket is encrypted with the service account's password hash — crack offline with no failed login attempts or detection.",
     "hints": [
       "Offline cracking of service account passwords"
     ]
@@ -107,7 +107,7 @@
     "required_keywords": [],
     "explanation": "Relay the captured authentication to the file server using ntlmrelayx.py. Since SMB signing is disabled, the relay will succeed and give you a shell.",
     "hints": [
-      "Don't crack \u2014 relay instead"
+      "Don't crack — relay instead"
     ]
   },
   {
@@ -142,7 +142,7 @@
     ],
     "validation_type": "contains_any",
     "required_keywords": [],
-    "explanation": "Golden Ticket forges a TGT using krbtgt hash \u2014 gives access to EVERYTHING and touches the DC. Silver Ticket forges a TGS for ONE specific service using the service account hash \u2014 doesn't touch the DC (stealthier).",
+    "explanation": "Golden Ticket forges a TGT using krbtgt hash — gives access to EVERYTHING and touches the DC. Silver Ticket forges a TGS for ONE specific service using the service account hash — doesn't touch the DC (stealthier).",
     "hints": [
       "One is universal, one is targeted"
     ]
@@ -350,7 +350,7 @@
     ],
     "validation_type": "contains_any",
     "required_keywords": [],
-    "explanation": "Pass-the-Hash uses NTLM hash for authentication (works when NTLM is allowed). Pass-the-Ticket uses a Kerberos ticket (TGT/TGS) \u2014 works even when NTLM is disabled.",
+    "explanation": "Pass-the-Hash uses NTLM hash for authentication (works when NTLM is allowed). Pass-the-Ticket uses a Kerberos ticket (TGT/TGS) — works even when NTLM is disabled.",
     "hints": [
       "NTLM vs Kerberos authentication"
     ]
@@ -373,6 +373,182 @@
     "explanation": "WriteDACL lets you modify the target's ACL. Grant yourself GenericAll or DCSync rights on that user, then reset their password or perform DCSync.",
     "hints": [
       "Modify their permissions to give yourself access"
+    ]
+  },
+  {
+    "id": "vq-ad-21",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What PowerView command finds all Domain Admins in the domain?",
+    "correct_answers": [
+      "Get-NetGroupMember -GroupName \"Domain Admins\"",
+      "Get-NetGroupMember \"Domain Admins\"",
+      "net group \"Domain Admins\" /domain"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "PowerView's Get-NetGroupMember lists members of a specified group. Get-NetGroupMember -GroupName \"Domain Admins\" returns all domain admins. Also works with net group or ActiveDirectory module.",
+    "hints": [
+      "PowerView's group member enumeration function"
+    ]
+  },
+  {
+    "id": "vq-ad-22",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is AD CS ESC1 abuse and what conditions make it exploitable?",
+    "correct_answers": [
+      "ESC1 allows domain escalation via certificate templates where low-priv users can enroll and get arbitrary SAN (subject alternative name)",
+      "Certificate template allows enrollment with arbitrary SAN, enabling impersonation of any user",
+      "Certificate template with CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT enabled"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "AD CS ESC1 abuse targets certificate templates where low-privilege users can enroll and supply arbitrary Subject Alternative Names (SAN). If the template allows authentication (Client Authentication EKU), you can request a certificate as Domain Admin and authenticate with it.",
+    "hints": [
+      "Look for templates where enrollees can supply their own subject name"
+    ]
+  },
+  {
+    "id": "vq-ad-23",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You find a GPO applied to the Domain Controllers OU that is writable by low-privilege users. How can you escalate?",
+    "correct_answers": [
+      "Modify the GPO to add a scheduled task, startup script, or registry change that creates a local admin on all DCs",
+      "Edit the GPO to push a malicious startup script to DCs",
+      "Add a task to the GPO that runs a reverse shell or creates an admin account on DCs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "If a GPO linked to the DCs OU is writable, modify it to include a startup script that adds a local admin or runs a reverse shell. The next time DCs refresh group policy (gpupdate / force or reboot), they execute your code as SYSTEM.",
+    "hints": [
+      "GPOs can deploy startup scripts that run as SYSTEM"
+    ]
+  },
+  {
+    "id": "vq-ad-24",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What netexec command dumps LSA secrets from a Windows machine?",
+    "correct_answers": [
+      "netexec smb target -u user -p pass --lsa",
+      "nxc smb target -u user -p pass --lsa",
+      "crackmapexec smb target -u user -p pass -M lsassy"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "netexec smb target -u user -p pass --lsa dumps LSA secrets including cached domain credentials, service account passwords stored as LSA secrets, and DPAPI keys.",
+    "hints": [
+      "Use --lsa flag with netexec smb"
+    ]
+  },
+  {
+    "id": "vq-ad-25",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is the difference between Constrained and Unconstrained Delegation, and how does Resource-Based Constrained Delegation (RBCD) differ?",
+    "correct_answers": [
+      "Unconstrained allows delegation to ANY service. Constrained limits delegation to specific services listed in msDS-AllowedToDelegateTo. RBCD allows the resource to specify who can delegate to it via msDS-AllowedToActOnBehalfOfOtherIdentity.",
+      "Unconstrained = any service, Constrained = specific SPNs, RBCD = resource-controlled delegation"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Unconstrained Delegation: server can impersonate user to ANY service. Constrained Delegation: limited to specific SPNs on msDS-AllowedToDelegateTo. RBCD: the target resource's msDS-AllowedToActOnBehalfOfOtherIdentity attribute controls which accounts can delegate to it. RBCD is exploitable if you have Write permissions on the target computer object.",
+    "hints": [
+      "Think about what controls the delegation permission and what scope each allows"
+    ]
+  },
+  {
+    "id": "vq-ad-26",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What Impacket tool performs an RBCD attack from Linux with a computer account?",
+    "correct_answers": [
+      "impacket-rbcd",
+      "rbcd.py",
+      "rbcd.py -action write -delegate-to DC$ -delegate-from ATTACKER$"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "impacket-rbcd.py sets the msDS-AllowedToActOnBehalfOfOtherIdentity attribute on a target computer object, allowing your controlled machine account to impersonate any user (including DA) to that target. Works with getST.py for final ticket request.",
+    "hints": [
+      "An impacket script specifically for RBCD attacks"
+    ]
+  },
+  {
+    "id": "vq-ad-27",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have a shell as a low-privileged domain user on a Windows machine. The domain functional level is 2008 R2. How can you potentially exploit MS14-068?",
+    "correct_answers": [
+      "MS14-068 patches the PAC (Privilege Attribute Certificate) validation in Kerberos allowing a forged PAC. Use PyKEK or goldenPac.py to forge a PAC claiming Domain Admin.",
+      "Use MS14-068 exploit to forge a Kerberos PAC with elevated privileges via PyKEK/goldenPac.py"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "MS14-068 (CVE-2014-6324) is a vulnerability in Kerberos PAC validation. It allows a domain user to forge a PAC claiming to be Domain Admin. Tools: PyKEK (ms14-068.py) or impacket's goldenPac.py. Requires: user creds, domain SID, DC IP. Only works on unpatched DCs.",
+    "hints": [
+      "A famous Kerberos vulnerability from 2014 involving the PAC"
+    ]
+  },
+  {
+    "id": "vq-ad-28",
+    "topic_id": "active_directory",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is an ACL abuse chain in Active Directory and why is it powerful?",
+    "correct_answers": [
+      "ACL abuse chains exploit permission relationships between objects. User A has rights on Group B, Group B is member of Group C, Group C has admin rights on Server D. BloodHound maps these attack paths.",
+      "Chaining multiple ACL permissions together to escalate privileges through a path of least resistance"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "ACL abuse chains exploit the permission relationships between AD objects. For example: GenericAll on User1 -> User1 has DCSync rights -> Dump all hashes. BloodHound visualizes these paths. Common rights: GenericAll, GenericWrite, WriteOwner, WriteDACL, ForceChangePassword, AllExtendedRights.",
+    "hints": [
+      "Think multi-hop: you might not directly have access, but the path through objects gets you there"
+    ]
+  },
+  {
+    "id": "vq-ad-29",
+    "topic_id": "active_directory",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What impacket tool extracts all domain user Kerberoastable accounts' TGS hashes?",
+    "correct_answers": [
+      "GetUserSPNs.py",
+      "impacket-GetUserSPNs",
+      "GetUserSPNs.py -request -dc-ip DC domain/user:pass"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "GetUserSPNs.py finds all service accounts (with SPNs) in the domain and requests their TGS tickets. Use -request to output crackable hashes. This is the Linux equivalent of Rubeus kerberoast. The -usersfile flag queries specific users.",
+    "hints": [
+      "An impacket script for Kerberoasting service accounts"
+    ]
+  },
+  {
+    "id": "vq-ad-30",
+    "topic_id": "active_directory",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You compromised the built-in Administrator account on one domain. Forest trust exists with another domain. How do you attack the trusting forest?",
+    "correct_answers": [
+      "Use SIDHistory injection or extraSids to forge the Enterprise Admin SID, or exploit the trust with extraSids attack using Mimikatz or impacket",
+      "Use Mimikatz extraSids or SIDHistory injection to impersonate Enterprise Admins across forest trust"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "With DA in one forest domain, check for forest trusts. If the trust uses TGT delegation (most do), use Mimikatz's extraSids to add the other forest's Enterprise Admin SID to a forged TGT. Or use SIDHistory to inject privileged SIDs across the trust. Impacket's ticketer.py also works.",
+    "hints": [
+      "Forest trusts can be exploited using SID injection into inter-forest TGTs"
     ]
   }
 ]

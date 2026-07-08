@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from models.database import get_connection
+from services.stats import award_xp, XP_QUIZ_CORRECT
 
 router = APIRouter()
 
@@ -44,14 +45,15 @@ async def get_next_question(request: Request, category: str):
 
 @router.post("/answer")
 async def submit_answer(request: Request, body: AnswerSubmit):
-    """Submit answer and get validation result."""
-    questions = [q for q in request.app.state.kb.questions if q.get("topic_id") == body.category]
-    question = next((q for q in questions if q["id"] == body.question_id), None)
-    if not question:
+    """Submit answer and get validation result — awards XP on correct."""
+    kb = request.app.state.kb
+    question = kb.get_question(body.question_id)
+    if not question or question.get("topic_id") != body.category:
         raise HTTPException(404, "Question not found")
 
     result = request.app.state.quiz_engine.validate_answer(question, body.answer)
 
+    # Record history first, then award XP
     conn = get_connection()
     conn.execute(
         "INSERT INTO quiz_history (question_id, category, correct, user_answer) VALUES (?, ?, ?, ?)",
@@ -59,7 +61,37 @@ async def submit_answer(request: Request, body: AnswerSubmit):
     )
     conn.commit()
     conn.close()
-    return result
+
+    # Award XP for correct answers
+    xp_awarded = 0
+    streak = None
+    if result["correct"]:
+        streak = award_xp(XP_QUIZ_CORRECT, "quiz")
+        xp_awarded = XP_QUIZ_CORRECT
+
+    return {
+        **result,
+        "xp_awarded": xp_awarded,
+        "streak": streak,
+    }
+
+
+@router.get("/question/{question_id}")
+async def get_question_by_id(request: Request, question_id: str):
+    """Get a specific question by ID — used by lesson checkpoints.
+    Does NOT mark the question as seen (unlike /next)."""
+    question = request.app.state.kb.get_question(question_id)
+    if not question:
+        raise HTTPException(404, "Question not found")
+
+    return {
+        "id": question["id"],
+        "category": question.get("topic_id", ""),
+        "type": question["type"],
+        "difficulty": question["difficulty"],
+        "question": question["question"],
+        "hints": question.get("hints", []),
+    }
 
 
 @router.get("/stats")

@@ -5,7 +5,8 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)
-![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen)
+![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)
+![Tests](https://img.shields.io/badge/Tests-42%20passing-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -30,15 +31,16 @@ VAPTLearn is a local-first cybersecurity learning platform that teaches penetrat
 
 | Feature | Description |
 |---------|-------------|
-| 🔍 Command Explorer | 402 commands with search & filter |
-| 📖 Learning Paths | 7 theory chapters across PTES phases |
+| 🔍 Command Explorer | 402 commands with search & filter across 53 categories |
+| 📖 Guided Lessons | 7 PTES phases with 65 in-depth theory sections |
 | 🛠️ Tool Library | 22 tools with installation guides |
-| 🎯 MITRE ATT&CK | Techniques mapped to commands |
-| 🛡️ Dual Perspective | Offense + Defense for every technique |
-| 📊 Progress Tracking | Mark commands as learned |
-| 🧠 Quiz Engine | 40 quiz questions to test knowledge |
+| 🎯 MITRE ATT&CK | 200+ techniques mapped to commands |
+| 🧠 Quiz Engine | 300 questions across 10 categories with streak/XP |
+| 📖 VAPT Glossary | 213 searchable cybersecurity terms |
+| 🏆 Level System | 10 levels with XP progression (separate from streak) |
+| 🔖 Progress Tracking | Mark commands & lessons as completed |
 | 🔖 Bookmarks & Notes | Personal reference system |
-| 🌙 Hyperstudio Theme | Monochrome terminal + amber accents |
+| 🎨 Lamborghini Identity | Carbon fiber + Venom Green + Arancio Orange theme |
 
 ---
 
@@ -47,11 +49,15 @@ VAPTLearn is a local-first cybersecurity learning platform that teaches penetrat
 | Metric | Count |
 |--------|-------|
 | Commands | 402 |
-| Categories | 10 |
+| Command Data Files | 53 |
 | Tools | 22 |
-| Theory Chapters | 7 |
-| Quiz Questions | 40 |
-| Automated Tests | 26 |
+| Theory Phases | 7 |
+| Theory Sections | 65 |
+| Quiz Questions | 300 |
+| Quiz Categories | 10 |
+| Glossary Terms | 213 |
+| Max Level | 10 |
+| Automated Tests | 42 |
 
 ---
 
@@ -69,10 +75,15 @@ VAPTLearn is a local-first cybersecurity learning platform that teaches penetrat
 git clone https://github.com/Yash-Patil-1/VAPTLearn.git
 cd VAPTLearn
 
+# Option A: Automated setup
+chmod +x setup.sh
+./setup.sh
+
+# Option B: Manual setup
 # Backend setup
 cd backend
-python -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
 # Frontend setup
@@ -85,7 +96,8 @@ npm install
 ```bash
 # Terminal 1 — Backend
 cd backend
-./venv/bin/python -m uvicorn main:app --reload --port 8000
+source .venv/bin/activate
+uvicorn main:app --reload --port 8000
 
 # Terminal 2 — Frontend
 cd frontend
@@ -102,9 +114,9 @@ Open **http://localhost:5173**
 |-------|-----------|
 | Frontend | React 18, Vite, Tailwind CSS v4 |
 | Backend | FastAPI, Python 3.10+ |
-| Database | SQLite (progress tracking) |
-| Knowledge Base | JSON (commands, tools, theory) |
-| Design | Hyperstudio — monochrome terminal + amber (#E7C59A) + green (#00AC5C) |
+| Database | SQLite (progress, streaks, XP, daily activity) |
+| Knowledge Base | JSON (commands, tools, theory, questions, glossary) |
+| Design | Lamborghini — carbon black + Venom Green (#B4FF00) + Arancio Orange (#FF5C00) |
 
 ---
 
@@ -120,8 +132,16 @@ Open **http://localhost:5173**
 | GET | `/api/tools` | List all tools |
 | GET | `/api/mitre` | MITRE ATT&CK techniques |
 | GET | `/api/mitre/tactics` | MITRE tactics |
-| GET | `/api/quiz/questions` | Get quiz questions |
-| POST | `/api/quiz/submit` | Submit quiz answers |
+| GET | `/api/lessons` | List guided lessons (7 phases) |
+| GET | `/api/lessons/{id}` | Get lesson with sections + checkpoints |
+| POST | `/api/lessons/{id}/complete` | Complete lesson & award XP |
+| GET | `/api/quiz/next` | Get next quiz question |
+| POST | `/api/quiz/answer` | Submit quiz answer |
+| GET | `/api/quiz/stats` | Quiz performance stats |
+| GET | `/api/streak` | Get streak, XP, level, daily activity |
+| GET | `/api/glossary` | List all glossary terms |
+| GET | `/api/glossary/search?q=` | Search glossary |
+| GET | `/api/glossary/count` | Glossary term count |
 | POST | `/api/progress/mark` | Mark command as learned |
 | GET | `/api/progress` | Get learning progress |
 
@@ -132,30 +152,43 @@ Open **http://localhost:5173**
 ```
 VAPTLearn/
 ├── backend/
-│   ├── main.py                 # FastAPI application
-│   ├── requirements.txt        # Python dependencies
+│   ├── main.py                       # FastAPI application
+│   ├── requirements.txt              # Python dependencies
 │   ├── data/
-│   │   ├── commands/           # Command JSON files (402 commands)
-│   │   ├── tools/              # Tool definitions (22 tools)
-│   │   ├── phases/             # PTES phase data
-│   │   ├── mitre/              # MITRE ATT&CK mappings
-│   │   ├── theory/             # Learning chapters (7)
-│   │   └── questions/          # Quiz questions (40)
-│   ├── models/                 # Database models
-│   ├── routers/                # API route handlers
-│   ├── services/               # Business logic
-│   └── tests/                  # Test suite (26 tests)
+│   │   ├── commands/                 # Command JSON files (402 commands, 53 files)
+│   │   ├── theory/                   # Learning content (7 phases, 65 sections)
+│   │   ├── questions/                # Quiz questions (300 across 10 categories)
+│   │   ├── glossary.json             # 213 VAPT terms
+│   │   ├── tools.json                # Tool definitions (22 tools)
+│   │   ├── phases.json               # PTES phase definitions
+│   │   ├── mitre_techniques.json     # MITRE ATT&CK techniques
+│   │   └── domains.json              # Category domains
+│   ├── models/
+│   │   ├── database.py               # SQLite init + connection
+│   │   └── schemas.py                # Pydantic models
+│   ├── routers/
+│   │   ├── commands.py, phases.py, tools.py, mitre.py
+│   │   ├── quiz.py, lessons.py, progress.py
+│   │   ├── streak.py, glossary.py
+│   ├── services/
+│   │   ├── knowledge_base.py         # JSON data loader
+│   │   ├── quiz_engine.py            # Quiz logic + validation
+│   │   └── stats.py                  # XP, level, streak calculations
+│   ├── scripts/                      # Data generation scripts
+│   └── tests/                        # 42 automated tests
 ├── frontend/
 │   ├── src/
-│   │   ├── components/         # React components
-│   │   ├── pages/              # Page views
-│   │   └── styles/             # Tailwind styles
+│   │   ├── components/               # Reusable React components
+│   │   ├── pages/                    # 12 page views
+│   │   ├── styles/globals.css        # Tailwind v4 + theme
+│   │   ├── App.jsx                   # Router setup
+│   │   └── main.jsx                  # Entry point
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
-├── data/
-│   └── database/               # SQLite database
-├── docs/                       # Design documents
+├── .vscode/settings.json             # VS Code Tailwind config
+├── data/database/                    # SQLite database (auto-created)
+├── docs/                             # Design documentation
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -167,10 +200,11 @@ VAPTLearn/
 
 ```bash
 cd backend
-./venv/bin/python -m pytest tests/ -v
+source .venv/bin/activate
+python -m pytest tests/ -v
 ```
 
-**26 tests passing** — knowledge base integrity, API endpoints, search, filters, progress tracking.
+**42 tests passing** — knowledge base integrity, API endpoints, search, filters, progress tracking, quiz engine, lesson system, streak/XP calculations.
 
 ---
 
@@ -178,39 +212,42 @@ cd backend
 
 | Category | Description |
 |----------|-------------|
-| Reconnaissance | Network scanning, OSINT, subdomain enumeration |
-| Enumeration | Service enumeration, SMB, SNMP, LDAP, DNS |
-| Web Testing | Directory fuzzing, SQL injection, XSS, vulnerability scanning |
-| Active Directory | BloodHound, Impacket, Kerberos attacks |
-| Privilege Escalation | Linux/Windows privesc, kernel exploits |
-| Exploitation | Metasploit, payload generation, exploit search |
-| Post-Exploitation | Credential dumping, pivoting, persistence |
-| Password Attacks | Hash cracking, brute force, wordlists |
-| Wireless | WiFi attacks, WPA cracking |
-| Reporting | Documentation, evidence collection |
+| Chapter | Sections | Description |
+|---------|----------|-------------|
+| Reconnaissance | 11 | OSINT, subdomain enumeration, Shodan, ASN mapping, recon automation |
+| Enumeration | 10 | Service enum, SMB, SNMP, LDAP, DNS, database, cloud services |
+| Vulnerability | 9 | Nmap NSE, CVE research, fuzzing, race conditions |
+| Exploitation | 10 | SQLi, file upload RCE, SSRF, Metasploit, container escape, C2 |
+| Privilege Escalation | 9 | Linux/Windows privesc, kernel exploits, cloud/K8s privesc |
+| Post-Exploitation | 9 | Credential dumping, pivoting, AD CS, persistence, cloud post-ex |
+| Reporting | 7 | Documentation, evidence collection, report QA, metrics |
+
+**Quiz categories (300 questions):** Reconnaissance, Enumeration, Web Testing, Exploitation, Vulnerability Assessment, Privilege Escalation, Post-Exploitation, Active Directory, Password Attacks, Wireless
 
 ---
 
 ## 🎨 Design
 
-Hyperstudio design language:
-- Dark monochrome terminal aesthetic
-- Amber accent (#E7C59A) for highlights
-- Green accent (#00AC5C) for success states
-- Minimal, professional, distraction-free
+**Lamborghini-inspired design language:**
+- Carbon black (`#0A0B0A`) background — dark, aggressive, high-performance
+- Forged panel (`#141614`) for cards — angular clip paths, carbon-fiber aesthetic
+- Venom Green (`#B4FF00`) accents — neon, energetic, high-contrast
+- Arancio Orange (`#FF5C00`) for highlights — heat, power, warning
+- JetBrains Mono + Rajdhani for typography
+- No border-radius — all angular, industrial, mechanical
 
 ---
 
 ## 🔒 Important
 
 This is an **educational platform**. It does NOT:
-- Execute attacks
+- Execute attacks against unauthorized targets
 - Provide vulnerable labs
 - Automate exploitation
 - Use external AI APIs
 - Require cloud or VMs
 
-It teaches methodology, explains commands, and builds understanding. Everything runs locally.
+It teaches methodology, explains commands, reinforces learning through active-recall quizzes, and builds real understanding. Everything runs locally.
 
 ---
 

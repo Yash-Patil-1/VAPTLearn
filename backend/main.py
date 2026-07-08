@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from routers import commands, phases, tools, mitre, progress, quiz
+from routers import commands, phases, tools, mitre, progress, quiz, lessons, streak, glossary
 from models.database import init_db
 from services.knowledge_base import KnowledgeBase
 from services.quiz_engine import QuizEngine
@@ -51,6 +51,9 @@ app.include_router(tools.router, prefix="/api/tools", tags=["Tools"])
 app.include_router(mitre.router, prefix="/api/mitre", tags=["MITRE ATT&CK"])
 app.include_router(progress.router, prefix="/api/progress", tags=["Progress"])
 app.include_router(quiz.router, prefix="/api/quiz", tags=["Quiz"])
+app.include_router(lessons.router, prefix="/api/lessons", tags=["Lessons"])
+app.include_router(streak.router, prefix="/api/streak", tags=["Streak"])
+app.include_router(glossary.router, prefix="/api", tags=["Glossary"])
 
 
 @app.get("/")

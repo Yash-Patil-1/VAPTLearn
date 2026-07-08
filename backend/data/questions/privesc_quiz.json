@@ -371,5 +371,182 @@
     "hints": [
       "Shell wildcard expansion treats filenames starting with -- as command arguments"
     ]
+  },
+  {
+    "id": "vq-privesc-21",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What WinPEAS command runs all checks for Windows privilege escalation?",
+    "correct_answers": [
+      "winpeas.exe",
+      "winpeas.exe -all",
+      "winpeas.exe cmd",
+      "WinPEAS.bat"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WinPEAS (Windows PEASS-ng) runs comprehensive privilege escalation checks including: services permissions, unquoted paths, AlwaysInstallElevated, registry autoruns, credentials in files, token privileges, and kernel exploits. Part of the PEASS-ng suite with linpeas for Linux.",
+    "hints": [
+      "The Windows version of LinPEAS - from the same PEASS-ng project"
+    ]
+  },
+  {
+    "id": "vq-privesc-22",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your current user has SeBackupPrivilege enabled. How can you abuse this to escalate privileges or access protected files?",
+    "correct_answers": [
+      "Use robocopy /b or diskshadow or wbadmin to read files that would normally be denied (like NTDS.dit and SYSTEM registry hive)",
+      "Use SeBackupPrivilege with robocopy /b to back up files, diskshadow for shadow copies to access NTDS.dit"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "SeBackupPrivilege bypasses file ACLs for backup purposes. Use robocopy /B to copy otherwise denied files. For NTDS.dit: use diskshadow.exe to create a shadow copy of the C: drive, then copy NTDS.dit from the shadow copy. Combine with SeRestorePrivilege to restore modified files (like services).",
+    "hints": [
+      "This privilege allows reading any file regardless of ACL - use backup tools or shadow copies"
+    ]
+  },
+  {
+    "id": "vq-privesc-23",
+    "topic_id": "privilege_escalation",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is the difference between Scheduled Task and Service privilege escalation on Windows?",
+    "correct_answers": [
+      "Scheduled tasks: check for misconfigured tasks running as SYSTEM with writable scripts/binaries or weak task permissions. Services: check for unquoted paths, writable service binaries, weak service DACLs, or disabled services that can be started.",
+      "Tasks run on schedule/trigger, services run automatically. Both can have writable paths or weak configs."
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Scheduled Task escalation: find tasks running as high-integrity users (SYSTEM) with writable actions or modifiable task definitions. Use schtasks /query to list. Service escalation: weak service permissions (accesschk), unquoted paths, writable binary paths, or services you can stop/modify. Use sc qc to enumerate.",
+    "hints": [
+      "Both can exploit writable paths and weak permissions - one uses schtasks, the other uses sc"
+    ]
+  },
+  {
+    "id": "vq-privesc-24",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What tool creates a custom PE executable that spawns a SYSTEM shell when run, useful for Windows service escalation?",
+    "correct_answers": [
+      "msfvenom -p windows/shell_reverse_tcp -f exe-service > service.exe",
+      "msfvenom with exe-service format",
+      "msfvenom -p windows/exec CMD=cmd.exe -f exe-service"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "msfvenom -f exe-service outputs a Windows executable designed to run as a Windows service (responds to SCM start/stop controls correctly). Standard .exe (without -f exe-service) may fail to start as a service because it doesn't communicate with the Service Control Manager properly.",
+    "hints": [
+      "The exe-service output format creates service-compatible payloads"
+    ]
+  },
+  {
+    "id": "vq-privesc-25",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You can write to the web root of an IIS server running as ApplicationPoolIdentity. How do you escalate to a higher integrity level?",
+    "correct_answers": [
+      "Upload a Web Shell (ASPX/ASP), execute commands as the IIS app pool account, then exploit SeImpersonatePrivilege with PrintSpoofer/JuicyPotato to escalate to SYSTEM",
+      "Upload ASPX webshell, use whoami /priv to confirm SeImpersonatePrivilege, run PrintSpoofer for SYSTEM"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "IIS privesc chain: 1) Upload an ASPX/ASP webshell to the writable web root, 2) Execute cmd through webshell as ApplicationPoolIdentity (IIS app pool), 3) Check privileges (whoami /priv - likely SeImpersonatePrivilege), 4) Upload and execute PrintSpoofer or JuicyPotato to escalate to SYSTEM.",
+    "hints": [
+      "IIS app pools run as limited accounts but typically have SeImpersonate privileges exploitable via Potato attacks"
+    ]
+  },
+  {
+    "id": "vq-privesc-26",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What command shows all mounted filesystems and their mount options to identify misconfigured mounts?",
+    "correct_answers": [
+      "mount",
+      "cat /etc/fstab",
+      "findmnt",
+      "mount -l | grep 'noexec|nosuid|rw'"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Check mount options: nosuid (SUID bits ignored on this filesystem), noexec (binaries can't execute), nodev (device files ignored). Look for filesystems mounted with suid, exec, dev flags that shouldn't have them, or removable media with writable+executable permissions. /etc/fstab shows persistent mount configurations.",
+    "hints": [
+      "Check which filesystems are mounted with suid/exec privileges since these affect exploit viability"
+    ]
+  },
+  {
+    "id": "vq-privesc-27",
+    "topic_id": "privilege_escalation",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is cgroups/namespace escape in containerized environments and how does it work?",
+    "correct_answers": [
+      "Cgroup/namespace escape exploits misconfigured container security. If containers run with --privileged, --pid=host, or have access to /dev/shm, /proc/sys, or cgroup notify_on_release, you can break out to the host.",
+      "Container breakout exploiting misconfigured cgroups, namespaces, or host filesystem mounts"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Container escape via: privileged mode (full host access, all capabilities), mounted host filesystem (chroot into /mnt/host), cgroup notify_on_release (write to release_agent for command injection on host), /proc/sys exploitation, or kernel vulnerabilities specific to container runtimes.",
+    "hints": [
+      "Check if the container runs privileged or has unusual capability/mount configurations"
+    ]
+  },
+  {
+    "id": "vq-privesc-28",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have access to the Jenkins script console on a Linux server. Jenkins runs as the 'jenkins' user. How do you escalate to root?",
+    "correct_answers": [
+      "Use Jenkins Script Console to run Groovy scripts executing system commands: 'def proc = \"whoami\".execute(); println proc.text'. Check sudo -l, SUID, or internal Jenkins credentials.",
+      "Jenkins script console runs Groovy - execute shell commands with .execute(), then check for sudo, SSH keys, or Jenkins stored credentials"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Jenkins script console provides Groovy code execution. Run 'println \"id\".execute().text' for command execution. Then: check sudo -l, search for Jenkins credentials (Manage Jenkins -> Manage Credentials), look for SSH keys in /var/lib/jenkins/.ssh/, check for cloud provider metadata endpoints, or modify Jenkins jobs to run as root.",
+    "hints": [
+      "Jenkins script console = Groovy code execution. Search for stored credentials and SSH keys."
+    ]
+  },
+  {
+    "id": "vq-privesc-29",
+    "topic_id": "privilege_escalation",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What net command enumerates local groups and members on a Windows machine for privesc insights?",
+    "correct_answers": [
+      "net localgroup",
+      "net localgroup Administrators",
+      "net users",
+      "net localgroup administrators"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "net localgroup lists all local groups, net localgroup Administrators shows members of the admin group. Also check: net users (all local users), net user USERNAME (user details including groups). Domain enumeration: net group /domain, net user /domain.",
+    "hints": [
+      "Net commands for enumerating local users and groups"
+    ]
+  },
+  {
+    "id": "vq-privesc-30",
+    "topic_id": "privilege_escalation",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You have SSH access as a low-privileged user. The server has NFS shares exported. The /home share is exported with no_root_squash. How do you escalate?",
+    "correct_answers": [
+      "Mount the NFS share as root on your attacker machine, create a SUID binary owned by root in the share directory, then execute it on the target to get root",
+      "Mount NFS share from attacker, create SUID root binary, execute on target for root privileges"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "no_root_squash means files created by root on the NFS client retain root ownership on the server. Mount the share from your attacker machine (as root), create a SUID root binary or set SUID on /bin/bash, then execute it through your low-priv SSH session to get root on the target.",
+    "hints": [
+      "no_root_squash preserves client-side root ownership on the NFS server - use it to place SUID binaries"
+    ]
   }
 ]

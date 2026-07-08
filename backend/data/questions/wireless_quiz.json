@@ -362,5 +362,180 @@
     "hints": [
       "The most popular network protocol analyzer, used with a monitor mode interface"
     ]
+  },
+  {
+    "id": "vq-wireless-21",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What aircrack-ng command tests a specific WPA password directly without a wordlist?",
+    "correct_answers": [
+      "aircrack-ng -w <(echo 'password') capture.cap",
+      "aircrack-ng -w <(echo pass) capture-01.cap",
+      "aircrack-ng -w /dev/stdin capture.cap <<<'password'"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Process substitution <(echo 'password') creates a temporary file descriptor containing the password. This lets you test a single password without creating a wordlist file. Useful for quick verification after cracking or testing guessed passwords.",
+    "hints": [
+      "Use bash process substitution to avoid creating a wordlist file"
+    ]
+  },
+  {
+    "id": "vq-wireless-22",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to perform a wireless assessment of a facility but cannot use active scanning tools that emit RF signals (passive-only). What tools and techniques can you use?",
+    "correct_answers": [
+      "Use kismet in passive mode, airodump-ng without injection, and Wireshark for capture analysis. Map AP locations with signal triangulation from multiple positions.",
+      "Kismet passive monitoring, airodump-ng for capture, Wireshark analysis, physical site survey"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "Passive wireless assessment: kismet runs entirely passively detecting APs, clients, and potential rogues without emitting packets. airodump-ng captures frames for analysis without injection. Wireshark/tshark analyzes captured traffic for vulnerabilities. Physical walk-throughs with directional antennas map AP locations via signal strength changes.",
+    "hints": [
+      "Kismet runs fully passive - no packet injection needed for basic discovery and mapping"
+    ]
+  },
+  {
+    "id": "vq-wireless-23",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "medium",
+    "question": "What is EAP-TLS and why is it considered the most secure EAP method?",
+    "correct_answers": [
+      "EAP-TLS uses mutual certificate-based authentication (client AND server each have a certificate), preventing credential theft, relay attacks, and not vulnerable to offline cracking unlike PEAP/EAP-MSCHAPv2 or EAP-TTLS",
+      "Mutual certificate authentication for both client and server, immune to credential theft and relay"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "EAP-TLS requires valid certificates on BOTH the server (RADIUS) and every client device. This mutual authentication prevents: rogue AP attacks (client validates server cert), credential theft (no password transmitted), offline cracking (no crackable hash), and relay attacks. Setup complexity is higher but security is superior.",
+    "hints": [
+      "Both sides authenticate with certificates - no passwords or shared secrets transmitted"
+    ]
+  },
+  {
+    "id": "vq-wireless-24",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What hashcat mode cracks WPA/WPA2 PMKID hashes extracted from captured handshakes?",
+    "correct_answers": [
+      "hashcat -m 22000",
+      "-m 22000",
+      "hashcat -m 22000 hash.hc22000 wordlist.txt"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "hashcat mode 22000 cracks WPA/WPA2 PMKID and EAPOL handshakes using the new hc22000 format. Convert .cap files with hcxpcapngtool. Mode 22000 replaced older mode 2500 (WPA) and supports both PMKID and traditional handshake cracking in a single format.",
+    "hints": [
+      "The newer hashcat mode that replaced 2500 for WPA cracking"
+    ]
+  },
+  {
+    "id": "vq-wireless-25",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You're assessing a WPA3 network. What specific tools and approaches would you use since traditional aircrack-ng doesn't support WPA3 cracking?",
+    "correct_answers": [
+      "Capture the SAE handshake using hcxdumptool, then crack with hashcat -m 22000 (which now supports WPA3 SAE). Check for Dragonblood vulnerabilities or WPA3 transition mode downgrade.",
+      "Use hcxdumptool to capture WPA3 handshake, crack with hashcat mode 22000, test Dragonblood CVEs"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "WPA3 assessment: hcxdumptool captures WPA3 SAE handshakes (requires 802.11w=off or capturing association frames). Hashcat mode 22000 now supports WPA3 password cracking. Check for Dragonblood vulnerabilities (CVE-2019-9494/9495). If WPA3 transition mode is enabled, clients may downgrade to WPA2.",
+    "hints": [
+      "Use hcxtools instead of aircrack-ng for WPA3 handshake capture and cracking"
+    ]
+  },
+  {
+    "id": "vq-wireless-26",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "easy",
+    "question": "What are the main security differences between 2.4GHz and 5GHz WiFi bands?",
+    "correct_answers": [
+      "5GHz has more channels, less interference, higher throughput, and shorter range. 2.4GHz penetrates walls better but has more interference (Bluetooth, microwaves) and fewer non-overlapping channels.",
+      "5GHz: faster, less congested, shorter range. 2.4GHz: better range/penetration, slower, more interference"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "2.4GHz: better wall penetration, longer range, but more interference (shared with Bluetooth, Zigbee, microwaves), only 3 non-overlapping channels, more prone to congestion. 5GHz: more channels (23 non-overlapping), less interference, higher throughput (802.11ac/n), but shorter range and less wall penetration.",
+    "hints": [
+      "Trade-off between range/penetration (2.4GHz) vs speed/interference (5GHz)"
+    ]
+  },
+  {
+    "id": "vq-wireless-27",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "hard",
+    "question": "What tool extracts WPA/WPA2 handshakes from a large packet capture and converts them to hashcat format?",
+    "correct_answers": [
+      "hcxpcapngtool",
+      "hcxpcapngtool -o hash.hc22000 capture.pcapng",
+      "hcxhash2cap",
+      "hcxpcapngtool -E essidlist -o output capture.pcapng"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "hcxpcapngtool from the hcxtools suite extracts PMKID/EAPOL handshakes from pcapng files and outputs them in hashcat mode 22000 compatible format. It filters out duplicate handshakes and handles conversions automatically. Part of the hcxtools suite along with hcxdumptool.",
+    "hints": [
+      "A tool from the hcxtools family that converts captures to crackable format"
+    ]
+  },
+  {
+    "id": "vq-wireless-28",
+    "topic_id": "wireless",
+    "type": "theory",
+    "difficulty": "hard",
+    "question": "What is 802.11w (Management Frame Protection) and how does it affect wireless attacks?",
+    "correct_answers": [
+      "802.11w protects deauthentication, disassociation, and certain management frames with cryptographic integrity checks, preventing deauth attacks and many WiFi DoS techniques",
+      "Encrypts deauth/disassoc management frames, preventing spoofed deauth attacks used to capture handshakes"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "802.11w (MFP - Management Frame Protection) cryptographically protects certain management frames (deauthentication, disassociation, channel switch announcement). When enforced, traditional deauth attacks fail because the aircrack-ng deauth packets are rejected. However, not all clients/APs require it (PMF required/optional/capable).",
+    "hints": [
+      "This standard makes deauthentication attacks much harder by protecting management frames"
+    ]
+  },
+  {
+    "id": "vq-wireless-29",
+    "topic_id": "wireless",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You captured a WPA handshake but need to decrypt live traffic. What additional information do you need and what tool decrypts the traffic?",
+    "correct_answers": [
+      "You need the WPA PSK (password). In Wireshark: go to Edit -> Preferences -> IEEE 802.11 -> Decryption Keys, add the PSK, and Wireshark will decrypt data frames.",
+      "WPA PSK/password needed. Wireshark with decryption keys enabled under IEEE 802.11 preferences"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "After cracking the WPA password, you can decrypt captured traffic. In Wireshark: Edit -> Preferences -> Protocols -> IEEE 802.11 -> Enable decryption, add key (wpa-pwd:password:ssid). airdecap-ng also decrypts .cap files: airdecap-ng -e ESSID -p password capture.cap producing decrypted .dec.cap file.",
+    "hints": [
+      "Wireshark's IEEE 802.11 preferences allow decryption with the PSK"
+    ]
+  },
+  {
+    "id": "vq-wireless-30",
+    "topic_id": "wireless",
+    "type": "command",
+    "difficulty": "medium",
+    "question": "What airdecap-ng command decrypts a WPA capture file after cracking the password?",
+    "correct_answers": [
+      "airdecap-ng -e MyWiFi -p cracked_password capture.cap",
+      "airdecap-ng -e ESSID -p pass -l capture.cap",
+      "airdecap-ng -b BSSID -e ESSID -p password capture.cap"
+    ],
+    "validation_type": "contains_any",
+    "required_keywords": [],
+    "explanation": "airdecap-ng decrypts WEP/WPA captured traffic. For WPA: specify -e (ESSID/SSID) and -p (password). The -l flag removes decrypted packets from the output if you only want unencrypted data. Output file: capture-dec.cap readable in Wireshark for clear-text analysis.",
+    "hints": [
+      "Use -e for SSID and -p for password to decrypt the capture file"
+    ]
   }
 ]

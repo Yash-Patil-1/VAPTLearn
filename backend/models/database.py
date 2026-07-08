@@ -1,4 +1,4 @@
-"""SQLite database for user state (progress, bookmarks, notes)."""
+"""SQLite database for user state (progress, bookmarks, notes, streaks, XP)."""
 
 import sqlite3
 from pathlib import Path
@@ -49,6 +49,23 @@ async def init_db():
             correct INTEGER NOT NULL,
             user_answer TEXT,
             answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Streak & XP tables
+        CREATE TABLE IF NOT EXISTS user_stats (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            total_xp INTEGER NOT NULL DEFAULT 0,
+            current_streak INTEGER NOT NULL DEFAULT 0,
+            longest_streak INTEGER NOT NULL DEFAULT 0,
+            last_active_date TEXT
+        );
+        INSERT OR IGNORE INTO user_stats (id) VALUES (1);
+
+        CREATE TABLE IF NOT EXISTS daily_activity (
+            date TEXT PRIMARY KEY,
+            xp INTEGER NOT NULL DEFAULT 0,
+            lessons INTEGER NOT NULL DEFAULT 0,
+            quizzes INTEGER NOT NULL DEFAULT 0
         );
     """)
     conn.commit()

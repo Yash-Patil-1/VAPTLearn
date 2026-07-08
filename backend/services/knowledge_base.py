@@ -18,6 +18,8 @@ class KnowledgeBase:
         self.tools: list[dict] = []
         self.mitre_techniques: list[dict] = []
         self.questions: list[dict] = []
+        self._question_index: dict[str, dict] = {}  # id -> question
+        self.glossary: list[dict] = []
         self.theory: list[dict] = []
         self._index: dict[str, dict] = {}  # id -> command
 
@@ -57,7 +59,16 @@ class KnowledgeBase:
         if questions_dir.exists():
             for f in sorted(questions_dir.glob("*.json")):
                 with open(f, 'r') as fp:
-                    self.questions.extend(json.load(fp))
+                    entries = json.load(fp)
+                    self.questions.extend(entries)
+                    for q in entries:
+                        self._question_index[q["id"]] = q
+
+        # Load glossary
+        glossary_file = DATA_DIR / "glossary.json"
+        if glossary_file.exists():
+            with open(glossary_file, 'r') as f:
+                self.glossary = json.load(f)
 
         # Load theory
         theory_dir = DATA_DIR / "theory"
@@ -76,6 +87,10 @@ class KnowledgeBase:
 
     def get_command(self, command_id: str) -> Optional[dict]:
         return self._index.get(command_id)
+
+    def get_question(self, question_id: str) -> Optional[dict]:
+        """Look up a question by ID (O(1))."""
+        return self._question_index.get(question_id)
 
     def search_commands(self, query: str) -> list[dict]:
         """Simple text search across commands."""

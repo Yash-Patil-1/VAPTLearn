@@ -1,0 +1,18 @@
+{
+  // ============================================================
+  // VAPTLearn — IDE configuration (subfolder context)
+  // ============================================================
+
+  // --- CSS / Tailwind v4 ---
+  // @plugin, @theme, @utility are Tailwind CSS v4-specific at-rules.
+  // The built-in CSS language server flags them as unknown, but
+  // Vite's PostCSS pipeline processes them correctly at build time.
+  //
+  // This is the standard fix recommended by the Tailwind CSS v4 docs
+  // for suppressing "Unknown at rule" warnings in VS Code.
+  "css.lint.unknownAtRules": "ignore",
+
+  // --- Python ---
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+  "python.terminal.activateEnvironment": true
+}
