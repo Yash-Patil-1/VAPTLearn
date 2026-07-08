@@ -27,6 +27,22 @@ VAPTLearn is a local-first cybersecurity learning platform that teaches penetrat
 
 ---
 
+## 📸 Screenshots
+
+| Dashboard | Guided Lessons |
+|:---:|:---:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Lessons](docs/screenshots/lessons.png) |
+
+| Quiz Engine | Command Explorer |
+|:---:|:---:|
+| ![Quiz](docs/screenshots/quiz.png) | ![Commands](docs/screenshots/commands.png) |
+
+| Tool Library | MITRE ATT&CK | Glossary |
+|:---:|:---:|:---:|
+| ![Tools](docs/screenshots/tools.png) | ![MITRE](docs/screenshots/mitre.png) | ![Glossary](docs/screenshots/glossary.png) |
+
+---
+
 ## ✨ Features
 
 | Feature | Description |
