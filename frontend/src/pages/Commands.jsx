@@ -77,7 +77,7 @@ export default function Commands() {
       <div className="space-y-2">
         {commands.map(cmd => (
           <Link
-            key={cmd.id}
+            key={cmd.id + '-' + cmd.command.substring(0, 20)}
             to={`/commands/${cmd.id}`}
             className="block px-5 py-3 transition-all duration-200"
             style={{

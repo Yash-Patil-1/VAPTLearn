@@ -3,8 +3,6 @@ import { Search, BookText, ChevronDown, ChevronUp } from 'lucide-react'
 import SkeletonLoader from '../components/SkeletonLoader'
 import ErrorMessage from '../components/ErrorMessage'
 
-const API_BASE = 'http://localhost:8000'
-
 export default function Glossary() {
   const [terms, setTerms] = useState([])
   const [loading, setLoading] = useState(true)
@@ -15,7 +13,7 @@ export default function Glossary() {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    fetch(`${API_BASE}/api/glossary`)
+    fetch('/api/glossary')
       .then(r => r.json())
       .then(data => {
         setTerms(data.terms || [])
