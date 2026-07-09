@@ -11,8 +11,7 @@ venv/
 data/database/*.db
 
 # IDE
-.vscode/*
-!.vscode/settings.json
+.vscode/
 .idea/
 
 # OS
