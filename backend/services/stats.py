@@ -9,7 +9,6 @@ from datetime import date, timedelta
 from models.database import get_connection
 
 # XP values (named constants, tune later)
-XP_SECTION_CHECKPOINT = 5   # Lesson section checkpoint answered correctly
 XP_LESSON_COMPLETE = 15     # Lesson completed (all checkpoints done)
 XP_QUIZ_CORRECT = 5         # Quiz question correct
 DAILY_GOAL_XP = 50          # Daily goal — the flame lights when met
