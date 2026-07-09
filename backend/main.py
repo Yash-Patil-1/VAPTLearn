@@ -10,6 +10,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
+
 from routers import commands, phases, tools, mitre, progress, quiz, lessons, streak, glossary
 from models.database import init_db
 from services.knowledge_base import KnowledgeBase
@@ -19,15 +23,15 @@ from services.quiz_engine import QuizEngine
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load knowledge base on startup."""
-    print("🔒 Loading VAPTLearn knowledge base...")
+    logger.info("Loading VAPTLearn knowledge base...")
     app.state.kb = KnowledgeBase()
     app.state.kb.load()
-    print(f"✅ Loaded {app.state.kb.command_count} commands, {app.state.kb.tool_count} tools")
+    logger.info("Loaded %d commands, %d tools", app.state.kb.command_count, app.state.kb.tool_count)
     app.state.quiz_engine = QuizEngine(app.state.kb.questions if hasattr(app.state.kb, 'questions') else [])
     await init_db()
-    print("✅ Database initialized.")
+    logger.info("Database initialized.")
     yield
-    print("👋 Shutting down VAPTLearn.")
+    logger.info("Shutting down VAPTLearn.")
 
 
 app = FastAPI(

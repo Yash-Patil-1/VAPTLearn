@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle, Lightbulb, Award, Flame } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
@@ -20,6 +20,7 @@ export default function LessonView() {
   const [completed, setCompleted] = useState(false)
   const [xpEarned, setXpEarned] = useState(0)
   const [streak, setStreak] = useState(null)
+  const sectionRef = useRef(null)
   // 'reading' | 'checkpoint' | 'result'
   const [phase, setPhase] = useState('reading')
 
@@ -35,6 +36,10 @@ export default function LessonView() {
       setLoading(false)
     }).catch(() => { setError(true); setLoading(false) })
   }, [id])
+
+  useEffect(() => {
+    sectionRef.current?.focus()
+  }, [step])
 
   // When entering checkpoint phase, fetch the question
   useEffect(() => {
@@ -213,7 +218,7 @@ export default function LessonView() {
       {/* ===== READING PHASE ===== */}
       {phase === 'reading' && (
         <>
-          <div className="p-6 mb-6 animate-fade-in" key={`s-${step}`}
+          <div ref={sectionRef} tabIndex={-1} className="p-6 mb-6 animate-fade-in focus-visible:ring-1 focus-visible:ring-[#B4FF00] outline-none" key={`s-${step}`}
             style={{
               backgroundColor: '#141614',
               border: '1px solid rgba(180, 255, 0, 0.1)',
