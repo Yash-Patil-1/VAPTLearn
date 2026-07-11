@@ -56,7 +56,7 @@ VAPTLearn is a local-first cybersecurity learning platform that teaches penetrat
 | 🏆 Level System | 10 levels with XP progression (separate from streak) |
 | 🔖 Progress Tracking | Mark commands & lessons as completed |
 | 🔖 Bookmarks & Notes | Personal reference system |
-| 🎨 Lamborghini Identity | Carbon fiber + Venom Green + Arancio Orange theme |
+| 🎨 Lamborghini Identity | Dark/light toggle — Carbon fiber + Venom Green + Arancio Orange |
 
 ---
 
@@ -245,12 +245,11 @@ python -m pytest tests/ -v
 ## 🎨 Design
 
 **Lamborghini-inspired design language:**
-- Carbon black (`#0A0B0A`) background — dark, aggressive, high-performance
-- Forged panel (`#141614`) for cards — angular clip paths, carbon-fiber aesthetic
-- Venom Green (`#B4FF00`) accents — neon, energetic, high-contrast
-- Arancio Orange (`#FF5C00`) for highlights — heat, power, warning
-- JetBrains Mono + Rajdhani for typography
-- No border-radius — all angular, industrial, mechanical
+- **Dark/light toggle** — defaults to dark, persists in localStorage
+- **Dark theme:** carbon black (`#0A0B0A`) background, forged panel (`#141614`) cards
+- **Light theme:** cream (`#F5F7FA`) background, white cards, dark text
+- Venom Green (`#B4FF00`), Arancio Orange (`#FF5C00`) accents
+- JetBrains Mono + Rajdhani, angular clip paths, no border-radius
 
 ---
 

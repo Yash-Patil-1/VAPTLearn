@@ -12,8 +12,8 @@ export default function StreakBadge() {
   if (!data) return null
 
   const flameColor = data.goal_met
-    ? 'text-[#B4FF00] drop-shadow-[0_0_6px_rgba(180,255,0,0.5)]'
-    : 'text-[#7C837A]'
+    ? 'text-[var(--color-venom-green)] drop-shadow-[0_0_6px_color-mix(in srgb, var(--color-venom-green) 50%, transparent)]'
+    : 'text-[var(--color-ash-steel)]'
 
   return (
     <div className="flex items-center gap-2 px-3 py-2">
@@ -21,7 +21,7 @@ export default function StreakBadge() {
       <span className={`font-mono text-sm font-bold ${flameColor}`}>
         {data.current_streak}
       </span>
-      <span className="text-[10px] text-[#7C837A]">
+      <span className="text-[10px] text-[var(--color-ash-steel)]">
         {data.today_xp}/{data.daily_goal} XP
       </span>
     </div>

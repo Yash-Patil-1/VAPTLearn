@@ -9,7 +9,7 @@
  *   <SkeletonLoader variant="lesson" count={7} />
  */
 const baseStyle = {
-  backgroundColor: 'rgba(124, 131, 122, 0.08)',
+  backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 8%, transparent)',
   animation: 'skeleton-pulse 1.8s ease-in-out infinite',
 };
 

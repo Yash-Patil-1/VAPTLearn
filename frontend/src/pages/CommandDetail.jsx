@@ -41,7 +41,7 @@ export default function CommandDetail() {
   if (error) {
     return (
       <div className="max-w-4xl">
-        <Link to="/commands" className="inline-flex items-center gap-1 text-[#B4FF00] hover:underline mb-6 text-sm">
+        <Link to="/commands" className="inline-flex items-center gap-1 text-[var(--color-venom-green)] hover:underline mb-6 text-sm">
           <ArrowLeft className="w-4 h-4" /> Back to Commands
         </Link>
         <ErrorMessage message="Command not found or server unavailable." />
@@ -58,25 +58,25 @@ export default function CommandDetail() {
       {/* Header */}
       <h1 className="text-2xl font-bold text-ice-white mb-2">{cmd.name}</h1>
       <div className="flex gap-2 mb-6 flex-wrap">
-        <Tag color="#B4FF00">{cmd.tool}</Tag>
-        <Tag color="#7C837A">{cmd.category.replace(/_/g, ' ')}</Tag>
-        <Tag color="#FFC400">{cmd.mitre_tactic}</Tag>
-        {cmd.os.map(o => <Tag key={o} color="#7C837A">{o}</Tag>)}
+        <Tag color="var(--color-venom-green)">{cmd.tool}</Tag>
+        <Tag color="var(--color-ash-steel)">{cmd.category.replace(/_/g, ' ')}</Tag>
+        <Tag color="var(--color-medium)">{cmd.mitre_tactic}</Tag>
+        {cmd.os.map(o => <Tag key={o} color="var(--color-ash-steel)">{o}</Tag>)}
       </div>
 
       {/* Command */}
       <div className="relative mb-8">
-        <div className="bg-carbon-black border border-[rgba(124,131,122,0.12)] p-4 font-mono text-sm text-[#B4FF00] overflow-x-auto">
+        <div className="bg-carbon-black border border-[color-mix(in_srgb,var(--color-ash-steel)_12%,transparent)] p-4 font-mono text-sm text-[var(--color-venom-green)] overflow-x-auto">
           <code>{cmd.command}</code>
         </div>
-        <button onClick={copyCommand} className="absolute top-3 right-3 text-ash-steel hover:text-[#B4FF00] transition-colors">
+        <button onClick={copyCommand} className="absolute top-3 right-3 text-ash-steel hover:text-[var(--color-venom-green)] transition-colors">
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </button>
       </div>
 
       {/* Description */}
       <Section title="Description">
-        <p className="text-[#C9CFC7] text-sm leading-relaxed">{cmd.description}</p>
+        <p className="text-[var(--color-slate-mist)] text-sm leading-relaxed">{cmd.description}</p>
       </Section>
 
       {/* Arguments */}
@@ -84,8 +84,8 @@ export default function CommandDetail() {
         <div className="space-y-2">
           {Object.entries(cmd.arguments).map(([arg, desc]) => (
             <div key={arg} className="flex gap-3">
-              <code className="text-[#B4FF00] font-mono text-xs shrink-0">--{arg}</code>
-              <span className="text-[#C9CFC7] text-xs">{desc}</span>
+              <code className="text-[var(--color-venom-green)] font-mono text-xs shrink-0">--{arg}</code>
+              <span className="text-[var(--color-slate-mist)] text-xs">{desc}</span>
             </div>
           ))}
         </div>
@@ -93,14 +93,14 @@ export default function CommandDetail() {
 
       {/* Expected Output */}
       <Section title="Expected Output">
-        <div className="bg-carbon-black border border-[rgba(124,131,122,0.12)] p-4 font-mono text-xs text-[#C9CFC7] whitespace-pre-wrap">{cmd.expected_output}</div>
+        <div className="bg-carbon-black border border-[color-mix(in_srgb,var(--color-ash-steel)_12%,transparent)] p-4 font-mono text-xs text-[var(--color-slate-mist)] whitespace-pre-wrap">{cmd.expected_output}</div>
       </Section>
 
       {/* MITRE ATT&CK */}
       <Section title="MITRE ATT&CK" icon={Target}>
         <div className="flex gap-2 flex-wrap">
           {cmd.mitre_mapping.map(t => (
-            <Tag key={t} color="#B4FF00">{t}</Tag>
+            <Tag key={t} color="var(--color-venom-green)">{t}</Tag>
           ))}
           <span className="text-xs text-ash-steel self-center ml-2">Tactic: {cmd.mitre_tactic}</span>
         </div>
@@ -110,8 +110,8 @@ export default function CommandDetail() {
       <Section title="Detection (Blue Team)" icon={Shield}>
         <ul className="space-y-1">
           {cmd.detections.map((d, i) => (
-            <li key={i} className="text-xs text-[#C9CFC7] flex gap-2">
-              <span className="text-[#B4FF00] shrink-0">▸</span> {d}
+            <li key={i} className="text-xs text-[var(--color-slate-mist)] flex gap-2">
+              <span className="text-[var(--color-venom-green)] shrink-0">▸</span> {d}
             </li>
           ))}
         </ul>
@@ -121,7 +121,7 @@ export default function CommandDetail() {
       <Section title="Remediation">
         <ul className="space-y-1">
           {cmd.remediation.map((r, i) => (
-            <li key={i} className="text-xs text-[#C9CFC7] flex gap-2">
+            <li key={i} className="text-xs text-[var(--color-slate-mist)] flex gap-2">
               <span className="text-medium shrink-0">▸</span> {r}
             </li>
           ))}
@@ -132,7 +132,7 @@ export default function CommandDetail() {
       <Section title="Common Mistakes" icon={AlertTriangle}>
         <ul className="space-y-1">
           {cmd.common_mistakes.map((m, i) => (
-            <li key={i} className="text-xs text-[#C9CFC7] flex gap-2">
+            <li key={i} className="text-xs text-[var(--color-slate-mist)] flex gap-2">
               <span className="text-critical shrink-0">▸</span> {m}
             </li>
           ))}
@@ -143,7 +143,7 @@ export default function CommandDetail() {
       <Section title="Alternatives" icon={Wrench}>
         <div className="flex flex-wrap gap-2">
           {cmd.alternatives.map((a, i) => (
-            <Tag key={i} color="#7C837A">{a}</Tag>
+            <Tag key={i} color="var(--color-ash-steel)">{a}</Tag>
           ))}
         </div>
       </Section>
@@ -154,7 +154,7 @@ export default function CommandDetail() {
           <ul className="space-y-1">
             {cmd.references.map((ref, i) => (
               <li key={i}>
-                <a href={ref} target="_blank" rel="noopener noreferrer" className="text-xs text-[#B4FF00] hover:underline hover:text-[#B4FF00]/80 transition-colors">
+                <a href={ref} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--color-venom-green)] hover:underline hover:text-[var(--color-venom-green)]/80 transition-colors">
                   {ref}
                 </a>
               </li>
@@ -170,7 +170,7 @@ function Section({ title, icon: Icon, children }) {
   return (
     <div className="mb-6">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-ice-white mb-3 uppercase tracking-wider">
-        {Icon && <Icon className="w-4 h-4 text-[#B4FF00]" />}
+        {Icon && <Icon className="w-4 h-4 text-[var(--color-venom-green)]" />}
         {title}
       </h2>
       {children}
@@ -181,7 +181,7 @@ function Section({ title, icon: Icon, children }) {
 function Tag({ color, children }) {
   return (
     <span className="px-2 py-0.5 text-[10px] font-mono inline-flex items-center"
-      style={{ border: `1px solid ${color}40`, color }}>
+      style={{ border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`, color }}>
       {children}
     </span>
   )

@@ -52,16 +52,16 @@ export default function Dashboard() {
         {streak && (
           <div className="flex flex-col items-end gap-2 px-4 py-3 rounded-sm"
             style={{
-              backgroundColor: 'rgba(180, 255, 0, 0.04)',
-              border: '1px solid rgba(180, 255, 0, 0.1)',
+              backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 4%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-venom-green) 10%, transparent)',
             }}>
             {/* Level */}
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-mono px-1.5 py-0.5"
                 style={{
-                  backgroundColor: 'rgba(180, 255, 0, 0.1)',
-                  border: '1px solid rgba(180, 255, 0, 0.25)',
-                  color: '#B4FF00',
+                  backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 10%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-venom-green) 25%, transparent)',
+                  color: 'var(--color-venom-green)',
                 }}>
                 LVL {streak.level}
               </span>
@@ -73,18 +73,18 @@ export default function Dashboard() {
             </div>
             {/* Level XP bar */}
             {!streak.max_level_reached && (
-              <div className="w-40 h-1 rounded-full mb-2" style={{ backgroundColor: 'rgba(124, 131, 122, 0.15)' }}>
+              <div className="w-40 h-1 rounded-full mb-2" style={{ backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}>
                 <div className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${(streak.level_xp / streak.next_level_xp) * 100}%`,
-                    backgroundColor: '#FF5C00',
+                    backgroundColor: 'var(--color-high)',
                   }} />
               </div>
             )}
             <div className="flex items-center gap-2">
-              <Flame className={`w-5 h-5 ${streak.goal_met ? 'text-[#B4FF00]' : 'text-ash-steel'}`}
-                style={streak.goal_met ? { filter: 'drop-shadow(0 0 6px rgba(180,255,0,0.5))' } : {}} />
-              <span className={`font-mono text-lg font-bold ${streak.goal_met ? 'text-[#B4FF00]' : 'text-ash-steel'}`}>
+              <Flame className={`w-5 h-5 ${streak.goal_met ? 'text-venom-green' : 'text-ash-steel'}`}
+                style={streak.goal_met ? { filter: 'drop-shadow(0 0 6px color-mix(in srgb, var(--color-venom-green) 50%, transparent))' } : {}} />
+              <span className={`font-mono text-lg font-bold ${streak.goal_met ? 'text-venom-green' : 'text-ash-steel'}`}>
                 {streak.current_streak}
               </span>
               <span className="text-xs text-ash-steel font-mono">day streak</span>
@@ -94,11 +94,11 @@ export default function Dashboard() {
               <span className="text-sm font-mono text-ice-white">{streak.total_xp} XP</span>
             </div>
             {/* Daily XP bar */}
-            <div className="w-40 h-1.5 rounded-full mt-1" style={{ backgroundColor: 'rgba(124, 131, 122, 0.15)' }}>
+            <div className="w-40 h-1.5 rounded-full mt-1" style={{ backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}>
               <div className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${goalProgress}%`,
-                  background: 'linear-gradient(90deg, #B4FF00, #FF5C00)',
+                  background: 'linear-gradient(90deg, var(--color-venom-green), var(--color-high))',
                 }} />
             </div>
           </div>
@@ -117,11 +117,11 @@ export default function Dashboard() {
                   style={{
                     height: `${h}px`,
                     backgroundColor: pct >= 1
-                      ? '#B4FF00'
+                      ? 'var(--color-venom-green)'
                       : pct > 0
-                        ? 'rgba(180, 255, 0, 0.3)'
-                        : 'rgba(124, 131, 122, 0.08)',
-                    boxShadow: pct >= 1 ? '0 0 8px rgba(180, 255, 0, 0.3)' : 'none',
+                        ? 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)'
+                        : 'color-mix(in srgb, var(--color-ash-steel) 8%, transparent)',
+                    boxShadow: pct >= 1 ? '0 0 8px color-mix(in srgb, var(--color-venom-green) 30%, transparent)' : 'none',
                   }} />
                 <span className="text-[8px] font-mono text-ash-steel">
                   {day.date.slice(-2)}
@@ -163,11 +163,11 @@ function StatCard({ icon: Icon, label, value }) {
   return (
     <div className="flex flex-col items-center text-center py-5 rounded-sm"
       style={{
-        backgroundColor: '#141614',
-        border: '1px solid rgba(124, 131, 122, 0.12)',
+        backgroundColor: 'var(--color-forged-panel)',
+        border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
         clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
       }}>
-      <Icon className="w-5 h-5 text-[#B4FF00] mb-2" />
+      <Icon className="w-5 h-5 text-venom-green mb-2" />
       <span className="text-2xl font-bold text-ice-white font-mono">{value}</span>
       <span className="text-xs text-ash-steel mt-0.5">{label}</span>
     </div>
@@ -179,16 +179,16 @@ function QuickLink({ to, title, desc }) {
     <Link to={to}
       className="flex items-center justify-between px-5 py-4 rounded-sm transition-all duration-200 group"
       style={{
-        backgroundColor: '#141614',
-        border: '1px solid rgba(124, 131, 122, 0.12)',
+        backgroundColor: 'var(--color-forged-panel)',
+        border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(180, 255, 0, 0.3)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124, 131, 122, 0.12)'}>
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-ash-steel) 12%, transparent)'}>
       <div>
         <h3 className="text-ice-white font-medium text-sm">{title}</h3>
         <p className="text-xs text-ash-steel mt-0.5">{desc}</p>
       </div>
-      <ArrowRight className="w-4 h-4 text-ash-steel group-hover:text-[#B4FF00] transition-colors" />
+      <ArrowRight className="w-4 h-4 text-ash-steel group-hover:text-venom-green transition-colors" />
     </Link>
   )
 }

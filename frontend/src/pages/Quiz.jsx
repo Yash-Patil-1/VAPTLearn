@@ -44,14 +44,14 @@ export default function Quiz() {
   }
 
   const activeCatStyle = {
-    backgroundColor: 'rgba(180, 255, 0, 0.08)',
-    border: '1px solid rgba(180, 255, 0, 0.3)',
-    color: '#B4FF00',
+    backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 8%, transparent)',
+    border: '1px solid color-mix(in srgb, var(--color-venom-green) 30%, transparent)',
+    color: 'var(--color-venom-green)',
   }
   const inactiveCatStyle = {
     backgroundColor: 'transparent',
-    border: '1px solid rgba(124, 131, 122, 0.15)',
-    color: '#7C837A',
+    border: '1px solid color-mix(in srgb, var(--color-ash-steel) 15%, transparent)',
+    color: 'var(--color-ash-steel)',
   }
 
   return (
@@ -73,14 +73,14 @@ export default function Quiz() {
       {/* Stats bar */}
       <div className="flex gap-6 mb-6 text-sm font-mono">
         <span className="text-ash-steel">Answered: <span className="text-ice-white">{stats.total_answered}</span></span>
-        <span className="text-ash-steel">Correct: <span className="text-[#B4FF00]">{stats.correct}</span></span>
+        <span className="text-ash-steel">Correct: <span className="text-[var(--color-venom-green)]">{stats.correct}</span></span>
         <span className="text-ash-steel">Accuracy: <span className="text-medium">{stats.accuracy}%</span></span>
       </div>
 
       {loading ? (
         <div className="p-5" style={{
-          backgroundColor: '#141614',
-          border: '1px solid rgba(124, 131, 122, 0.12)',
+          backgroundColor: 'var(--color-forged-panel)',
+          border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
           clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
         }}>
           <SkeletonLoader variant="text" lines={6} />
@@ -89,17 +89,17 @@ export default function Quiz() {
         <ErrorMessage message={error} onRetry={loadQuestion} />
       ) : question ? (
         <div className="p-5" style={{
-          backgroundColor: '#141614',
-          border: '1px solid rgba(124, 131, 122, 0.12)',
+          backgroundColor: 'var(--color-forged-panel)',
+          border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
           clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
         }}>
           <div className="flex justify-between mb-4">
             <span className="px-2 py-0.5 text-[10px] font-mono"
-              style={{ border: '1px solid rgba(180, 255, 0, 0.2)', color: '#B4FF00' }}>
+              style={{ border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)', color: 'var(--color-venom-green)' }}>
               {question.type}
             </span>
             <span className="px-2 py-0.5 text-[10px] font-mono"
-              style={{ border: '1px solid rgba(255, 196, 0, 0.3)', color: '#FFC400' }}>
+              style={{ border: '1px solid color-mix(in srgb, var(--color-medium) 30%, transparent)', color: 'var(--color-medium)' }}>
               {question.difficulty}
             </span>
           </div>
@@ -110,8 +110,8 @@ export default function Quiz() {
             <>
               <textarea value={answer} onChange={e => setAnswer(e.target.value)}
                 placeholder={question.type === 'command' ? 'Type the command...' : 'Type your answer...'}
-                className="w-full bg-carbon-black border border-[rgba(124,131,122,0.15)] p-3 text-ice-white font-mono text-sm h-24 resize-none mb-4 focus:outline-none transition-colors"
-                style={{ borderColor: answer ? 'rgba(180, 255, 0, 0.3)' : 'rgba(124, 131, 122, 0.15)' }}
+                className="w-full bg-carbon-black border border-[color-mix(in_srgb,var(--color-ash-steel)_15%,transparent)] p-3 text-ice-white font-mono text-sm h-24 resize-none mb-4 focus:outline-none transition-colors"
+                style={{ borderColor: answer ? 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)' : 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitAnswer() }}} />
               <div className="flex gap-3">
                 <button onClick={submitAnswer} className="btn-primary">Submit</button>
@@ -128,27 +128,27 @@ export default function Quiz() {
           {result && (
             <div className="mt-4 p-4"
               style={{
-                border: `1px solid ${result.correct ? 'rgba(180, 255, 0, 0.5)' : 'rgba(255, 59, 48, 0.5)'}`,
-                backgroundColor: result.correct ? 'rgba(180, 255, 0, 0.04)' : 'rgba(255, 59, 48, 0.04)',
+                border: `1px solid ${result.correct ? 'color-mix(in srgb, var(--color-venom-green) 50%, transparent)' : 'color-mix(in srgb, var(--color-critical) 50%, transparent)'}`,
+                backgroundColor: result.correct ? 'color-mix(in srgb, var(--color-venom-green) 4%, transparent)' : 'color-mix(in srgb, var(--color-critical) 4%, transparent)',
               }}>
               <div className="flex items-center gap-2 mb-2">
                 {result.correct
-                  ? <CheckCircle className="w-5 h-5 text-[#B4FF00]" />
+                  ? <CheckCircle className="w-5 h-5 text-[var(--color-venom-green)]" />
                   : <XCircle className="w-5 h-5 text-critical" />
                 }
                 <span className="font-medium text-ice-white">
                   {result.correct ? 'Correct!' : 'Incorrect'}
                 </span>
                 {result.xp_awarded > 0 && (
-                  <span className="flex items-center gap-1 text-xs text-[#B4FF00] font-mono ml-auto">
+                  <span className="flex items-center gap-1 text-xs text-[var(--color-venom-green)] font-mono ml-auto">
                     <Flame className="w-3 h-3" /> +{result.xp_awarded} XP
                   </span>
                 )}
               </div>
-              <p className="text-sm text-[#C9CFC7] mb-2">{result.explanation}</p>
+              <p className="text-sm text-[var(--color-slate-mist)] mb-2">{result.explanation}</p>
               {!result.correct && (
                 <p className="text-xs text-ash-steel">
-                  Expected: <code className="text-[#B4FF00] bg-carbon-black px-1 py-0.5 text-xs">{result.expected}</code>
+                  Expected: <code className="text-[var(--color-venom-green)] bg-carbon-black px-1 py-0.5 text-xs">{result.expected}</code>
                 </p>
               )}
               <button onClick={loadQuestion} className="btn-primary mt-4">Next Question →</button>
@@ -157,8 +157,8 @@ export default function Quiz() {
         </div>
       ) : (
         <div className="p-10 text-center" style={{
-          backgroundColor: '#141614',
-          border: '1px solid rgba(124, 131, 122, 0.12)',
+          backgroundColor: 'var(--color-forged-panel)',
+          border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
         }}>
           <p className="text-ash-steel">No questions available for this category yet.</p>
           <p className="text-xs text-ash-steel mt-2">Questions are being added — try another category.</p>

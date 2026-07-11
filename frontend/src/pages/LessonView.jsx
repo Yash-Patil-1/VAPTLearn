@@ -128,22 +128,22 @@ export default function LessonView() {
       <div className="max-w-4xl">
         <div className="p-10 text-center animate-fade-in"
           style={{
-            backgroundColor: '#141614',
-            border: '1px solid rgba(180, 255, 0, 0.3)',
+            backgroundColor: 'var(--color-forged-panel)',
+            border: '1px solid color-mix(in srgb, var(--color-venom-green) 30%, transparent)',
             clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
           }}>
-          <Award className="w-16 h-16 mx-auto mb-4 text-[#B4FF00]" />
+          <Award className="w-16 h-16 mx-auto mb-4 text-[var(--color-venom-green)]" />
           <h2 className="text-2xl font-bold text-ice-white mb-2">Lesson Complete!</h2>
           <p className="text-ash-steel mb-6">You've mastered this phase of VAPT methodology.</p>
           {xpEarned > 0 && (
             <div className="inline-flex flex-wrap items-center gap-3 px-5 py-3 mb-6"
               style={{
-                backgroundColor: 'rgba(180, 255, 0, 0.08)',
-                border: '1px solid rgba(180, 255, 0, 0.2)',
+                backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 8%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)',
                 clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)',
               }}>
-              <Flame className="w-5 h-5 text-[#B4FF00]" style={{ filter: 'drop-shadow(0 0 6px rgba(180,255,0,0.5))' }} />
-              <span className="text-[#B4FF00] font-bold font-mono">+{xpEarned} XP</span>
+              <Flame className="w-5 h-5 text-[var(--color-venom-green)]" style={{ filter: 'drop-shadow(0 0 6px color-mix(in srgb, var(--color-venom-green) 50%, transparent))' }} />
+              <span className="text-[var(--color-venom-green)] font-bold font-mono">+{xpEarned} XP</span>
               {streak && (
                 <>
                   <span className="text-ash-steel font-mono text-sm">
@@ -151,9 +151,9 @@ export default function LessonView() {
                   </span>
                   <span className="text-[10px] font-mono px-1.5 py-0.5"
                     style={{
-                      backgroundColor: 'rgba(180, 255, 0, 0.1)',
-                      border: '1px solid rgba(180, 255, 0, 0.25)',
-                      color: '#B4FF00',
+                      backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 10%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--color-venom-green) 25%, transparent)',
+                      color: 'var(--color-venom-green)',
                     }}>
                     LVL {streak.level}
                   </span>
@@ -173,7 +173,7 @@ export default function LessonView() {
   if (loading) {
     return (
       <div className="max-w-4xl">
-        <Link to="/learn" className="inline-flex items-center gap-1 text-[#B4FF00] hover:underline mb-6 text-sm">
+        <Link to="/learn" className="inline-flex items-center gap-1 text-[var(--color-venom-green)] hover:underline mb-6 text-sm">
           <ChevronLeft className="w-4 h-4" /> Back to lessons
         </Link>
         <SkeletonLoader variant="text" lines={5} count={2} />
@@ -184,7 +184,7 @@ export default function LessonView() {
   if (error || !lesson) {
     return (
       <div className="max-w-4xl">
-        <Link to="/learn" className="inline-flex items-center gap-1 text-[#B4FF00] hover:underline mb-6 text-sm">
+        <Link to="/learn" className="inline-flex items-center gap-1 text-[var(--color-venom-green)] hover:underline mb-6 text-sm">
           <ChevronLeft className="w-4 h-4" /> Back to lessons
         </Link>
         <ErrorMessage message="Lesson not found or server unavailable." />
@@ -197,18 +197,18 @@ export default function LessonView() {
 
   return (
     <div className="max-w-4xl">
-      <Link to="/learn" className="inline-flex items-center gap-1 text-[#B4FF00] hover:underline mb-6 text-sm transition-colors">
+      <Link to="/learn" className="inline-flex items-center gap-1 text-[var(--color-venom-green)] hover:underline mb-6 text-sm transition-colors">
         <ChevronLeft className="w-4 h-4" /> Back to lessons
       </Link>
 
       {/* Progress bar */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-1.5" style={{ backgroundColor: 'rgba(124, 131, 122, 0.15)' }}>
+        <div className="flex-1 h-1.5" style={{ backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}>
           <div className="h-full transition-all duration-500 ease-out"
             style={{
               width: `${((step + 1) / totalSections) * 100}%`,
-              backgroundColor: '#B4FF00',
-              boxShadow: '0 0 8px rgba(180, 255, 0, 0.3)',
+              backgroundColor: 'var(--color-venom-green)',
+              boxShadow: '0 0 8px color-mix(in srgb, var(--color-venom-green) 30%, transparent)',
             }}
           />
         </div>
@@ -218,33 +218,33 @@ export default function LessonView() {
       {/* ===== READING PHASE ===== */}
       {phase === 'reading' && (
         <>
-          <div ref={sectionRef} tabIndex={-1} className="p-6 mb-6 animate-fade-in focus-visible:ring-1 focus-visible:ring-[#B4FF00] outline-none" key={`s-${step}`}
+          <div ref={sectionRef} tabIndex={-1} className="p-6 mb-6 animate-fade-in focus-visible:ring-1 focus-visible:ring-[var(--color-venom-green)] outline-none" key={`s-${step}`}
             style={{
-              backgroundColor: '#141614',
-              border: '1px solid rgba(180, 255, 0, 0.1)',
+              backgroundColor: 'var(--color-forged-panel)',
+              border: '1px solid color-mix(in srgb, var(--color-venom-green) 10%, transparent)',
               clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
             }}>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[10px] font-mono px-2 py-0.5"
-                style={{ backgroundColor: 'rgba(180, 255, 0, 0.08)', color: '#B4FF00', border: '1px solid rgba(180, 255, 0, 0.2)' }}>
+                style={{ backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 8%, transparent)', color: 'var(--color-venom-green)', border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)' }}>
                 Section {step + 1}
               </span>
             </div>
             <h2 className="text-xl font-bold text-ice-white mb-4">{sections[step].title}</h2>
-            <div className="prose prose-invert max-w-none text-[#C9CFC7] leading-relaxed text-sm [&_strong]:text-ice-white [&_code]:text-[#B4FF00] [&_code]:bg-carbon-black [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_pre]:bg-carbon-black [&_pre]:border [&_pre]:border-forged-panel [&_pre]:p-3 [&_pre]:text-xs [&_pre]:font-mono">
+            <div className="prose prose-invert max-w-none text-[var(--color-slate-mist)] leading-relaxed text-sm [&_strong]:text-ice-white [&_code]:text-[var(--color-venom-green)] [&_code]:bg-carbon-black [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_pre]:bg-carbon-black [&_pre]:border [&_pre]:border-forged-panel [&_pre]:p-3 [&_pre]:text-xs [&_pre]:font-mono">
               <ReactMarkdown>{sections[step].content}</ReactMarkdown>
             </div>
 
             {/* Key concepts */}
             {sections[step].key_concepts && (
               <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t"
-                style={{ borderColor: 'rgba(124, 131, 122, 0.15)' }}>
+                style={{ borderColor: 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}>
                 {sections[step].key_concepts.map((concept, i) => (
                   <span key={i} className="px-2 py-0.5 text-[10px] font-mono"
                     style={{
-                      backgroundColor: 'rgba(180, 255, 0, 0.04)',
-                      border: '1px solid rgba(180, 255, 0, 0.1)',
-                      color: '#7C837A',
+                      backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 4%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--color-venom-green) 10%, transparent)',
+                      color: 'var(--color-ash-steel)',
                     }}>
                     {concept}
                   </span>
@@ -270,13 +270,13 @@ export default function LessonView() {
       {phase === 'checkpoint' && question && (
         <div className="p-6 mb-6 animate-fade-in"
           style={{
-            backgroundColor: '#141614',
-            border: '1px solid rgba(255, 92, 0, 0.15)',
+            backgroundColor: 'var(--color-forged-panel)',
+            border: '1px solid color-mix(in srgb, var(--color-high) 15%, transparent)',
             clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
           }}>
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[10px] font-mono px-2 py-0.5"
-              style={{ backgroundColor: 'rgba(255, 92, 0, 0.1)', color: '#FF5C00', border: '1px solid rgba(255, 92, 0, 0.3)' }}>
+              style={{ backgroundColor: 'color-mix(in srgb, var(--color-high) 10%, transparent)', color: 'var(--color-high)', border: '1px solid color-mix(in srgb, var(--color-high) 30%, transparent)' }}>
               CHECKPOINT
             </span>
           </div>
@@ -288,7 +288,7 @@ export default function LessonView() {
             onChange={e => setAnswer(e.target.value)}
             placeholder="Type your answer..."
             className="w-full bg-carbon-black border p-3 text-ice-white font-mono text-sm resize-none h-24 mb-3 focus:outline-none transition-colors"
-            style={{ borderColor: answer ? 'rgba(180, 255, 0, 0.3)' : 'rgba(124, 131, 122, 0.15)' }}
+            style={{ borderColor: answer ? 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)' : 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitCheckpoint() }}}
           />
           <div className="flex gap-3">
@@ -298,7 +298,7 @@ export default function LessonView() {
             </button>
           </div>
           {showHint && question.hints?.[0] && (
-            <p className="mt-3 text-xs italic" style={{ color: '#FF5C00' }}>💡 {question.hints[0]}</p>
+            <p className="mt-3 text-xs italic" style={{ color: 'var(--color-high)' }}>💡 {question.hints[0]}</p>
           )}
         </div>
       )}
@@ -307,27 +307,27 @@ export default function LessonView() {
       {phase === 'result' && result && (
         <div className="p-6 mb-6 animate-fade-in"
           style={{
-            border: `1px solid ${result.correct ? 'rgba(180, 255, 0, 0.5)' : 'rgba(255, 59, 48, 0.5)'}`,
-            backgroundColor: result.correct ? 'rgba(180, 255, 0, 0.04)' : 'rgba(255, 59, 48, 0.04)',
+            border: `1px solid ${result.correct ? 'color-mix(in srgb, var(--color-venom-green) 50%, transparent)' : 'color-mix(in srgb, var(--color-critical) 50%, transparent)'}`,
+            backgroundColor: result.correct ? 'color-mix(in srgb, var(--color-venom-green) 4%, transparent)' : 'color-mix(in srgb, var(--color-critical) 4%, transparent)',
           }}>
           <div className="flex items-center gap-2 mb-3">
             {result.correct
-              ? <CheckCircle className="w-5 h-5 text-[#B4FF00]" />
+              ? <CheckCircle className="w-5 h-5 text-[var(--color-venom-green)]" />
               : <XCircle className="w-5 h-5 text-critical" />
             }
             <span className="font-medium text-ice-white">
               {result.correct ? 'Correct!' : 'Not quite'}
             </span>
             {result.xp_awarded > 0 && (
-              <span className="text-[#B4FF00] text-xs font-mono ml-auto">
+              <span className="text-[var(--color-venom-green)] text-xs font-mono ml-auto">
                 <Flame className="w-3 h-3 inline mr-1" />+{result.xp_awarded} XP
               </span>
             )}
           </div>
-          <p className="text-sm text-[#C9CFC7] mb-3">{result.explanation}</p>
+          <p className="text-sm text-[var(--color-slate-mist)] mb-3">{result.explanation}</p>
           {!result.correct && (
             <p className="text-xs text-ash-steel mb-3">
-              Expected: <code className="text-[#B4FF00] bg-carbon-black px-1 py-0.5 text-xs">{result.expected}</code>
+              Expected: <code className="text-[var(--color-venom-green)] bg-carbon-black px-1 py-0.5 text-xs">{result.expected}</code>
             </p>
           )}
           <button onClick={advanceAfterResult} className="btn-primary flex items-center gap-1">

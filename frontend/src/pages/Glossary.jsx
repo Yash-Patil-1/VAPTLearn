@@ -61,19 +61,19 @@ export default function Glossary() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: '"Rajdhani", "Chakra Petch", sans-serif', color: '#EAEEE8' }}>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: '"Rajdhani", "Chakra Petch", sans-serif', color: 'var(--color-ice-white)' }}>
             Glossary
           </h1>
-          <p className="text-sm mt-1" style={{ color: '#7C837A' }}>
+          <p className="text-sm mt-1" style={{ color: 'var(--color-ash-steel)' }}>
             {terms.length} VAPT terminology definitions
           </p>
         </div>
-        <BookText className="w-6 h-6" style={{ color: '#B4FF00' }} />
+        <BookText className="w-6 h-6" style={{ color: 'var(--color-venom-green)' }} />
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#7C837A' }} />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-ash-steel)' }} />
         <input
           type="text"
           placeholder="Search terms or definitions..."
@@ -81,16 +81,16 @@ export default function Glossary() {
           onChange={e => { setSearch(e.target.value); setExpanded(null) }}
           className="w-full pl-10 pr-4 py-2.5 text-sm rounded-sm outline-none transition-colors"
           style={{
-            backgroundColor: 'rgba(124, 131, 122, 0.06)',
-            border: '1px solid rgba(124, 131, 122, 0.15)',
-            color: '#EAEEE8',
+            backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 6%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--color-ash-steel) 15%, transparent)',
+            color: 'var(--color-ice-white)',
           }}
         />
       </div>
 
       {/* Results count */}
       {search && (
-        <p className="text-xs" style={{ color: '#7C837A' }}>
+        <p className="text-xs" style={{ color: 'var(--color-ash-steel)' }}>
           {filtered.length} of {terms.length} terms match
         </p>
       )}
@@ -109,26 +109,26 @@ export default function Glossary() {
               key={i}
               className="rounded-sm overflow-hidden transition-all duration-200"
               style={{
-                backgroundColor: isOpen ? 'rgba(124, 131, 122, 0.08)' : 'rgba(124, 131, 122, 0.04)',
-                border: '1px solid rgba(124, 131, 122, 0.1)',
+                backgroundColor: isOpen ? 'color-mix(in srgb, var(--color-ash-steel) 8%, transparent)' : 'color-mix(in srgb, var(--color-ash-steel) 4%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-ash-steel) 10%, transparent)',
               }}
             >
               <button
                 onClick={() => setExpanded(isOpen ? null : i)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[rgba(124,131,122,0.06)]"
+                className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--color-ash-steel)_6%,transparent)]"
               >
-                <span className="text-sm font-medium" style={{ color: '#EAEEE8' }}>
+                <span className="text-sm font-medium" style={{ color: 'var(--color-ice-white)' }}>
                   {termDisplay}
                 </span>
                 {isOpen ? (
-                  <ChevronUp className="w-3.5 h-3.5 shrink-0" style={{ color: '#B4FF00' }} />
+                  <ChevronUp className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--color-venom-green)' }} />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: '#7C837A' }} />
+                  <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--color-ash-steel)' }} />
                 )}
               </button>
               {isOpen && (
                 <div className="px-4 pb-3 pt-0">
-                  <p className="text-sm leading-relaxed" style={{ color: '#B0B5AE' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-mist-text)' }}>
                     {entry.definition}
                   </p>
                 </div>
@@ -140,14 +140,14 @@ export default function Glossary() {
 
       {filtered.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-sm" style={{ color: '#7C837A' }}>
+          <p className="text-sm" style={{ color: 'var(--color-ash-steel)' }}>
             {search ? `No terms match "${search}"` : 'No terms found'}
           </p>
         </div>
       )}
 
       {/* Footer note */}
-      <p className="text-[10px] text-center pt-4" style={{ color: '#7C837A', opacity: 0.6 }}>
+      <p className="text-[10px] text-center pt-4" style={{ color: 'var(--color-ash-steel)', opacity: 0.6 }}>
         {terms.length} terms — continuously expanded as the platform grows
       </p>
     </div>
@@ -162,7 +162,7 @@ function highlightMatch(text, query) {
   return (
     <>
       {text.slice(0, idx)}
-      <span style={{ color: '#B4FF00' }}>{text.slice(idx, idx + query.length)}</span>
+      <span style={{ color: 'var(--color-venom-green)' }}>{text.slice(idx, idx + query.length)}</span>
       {text.slice(idx + query.length)}
     </>
   )

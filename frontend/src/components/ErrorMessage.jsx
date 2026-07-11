@@ -14,15 +14,15 @@ export default function ErrorMessage({ message, onRetry, compact = false }) {
       <div
         style={{
           padding: '1rem',
-          border: '1px solid rgba(255, 59, 48, 0.2)',
-          backgroundColor: 'rgba(255, 59, 48, 0.04)',
+          border: '1px solid color-mix(in srgb, var(--color-critical) 20%, transparent)',
+          backgroundColor: 'color-mix(in srgb, var(--color-critical) 4%, transparent)',
           display: 'flex',
           alignItems: 'center',
           gap: '0.75rem',
         }}
       >
-        <span style={{ color: '#FF3B30', fontSize: '14px', flexShrink: 0 }}>!</span>
-        <p style={{ color: '#7C837A', fontSize: '0.8rem', fontFamily: '"JetBrains Mono", monospace', margin: 0, flex: 1 }}>
+        <span style={{ color: 'var(--color-critical)', fontSize: '14px', flexShrink: 0 }}>!</span>
+        <p style={{ color: 'var(--color-ash-steel)', fontSize: '0.8rem', fontFamily: '"JetBrains Mono", monospace', margin: 0, flex: 1 }}>
           {text}
         </p>
         {onRetry && (
@@ -31,8 +31,8 @@ export default function ErrorMessage({ message, onRetry, compact = false }) {
             style={{
               padding: '0.3rem 0.75rem',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(180, 255, 0, 0.3)',
-              color: '#B4FF00',
+              border: '1px solid color-mix(in srgb, var(--color-venom-green) 30%, transparent)',
+              color: 'var(--color-venom-green)',
               fontSize: '0.7rem',
               fontFamily: '"JetBrains Mono", monospace',
               cursor: 'pointer',
@@ -57,15 +57,15 @@ export default function ErrorMessage({ message, onRetry, compact = false }) {
     >
       <div
         style={{
-          backgroundColor: '#141614',
-          border: '1px solid rgba(255, 59, 48, 0.2)',
+          backgroundColor: 'var(--color-forged-panel)',
+          border: '1px solid color-mix(in srgb, var(--color-critical) 20%, transparent)',
           clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
           padding: '2rem',
         }}
       >
         <p
           style={{
-            color: '#7C837A',
+            color: 'var(--color-ash-steel)',
             fontSize: '0.85rem',
             fontFamily: '"JetBrains Mono", monospace',
             lineHeight: 1.6,
@@ -79,8 +79,8 @@ export default function ErrorMessage({ message, onRetry, compact = false }) {
             onClick={onRetry}
             style={{
               padding: '0.5rem 1.25rem',
-              backgroundColor: '#B4FF00',
-              color: '#0A0B0A',
+              backgroundColor: 'var(--color-venom-green)',
+              color: 'var(--color-carbon-black)',
               fontWeight: 700,
               fontSize: '0.875rem',
               border: 'none',

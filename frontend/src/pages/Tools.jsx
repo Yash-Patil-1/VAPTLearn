@@ -31,31 +31,32 @@ export default function Tools() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {tools.map(tool => (
           <div key={tool.id}
-            className="p-4 transition-all duration-200"              style={{
-              backgroundColor: '#141614',
-              border: '1px solid rgba(124, 131, 122, 0.12)',
+            className="p-4 transition-all duration-200"
+            style={{
+              backgroundColor: 'var(--color-forged-panel)',
+              border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
               clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(180, 255, 0, 0.3)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(124, 131, 122, 0.12)' }}>
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-ash-steel) 12%, transparent)' }}>
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-ice-white font-medium">{tool.name}</h3>
                 <p className="text-xs text-ash-steel mt-1 line-clamp-2">{tool.description}</p>
               </div>
               <span className="px-2 py-0.5 text-[10px] font-mono shrink-0 ml-2"
-                style={{ border: '1px solid rgba(180, 255, 0, 0.2)', color: '#B4FF00' }}>
+                style={{ border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)', color: 'var(--color-venom-green)' }}>
                 {tool.command_count}
               </span>
             </div>
             <div className="flex gap-2 mt-3 flex-wrap">
               <span className="px-2 py-0.5 text-[10px] font-mono"
-                style={{ border: '1px solid rgba(124, 131, 122, 0.2)', color: '#7C837A' }}>
+                style={{ border: '1px solid color-mix(in srgb, var(--color-ash-steel) 20%, transparent)', color: 'var(--color-ash-steel)' }}>
                 {tool.category.replace(/_/g, ' ')}
               </span>
               {tool.platforms?.slice(0, 2).map(p => (
                 <span key={p} className="px-2 py-0.5 text-[10px] font-mono"
-                  style={{ border: '1px solid rgba(124, 131, 122, 0.2)', color: '#7C837A' }}>
+                  style={{ border: '1px solid color-mix(in srgb, var(--color-ash-steel) 20%, transparent)', color: 'var(--color-ash-steel)' }}>
                   {p}
                 </span>
               ))}

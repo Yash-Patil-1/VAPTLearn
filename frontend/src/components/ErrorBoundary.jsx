@@ -47,8 +47,8 @@ export default class ErrorBoundary extends Component {
         >
           <div
             style={{
-              backgroundColor: '#141614',
-              border: '1px solid rgba(255, 59, 48, 0.3)',
+              backgroundColor: 'var(--color-forged-panel)',
+              border: '1px solid color-mix(in srgb, var(--color-critical) 30%, transparent)',
               clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
               padding: '2rem',
             }}
@@ -58,21 +58,21 @@ export default class ErrorBoundary extends Component {
                 width: '48px',
                 height: '48px',
                 margin: '0 auto 1rem',
-                backgroundColor: 'rgba(255, 59, 48, 0.1)',
-                border: '1px solid rgba(255, 59, 48, 0.3)',
+                backgroundColor: 'color-mix(in srgb, var(--color-critical) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-critical) 30%, transparent)',
                 clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '20px',
-                color: '#FF3B30',
+                color: 'var(--color-critical)',
               }}
             >
               !
             </div>
             <h2
               style={{
-                color: '#EAEEE8',
+                color: 'var(--color-ice-white)',
                 fontSize: '1.1rem',
                 fontWeight: 600,
                 marginBottom: '0.5rem',
@@ -82,7 +82,7 @@ export default class ErrorBoundary extends Component {
             </h2>
             <p
               style={{
-                color: '#7C837A',
+                color: 'var(--color-ash-steel)',
                 fontSize: '0.8rem',
                 fontFamily: '"JetBrains Mono", monospace',
                 marginBottom: '1.5rem',
@@ -98,8 +98,8 @@ export default class ErrorBoundary extends Component {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.5rem 1.25rem',
-                backgroundColor: '#B4FF00',
-                color: '#0A0B0A',
+                backgroundColor: 'var(--color-venom-green)',
+                color: 'var(--color-carbon-black)',
                 fontWeight: 700,
                 fontSize: '0.875rem',
                 border: 'none',

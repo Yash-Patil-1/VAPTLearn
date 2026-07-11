@@ -44,36 +44,36 @@ export default function Learn() {
           <Link
             key={lesson.id}
             to={`/learn/${lesson.id}`}
-            className="card block hover:border-[#B4FF00]/30 transition-all duration-200 group"
+            className="card block hover:border-[var(--color-venom-green)]/30 transition-all duration-200 group"
             style={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)' }}
           >
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 flex items-center justify-center shrink-0 rounded-sm"
-                style={{ backgroundColor: 'rgba(180, 255, 0, 0.08)' }}>
-                <span className="text-[#B4FF00] font-bold text-sm font-mono">{i + 1}</span>
+                style={{ backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 8%, transparent)' }}>
+                <span className="text-[var(--color-venom-green)] font-bold text-sm font-mono">{i + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-ice-white font-medium group-hover:text-[#B4FF00] transition-colors">
+                  <h3 className="text-ice-white font-medium group-hover:text-[var(--color-venom-green)] transition-colors">
                     {lesson.title}
                   </h3>
                   {lesson.learned && (
-                    <CheckCircle className="w-4 h-4 text-[#B4FF00] shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-[var(--color-venom-green)] shrink-0" />
                   )}
                 </div>
                 <div className="flex gap-3 mt-2">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono"
-                    style={{ backgroundColor: 'rgba(180, 255, 0, 0.06)', border: '1px solid rgba(180, 255, 0, 0.2)', color: '#B4FF00' }}>
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--color-venom-green) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)', color: 'var(--color-venom-green)' }}>
                     <BookOpen className="w-3 h-3" />
                     {lesson.section_count} sections
                   </span>
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono"
-                    style={{ backgroundColor: 'rgba(124, 131, 122, 0.1)', border: '1px solid rgba(124, 131, 122, 0.2)', color: '#7C837A' }}>
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--color-ash-steel) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-ash-steel) 20%, transparent)', color: 'var(--color-ash-steel)' }}>
                     {lesson.checkpoint_count} questions
                   </span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-ash-steel group-hover:text-[#B4FF00] transition-colors shrink-0 mt-2" />
+              <ChevronRight className="w-4 h-4 text-ash-steel group-hover:text-[var(--color-venom-green)] transition-colors shrink-0 mt-2" />
             </div>
           </Link>          ))}
       </div>

@@ -13,6 +13,7 @@ export default function Commands() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [loadKey, setLoadKey] = useState(0)
 
   const loadCommands = () => {
     axios.get('/api/commands/categories').then(r => setCategories(r.data.categories)).catch(() => {})
@@ -36,7 +37,7 @@ export default function Commands() {
         setLoading(false)
       }).catch(() => { setError(true); setLoading(false) })
     }
-  }, [search, category])
+  }, [search, category, loadKey])
 
   return (
     <div className="max-w-5xl">
@@ -51,14 +52,14 @@ export default function Commands() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search commands, tools, techniques..."
-            className="w-full bg-carbon-black border border-[rgba(124,131,122,0.15)] px-3 py-2.5 pl-10 text-ice-white text-sm focus:outline-none transition-colors"
-            style={{ borderColor: search ? 'rgba(180, 255, 0, 0.3)' : 'rgba(124, 131, 122, 0.15)' }}
+            className="w-full bg-carbon-black border px-3 py-2.5 pl-10 text-ice-white text-sm focus:outline-none transition-colors"
+            style={{ borderColor: search ? 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)' : 'color-mix(in srgb, var(--color-ash-steel) 15%, transparent)' }}
           />
         </div>
         <select
           value={category}
           onChange={e => setCategory(e.target.value)}
-          className="bg-carbon-black border border-[rgba(124,131,122,0.15)] px-3 py-2.5 text-ice-white text-sm w-48 focus:outline-none"
+          className="bg-carbon-black border border-[color-mix(in_srgb,var(--color-ash-steel)_15%,transparent)] px-3 py-2.5 text-ice-white text-sm w-48 focus:outline-none"
         >
           <option value="">All Categories</option>
           {categories.map(c => (
@@ -70,7 +71,7 @@ export default function Commands() {
       <p className="text-xs text-ash-steel mb-4 font-mono">{total > 0 ? `${total} commands` : ''}</p>
 
       {error ? (
-        <ErrorMessage compact message="Failed to load commands." onRetry={() => setError(false)} />
+        <ErrorMessage compact message="Failed to load commands." onRetry={() => { setError(false); setLoadKey(k => k + 1) }} />
       ) : loading ? (
         <SkeletonLoader variant="list" count={8} />
       ) : (
@@ -81,26 +82,26 @@ export default function Commands() {
             to={`/commands/${cmd.id}`}
             className="block px-5 py-3 transition-all duration-200"
             style={{
-              backgroundColor: '#141614',
-              border: '1px solid rgba(124, 131, 122, 0.12)',
+              backgroundColor: 'var(--color-forged-panel)',
+              border: '1px solid color-mix(in srgb, var(--color-ash-steel) 12%, transparent)',
               clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(180, 255, 0, 0.3)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(124, 131, 122, 0.12)' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-venom-green) 30%, transparent)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-ash-steel) 12%, transparent)' }}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <h3 className="text-ice-white font-medium text-sm">{cmd.name}</h3>
-                <code className="text-xs text-[#B4FF00] font-mono mt-1 block truncate">{cmd.command}</code>
+                <code className="text-xs text-venom-green font-mono mt-1 block truncate">{cmd.command}</code>
               </div>
               <div className="flex gap-2 ml-4 shrink-0">
                 <span className="px-2 py-0.5 text-[10px] font-mono"
-                  style={{ border: '1px solid rgba(180, 255, 0, 0.2)', color: '#B4FF00' }}>
+                  style={{ border: '1px solid color-mix(in srgb, var(--color-venom-green) 20%, transparent)', color: 'var(--color-venom-green)' }}>
                   {cmd.tool}
                 </span>
                 {cmd.mitre_mapping?.[0] && (
                   <span className="px-2 py-0.5 text-[10px] font-mono"
-                    style={{ border: '1px solid rgba(180, 255, 0, 0.3)', color: '#B4FF00' }}>
+                    style={{ border: '1px solid color-mix(in srgb, var(--color-venom-green) 30%, transparent)', color: 'var(--color-venom-green)' }}>
                     {cmd.mitre_mapping[0]}
                   </span>
                 )}

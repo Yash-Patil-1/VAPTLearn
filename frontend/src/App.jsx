@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -14,9 +15,15 @@ import LessonView from './pages/LessonView'
 
 export default function App() {
   const location = useLocation()
+  const [lightMode, setLightMode] = useState(() => localStorage.getItem('vaptlearn-theme') === 'light')
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', lightMode)
+    localStorage.setItem('vaptlearn-theme', lightMode ? 'light' : 'dark')
+  }, [lightMode])
+  const toggleLightMode = () => setLightMode(prev => !prev)
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar lightMode={lightMode} toggleLightMode={toggleLightMode} />
       <main className="flex-1 ml-60 p-8">
         <ErrorBoundary key={location.pathname}>
           <Routes>
